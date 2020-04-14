@@ -1,8 +1,6 @@
 package main
 
 import (
-	"strconv"
-
 	g "github.com/AllenDang/giu"
 
 	"github.com/AllenDang/giu/imgui"
@@ -23,8 +21,4 @@ func selectInputPath() string {
 func selectOutputPath() string {
 	path, _ := dialog.File().Filter("video file", "mp4", "mkv", "mov", "flv", "avi").Save()
 	return path
-}
-
-func intToString(i int32) string {
-	return strconv.FormatInt(int64(i), 10)
 }

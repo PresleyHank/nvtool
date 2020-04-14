@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"image/color"
 
 	g "github.com/AllenDang/giu"
 	"github.com/AllenDang/giu/imgui"
@@ -78,6 +79,8 @@ func handleRunClick() {
 
 func loop() {
 	g.Context.IO().SetFontGlobalScale(1)
+	g.PushColorWindowBg(color.RGBA{50, 50, 50, 250})
+	g.PushColorFrameBg(color.RGBA{10, 10, 10, 240})
 	g.SingleWindow("Overview",
 		g.Layout{
 			g.TabBar("##maintab", g.Layout{
@@ -135,9 +138,12 @@ func loop() {
 				}),
 			}),
 		})
+	g.PopStyleColor()
+	g.PopStyleColor()
 }
 
 func main() {
-	w := g.NewMasterWindow("NVENC Video Encoder", 740, 420, g.MasterWindowFlagsNotResizable, loadFont)
+	w := g.NewMasterWindow("NVENC Video Encoder", 740, 420, g.MasterWindowFlagsFrameless|g.MasterWindowFlagsTransparent, loadFont)
+	w.SetBgColor(color.RGBA{0, 0, 0, 0})
 	w.Main(loop)
 }

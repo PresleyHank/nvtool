@@ -7,3 +7,5 @@ require (
 	github.com/gotk3/gotk3 v0.4.0 // indirect
 	github.com/sqweek/dialog v0.0.0-20200304031853-0dcd55bfe06a
 )
+
+replace github.com/AllenDang/giu => ../giu
