@@ -1,7 +1,7 @@
 package main
 
 import (
-	"strconv"
+	"fmt"
 
 	g "github.com/AllenDang/giu"
 	"github.com/AllenDang/giu/imgui"
@@ -29,6 +29,8 @@ var (
 	cq            int32 = 26
 	qmin          int32 = 16
 	qmax          int32 = 26
+	bitrate       int32 = 6000
+	maxrate       int32 = 24000
 	useTemporalAq       = false
 	aqStrength          = 15
 )
@@ -51,24 +53,24 @@ func handleRunClick() {
 	if isEncoding {
 		return
 	}
-	ffmpeg.RunEncode(inputPath, outputPath, []string{
+	go ffmpeg.RunEncode(inputPath, outputPath, []string{
 		"-c:a", "copy",
 		"-c:v", "h264_nvenc",
 		"-preset", "slow",
 		"-profile:v", "high",
 		"-level", "5.1",
 		"-rc:v", "vbr_hq",
-		"-cq", strconv.Itoa(int(cq)),
-		"-qmin", strconv.Itoa(int(qmin)),
-		"-qmax", strconv.Itoa(int(qmax)),
+		"-cq", fmt.Sprint(cq),
+		"-qmin", fmt.Sprint(qmin),
+		"-qmax", fmt.Sprint(qmax),
 		"-temporal-aq", "1",
-		"-aq-strength:v", strconv.Itoa(aqStrength),
+		"-aq-strength:v", fmt.Sprint(aqStrength),
 		// "-rc-lookahead:v", "32",
 		// "-refs:v", "16",
 		// "-bf:v", "3",
 		"-coder:v", "cabac",
-		// "-b:v", "6000k",
-		// "-maxrate", "24000k",
+		"-b:v", fmt.Sprintf("%dk", bitrate),
+		"-maxrate", fmt.Sprintf("%dk", maxrate),
 		"-map", "0:0",
 		"-f", "mp4",
 	}, &progress, &log, &isEncoding, g.Update)
@@ -93,34 +95,38 @@ func loop() {
 					g.Spacing(),
 					g.Line(
 						g.Label("Preset"),
-						g.Combo("##preset", presetItems[preset], presetItems, &preset, 80, 0, nil),
+						g.Combo("##preset", presetItems[preset], presetItems, &preset, 72, 0, nil),
 
 						g.Label("RC"),
-						g.Combo("##rc", rcItems[rc], rcItems, &rc, 80, 0, nil),
+						g.Combo("##rc", rcItems[rc], rcItems, &rc, 72, 0, nil),
 
 						g.Label("CQ"),
-						g.InputIntV("##cq", 50, &cq, 0, nil),
+						g.InputIntV("##cq", 40, &cq, 0, nil),
 
 						g.Label("QMin"),
-						g.InputIntV("##qmin", 50, &qmin, 0, nil),
+						g.InputIntV("##qmin", 40, &qmin, 0, nil),
 
 						g.Label("QMax"),
-						g.InputIntV("##qmax", 50, &qmax, 0, nil),
+						g.InputIntV("##qmax", 40, &qmax, 0, nil),
+
+						g.Label("Bitrate"),
+						g.InputIntV("k##bitrate", 60, &bitrate, 0, nil),
+
+						g.Label("Maxrate"),
+						g.InputIntV("k##maxrate", 60, &maxrate, 0, nil),
 					),
 					g.Spacing(),
-					g.InputTextMultiline("", &log, 705, 200, 0, nil, func() {
+					g.InputTextMultiline("", &log, 725, 200, 0, nil, func() {
 						imgui.SetScrollHereY(1.0)
 					}),
 					g.Spacing(),
-					g.ProgressBar(progress, 705, 20, ""),
+					g.ProgressBar(progress, 725, 20, ""),
 					g.Line(
 						g.Dummy(0, 5),
 					),
 					g.Line(
 						g.Dummy(-67, 24),
-						g.ButtonV("Run", 60, 24, func() {
-							go handleRunClick()
-						}),
+						g.ButtonV("Run", 60, 24, handleRunClick),
 					),
 				},
 				),
@@ -132,6 +138,6 @@ func loop() {
 }
 
 func main() {
-	w := g.NewMasterWindow("Overview", 720, 420, g.MasterWindowFlagsNotResizable, loadFont)
+	w := g.NewMasterWindow("NVENC Video Encoder", 740, 420, g.MasterWindowFlagsNotResizable, loadFont)
 	w.Main(loop)
 }
