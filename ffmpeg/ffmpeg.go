@@ -19,6 +19,10 @@ var (
 	isEncodingRegexp   = regexp.MustCompile(`speed=\d+\.\d+x`)
 )
 
+func GetFFMpegCmd() *exec.Cmd {
+	return ffmpegCmd
+}
+
 func GetDurationFromTimeParams(time []string) uint {
 	var (
 		hour     uint64
@@ -108,4 +112,6 @@ func RunEncode(inputPath string, outputPath string, args []string, progress *flo
 			onUpdate()
 		}
 	}
+	*isEncoding = false
+	onUpdate()
 }

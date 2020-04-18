@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 	"image/color"
+	"os/exec"
+	"runtime"
 
 	g "github.com/AllenDang/giu"
 	"github.com/AllenDang/giu/imgui"
@@ -59,6 +61,8 @@ func handleRunClick() {
 	if isEncoding {
 		return
 	}
+	log = ""
+	progress = 0
 	go ffmpeg.RunEncode(inputPath, outputPath, []string{
 		"-c:a", "copy",
 		// "-c:v", "libx264",
@@ -81,6 +85,22 @@ func handleRunClick() {
 		"-map", "0:0",
 		"-f", "mp4",
 	}, &progress, &log, &isEncoding, g.Update)
+}
+
+func handleStopClick() {
+	ffmpegCmd := ffmpeg.GetFFMpegCmd()
+	var err error
+	if runtime.GOOS == "windows" {
+		cmd := exec.Command("wmic", "process", "where", "name='ffmpeg.exe'", "delete")
+		err = cmd.Run()
+	} else {
+		err = ffmpegCmd.Process.Kill()
+	}
+	if err != nil {
+		fmt.Print(err)
+		return
+	}
+	isEncoding = false
 }
 
 func loop() {
@@ -145,7 +165,10 @@ func loop() {
 					),
 					g.Line(
 						g.Dummy(-67, 24),
-						g.ButtonV("Run", 60, 24, handleRunClick),
+						g.Condition(isEncoding,
+							g.Layout{g.ButtonV("Stop", 60, 24, handleStopClick)},
+							g.Layout{g.ButtonV("Run", 60, 24, handleRunClick)},
+						),
 					),
 				},
 				),
