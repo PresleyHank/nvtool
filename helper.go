@@ -22,3 +22,13 @@ func selectOutputPath() string {
 	path, _ := dialog.File().Filter("video file", "mp4", "mkv", "mov", "flv", "avi").Save()
 	return path
 }
+
+func limitValue(val int32, min int32, max int32) int32 {
+	if val > max {
+		return max
+	}
+	if val < min {
+		return min
+	}
+	return val
+}

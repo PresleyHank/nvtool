@@ -1,11 +1,15 @@
 github.com/AllenDang/giu v0.0.0-20200414030323-27b589e6143c h1:iCZftPbdozxInJqKtGrDH1lY+y2EfxOFraSKaqYE5y0=
 github.com/AllenDang/giu v0.0.0-20200414030323-27b589e6143c/go.mod h1:50UZLjnr/JyJgck0lh2hkTUkQsCGDVSMsZYn09bS2Ic=
+github.com/AllenDang/giu v0.0.0-20200416024059-9a0408ed7979 h1:FXbLykKY/ENgbAG81WzNrogzajLxSLAHOLdirqIE7Bw=
+github.com/AllenDang/giu v0.0.0-20200416024059-9a0408ed7979/go.mod h1:50UZLjnr/JyJgck0lh2hkTUkQsCGDVSMsZYn09bS2Ic=
 github.com/BurntSushi/freetype-go v0.0.0-20160129220410-b763ddbfe298/go.mod h1:D+QujdIlUNfa0igpNMk6UIvlb6C252URs4yupRUV4lQ=
 github.com/BurntSushi/graphics-go v0.0.0-20160129215708-b43f31a4a966/go.mod h1:Mid70uvE93zn9wgF92A/r5ixgnvX8Lh68fxp9KQBaI0=
 github.com/BurntSushi/xgb v0.0.0-20160522181843-27f122750802/go.mod h1:IVnqGOEym/WlBOVXweHU+Q+/VP0lqqI8lqeDx9IjBqo=
 github.com/BurntSushi/xgbutil v0.0.0-20160919175755-f7c97cef3b4e/go.mod h1:uw9h2sd4WWHOPdJ13MQpwK5qYWKYDumDqxWWIknEQ+k=
 github.com/Nicify/giu v0.0.0-20200414130650-31c88e023e1b h1:w8s34o/jbjRIVuHvtdBkuL8fpI7GdvWKYVwJEveuSbo=
 github.com/Nicify/giu v0.0.0-20200414130650-31c88e023e1b/go.mod h1:KuR2DyusKHo6xyl9PoDyl3A1mNKnOvVo1xygQqatXqg=
+github.com/Nicify/giu v0.0.0-20200415090018-86266fd1fbf8 h1:ecAUGNxfFVDK63EmgijkIZadd9MhCf88kzayCsbwR7g=
+github.com/Nicify/giu v0.0.0-20200415090018-86266fd1fbf8/go.mod h1:50UZLjnr/JyJgck0lh2hkTUkQsCGDVSMsZYn09bS2Ic=
 github.com/TheTitanrain/w32 v0.0.0-20180517000239-4f5cfb03fabf h1:FPsprx82rdrX2jiKyS17BH6IrTmUBYqZa/CXT4uvb+I=
 github.com/TheTitanrain/w32 v0.0.0-20180517000239-4f5cfb03fabf/go.mod h1:peYoMncQljjNS6tZwI9WVyQB3qZS6u79/N3mBOcnd3I=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=

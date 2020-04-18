@@ -19,7 +19,6 @@ var (
 	isEncodingRegexp   = regexp.MustCompile(`speed=\d+\.\d+x`)
 )
 
-// GetDurationFromTimeParams
 func GetDurationFromTimeParams(time []string) uint {
 	var (
 		hour     uint64
@@ -44,7 +43,6 @@ func GetDurationFromTimeParams(time []string) uint {
 	return duration
 }
 
-// GetDuration
 func GetDuration(inputPath string) (uint, error) {
 	cmd := exec.Command(ffmpegBinary, "-i", inputPath)
 	stderr, err := cmd.StderrPipe()
@@ -67,7 +65,6 @@ func GetDuration(inputPath string) (uint, error) {
 	return 0, scanner.Err()
 }
 
-// RunEncode
 func RunEncode(inputPath string, outputPath string, args []string, progress *float32, log *string, isEncoding *bool, onUpdate func()) {
 	fullDuration, err := GetDuration(inputPath)
 	if err != nil {
@@ -87,13 +84,13 @@ func RunEncode(inputPath string, outputPath string, args []string, progress *flo
 	if err != nil {
 		fmt.Println(err)
 	}
-	var info []string
+	var logList []string
 	scanner := bufio.NewScanner(stderr)
 	scanner.Split(bufio.ScanWords)
 	for scanner.Scan() {
 		line := scanner.Text()
 		if *isEncoding {
-			info = append(info, line)
+			logList = append(logList, line)
 		}
 		matches := encodingTimeRegexp.FindStringSubmatch(line)
 		if len(matches) == 5 {
@@ -103,11 +100,11 @@ func RunEncode(inputPath string, outputPath string, args []string, progress *flo
 		}
 		if isEncodingRegexp.MatchString(line) {
 			*isEncoding = true
-			logChunk := strings.Join(info, " ")
+			logChunk := strings.Join(logList, " ")
 			logChunk = strings.ReplaceAll(logChunk, "frame=", "\nframe=")
 			logChunk = strings.ReplaceAll(logChunk, "= ", "=")
 			*log += logChunk
-			info = info[:0]
+			logList = logList[:0]
 			onUpdate()
 		}
 	}
