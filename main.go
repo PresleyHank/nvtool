@@ -4,21 +4,26 @@ import (
 	"fmt"
 	"image/color"
 	"os/exec"
+	"path"
 	"runtime"
+	"strings"
 
 	g "github.com/AllenDang/giu"
 	"github.com/AllenDang/giu/imgui"
 	ffmpeg "github.com/Nicify/enclite/ffmpeg"
+	mediainfo "github.com/Nicify/enclite/mediainfo"
 )
 
 var (
+	font             = imgui.Font(0)
 	selectedTebIndex int
 	inputPath        string
 	outputPath       string
 	fullDuration     uint
 	isEncoding       bool
 	progress         float32
-	log              string
+	ffmpegLog        string
+	mediaInfoLog     string
 )
 
 var (
@@ -43,6 +48,7 @@ func handleInputClick() {
 	path := selectInputPath()
 	if len(path) > 1 {
 		inputPath = path
+		go setMediaInfo(path)
 	}
 }
 
@@ -61,7 +67,7 @@ func handleRunClick() {
 	if isEncoding {
 		return
 	}
-	log = ""
+	ffmpegLog = ""
 	progress = 0
 	go ffmpeg.RunEncode(inputPath, outputPath, []string{
 		"-c:a", "copy",
@@ -84,7 +90,23 @@ func handleRunClick() {
 		// "-maxrate", fmt.Sprintf("%dk", maxrate),
 		"-map", "0:0",
 		"-f", "mp4",
-	}, &progress, &log, &isEncoding, g.Update)
+	}, &progress, &ffmpegLog, &isEncoding, g.Update)
+}
+
+func setMediaInfo(inputPath string) {
+	info, err := mediainfo.GetMediaInfo(inputPath)
+	if err != nil {
+		mediaInfoLog = fmt.Sprintf("Error: %s", err)
+		return
+	}
+	mediaInfoLog = strings.Join(info, "\n")
+}
+
+func handleDrop(dropItem []string) {
+	inputPath = dropItem[0]
+	fileExt := path.Ext(inputPath)
+	outputPath = strings.Replace(inputPath, fileExt, "_x264.mp4", 1)
+	go setMediaInfo(inputPath)
 }
 
 func handleStopClick() {
@@ -155,7 +177,7 @@ func loop() {
 						// g.InputIntV("k##maxrate", 60, &maxrate, 0, nil),
 					),
 					g.Spacing(),
-					g.InputTextMultiline("", &log, 725, 200, 0, nil, func() {
+					g.InputTextMultiline("", &ffmpegLog, 724, 200, 0, nil, func() {
 						imgui.SetScrollHereY(1.0)
 					}),
 					g.Spacing(),
@@ -173,7 +195,8 @@ func loop() {
 				},
 				),
 				g.TabItem("MediaInfo", g.Layout{
-					g.Label("mediaInfo"),
+					g.Spacing(),
+					g.InputTextMultiline("mediainfo", &mediaInfoLog, 724, 370, g.InputTextFlagsReadOnly, nil, nil),
 				}),
 			}),
 		})
@@ -184,5 +207,6 @@ func loop() {
 func main() {
 	w := g.NewMasterWindow("NVENC Video Encoder", 740, 415, g.MasterWindowFlagsNotResizable|g.MasterWindowFlagsTransparent, loadFont)
 	w.SetBgColor(color.RGBA{0, 0, 0, 0})
+	w.SetDropCallback(handleDrop)
 	w.Main(loop)
 }
