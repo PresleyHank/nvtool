@@ -61,12 +61,8 @@ func handleOutputClick() {
 	}
 }
 
-func validateAQStrength() {
-	aqStrength = limitValue(aqStrength, 0, 15)
-}
-
 func handleRunClick() {
-	if isEncoding {
+	if isEncoding || inputPath == outputPath {
 		return
 	}
 	ffmpegLog = ""
@@ -111,7 +107,7 @@ func handleDrop(dropItem []string) {
 	go setMediaInfo(inputPath)
 }
 
-func handleStopClick() {
+func handleCancelClick() {
 	ffmpegCmd := ffmpeg.GetFFMpegCmd()
 	var err error
 	if runtime.GOOS == "windows" {
@@ -135,6 +131,9 @@ func loop() {
 	g.Context.IO().SetFontGlobalScale(1)
 	g.PushColorWindowBg(color.RGBA{50, 50, 50, 250})
 	g.PushColorFrameBg(color.RGBA{10, 10, 10, 240})
+	g.PushColorButton(color.RGBA{100, 100, 100, 255})
+	g.PushColorButtonHovered(color.RGBA{120, 120, 120, 240})
+	g.PushColorButtonActive(color.RGBA{80, 80, 80, 245})
 	g.SingleWindow("NVENC Video Encoder",
 		g.Layout{
 			g.TabBar("##maintab", g.Layout{
@@ -190,7 +189,7 @@ func loop() {
 					g.Line(
 						g.Dummy(-67, 24),
 						g.Condition(isEncoding,
-							g.Layout{g.ButtonV("Cancel", 60, 24, handleStopClick)},
+							g.Layout{g.ButtonV("Cancel", 60, 24, handleCancelClick)},
 							g.Layout{g.ButtonV("Run", 60, 24, handleRunClick)},
 						),
 					),
@@ -202,13 +201,17 @@ func loop() {
 				}),
 			}),
 		})
-	g.PopStyleColorV(2)
+	g.PopStyleColorV(5)
 	imgui.PopStyleVarV(4)
+
+	if g.Context.GetPlatform().ShouldStop() {
+		handleCancelClick()
+	}
 }
 
 func main() {
-	w := g.NewMasterWindow("NVENC Video Encoder", 740, 415, g.MasterWindowFlagsNotResizable|g.MasterWindowFlagsTransparent, loadFont)
-	w.SetBgColor(color.RGBA{0, 0, 0, 0})
-	w.SetDropCallback(handleDrop)
-	w.Main(loop)
+	mw := g.NewMasterWindow("NVENC Video Encoder", 740, 415, g.MasterWindowFlagsNotResizable|g.MasterWindowFlagsTransparent, loadFont)
+	mw.SetBgColor(color.RGBA{0, 0, 0, 0})
+	mw.SetDropCallback(handleDrop)
+	mw.Main(loop)
 }

@@ -32,3 +32,20 @@ func limitValue(val int32, min int32, max int32) int32 {
 	}
 	return val
 }
+
+func validatePath(inputPath string, outputPath string) bool {
+	if inputPath == outputPath {
+		return false
+	}
+	if inputPath == "" {
+		return false
+	}
+	if outputPath == "" {
+		return false
+	}
+	return true
+}
+
+func validateAQStrength() {
+	aqStrength = limitValue(aqStrength, 0, 15)
+}
