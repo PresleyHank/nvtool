@@ -7,6 +7,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"syscall"
 )
 
 var (
@@ -49,6 +50,7 @@ func GetDurationFromTimeParams(time []string) uint {
 
 func GetDuration(inputPath string) (uint, error) {
 	cmd := exec.Command(ffmpegBinary, "-i", inputPath)
+	cmd.SysProcAttr = &syscall.SysProcAttr{HideWindow: true}
 	stderr, err := cmd.StderrPipe()
 	if err != nil {
 		return 0, err
@@ -78,8 +80,8 @@ func RunEncode(inputPath string, outputPath string, args []string, progress *flo
 	args = append([]string{"-i", inputPath}, args...)
 	args = append(ffmpegPrefix, args...)
 	args = append(args, outputPath)
-	fmt.Println(args)
 	ffmpegCmd = exec.Command(ffmpegBinary, args...)
+	ffmpegCmd.SysProcAttr = &syscall.SysProcAttr{HideWindow: true}
 	stderr, err := ffmpegCmd.StderrPipe()
 	if err != nil {
 		fmt.Println(err)

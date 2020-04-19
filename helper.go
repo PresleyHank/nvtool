@@ -10,7 +10,7 @@ import (
 func loadFont() {
 	fonts := g.Context.IO().Fonts()
 	fontPath := "./iosevka-regular.ttf"
-	fonts.AddFontFromFileTTFV(fontPath, 16, imgui.DefaultFontConfig, fonts.GlyphRangesChineseSimplifiedCommon())
+	fonts.AddFontFromFileTTFV(fontPath, 16, imgui.DefaultFontConfig, fonts.GlyphRangesDefault())
 }
 
 func selectInputPath() string {

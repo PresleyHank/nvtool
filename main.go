@@ -7,6 +7,7 @@ import (
 	"path"
 	"runtime"
 	"strings"
+	"syscall"
 
 	g "github.com/AllenDang/giu"
 	"github.com/AllenDang/giu/imgui"
@@ -114,6 +115,7 @@ func handleCancelClick() {
 	var err error
 	if runtime.GOOS == "windows" {
 		cmd := exec.Command("wmic", "process", "where", "name='ffmpeg.exe'", "delete")
+		cmd.SysProcAttr = &syscall.SysProcAttr{HideWindow: true}
 		err = cmd.Run()
 	} else {
 		err = ffmpegCmd.Process.Kill()

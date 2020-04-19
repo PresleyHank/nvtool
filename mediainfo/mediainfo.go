@@ -3,6 +3,7 @@ package mediainfo
 import (
 	"bufio"
 	"os/exec"
+	"syscall"
 )
 
 var (
@@ -11,6 +12,7 @@ var (
 
 func GetMediaInfo(mediaFile string) (mediainfo []string, err error) {
 	cmd := exec.Command(mediainfoBinary, mediaFile)
+	cmd.SysProcAttr = &syscall.SysProcAttr{HideWindow: true}
 	stdout, err := cmd.StdoutPipe()
 	err = cmd.Start()
 	if err != nil {
