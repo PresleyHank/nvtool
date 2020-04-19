@@ -45,17 +45,19 @@ var (
 )
 
 func handleInputClick() {
-	path := selectInputPath()
-	if len(path) > 1 {
-		inputPath = path
-		go setMediaInfo(path)
+	filePath := selectInputPath()
+	if len(filePath) > 1 {
+		inputPath = filePath
+		fileExt := path.Ext(inputPath)
+		outputPath = strings.Replace(inputPath, fileExt, "_x264.mp4", 1)
+		go setMediaInfo(filePath)
 	}
 }
 
 func handleOutputClick() {
-	path := selectOutputPath()
-	if len(path) > 1 {
-		outputPath = path
+	filePath := selectOutputPath()
+	if len(filePath) > 1 {
+		outputPath = filePath
 	}
 }
 
@@ -188,7 +190,7 @@ func loop() {
 					g.Line(
 						g.Dummy(-67, 24),
 						g.Condition(isEncoding,
-							g.Layout{g.ButtonV("Stop", 60, 24, handleStopClick)},
+							g.Layout{g.ButtonV("Cancel", 60, 24, handleStopClick)},
 							g.Layout{g.ButtonV("Run", 60, 24, handleRunClick)},
 						),
 					),
