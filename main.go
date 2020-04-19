@@ -47,6 +47,8 @@ var (
 func handleInputClick() {
 	filePath := selectInputPath()
 	if len(filePath) > 1 {
+		progress = 0
+		ffmpegLog = ""
 		inputPath = filePath
 		fileExt := path.Ext(inputPath)
 		outputPath = strings.Replace(inputPath, fileExt, "_x264.mp4", 1)
@@ -62,11 +64,11 @@ func handleOutputClick() {
 }
 
 func handleRunClick() {
-	if isEncoding || inputPath == outputPath {
+	if isEncoding || !validatePath(inputPath, outputPath) {
 		return
 	}
-	ffmpegLog = ""
 	progress = 0
+	ffmpegLog = ""
 	go ffmpeg.RunEncode(inputPath, outputPath, []string{
 		"-c:a", "copy",
 		// "-c:v", "libx264",
