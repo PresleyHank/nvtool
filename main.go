@@ -65,7 +65,7 @@ func handleOutputClick() {
 }
 
 func handleRunClick() {
-	if isEncoding || !validatePath(inputPath, outputPath) {
+	if isEncoding || invalidPath(inputPath, outputPath) {
 		return
 	}
 	progress = 0
