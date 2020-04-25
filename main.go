@@ -11,12 +11,13 @@ import (
 
 	g "github.com/AllenDang/giu"
 	"github.com/AllenDang/giu/imgui"
-	ffmpeg "github.com/Nicify/enclite/ffmpeg"
-	mediainfo "github.com/Nicify/enclite/mediainfo"
+	ffmpeg "github.com/Nicify/nvtool/ffmpeg"
+	mediainfo "github.com/Nicify/nvtool/mediainfo"
 )
 
 var (
 	font             = imgui.Font(0)
+	controlFlas      g.WindowFlags
 	selectedTebIndex int
 	inputPath        string
 	outputPath       string
@@ -70,6 +71,7 @@ func handleRunClick() {
 	}
 	progress = 0
 	ffmpegLog = ""
+	controlFlas = g.WindowFlagsNoInputs
 	go ffmpeg.RunEncode(inputPath, outputPath, []string{
 		"-c:a", "copy",
 		// "-c:v", "libx264",
@@ -104,6 +106,9 @@ func setMediaInfo(inputPath string) {
 }
 
 func handleDrop(dropItem []string) {
+	if isEncoding {
+		return
+	}
 	inputPath = dropItem[0]
 	fileExt := path.Ext(inputPath)
 	outputPath = strings.Replace(inputPath, fileExt, "_x264.mp4", 1)
@@ -125,6 +130,7 @@ func handleCancelClick() {
 		return
 	}
 	isEncoding = false
+	controlFlas = g.WindowFlagsNone
 }
 
 func loop() {
@@ -138,49 +144,51 @@ func loop() {
 	g.PushColorButton(color.RGBA{100, 100, 100, 255})
 	g.PushColorButtonHovered(color.RGBA{120, 120, 120, 240})
 	g.PushColorButtonActive(color.RGBA{80, 80, 80, 245})
-	g.SingleWindow("NVENC Video Encoder",
+	g.SingleWindow("NVENC Video Toolbox",
 		g.Layout{
-			g.TabBar("##maintab", g.Layout{
+			g.TabBar("maintab", g.Layout{
 				g.TabItem("Encode", g.Layout{
-					g.Spacing(),
-					g.Line(
-						g.InputTextV("##video", -55, &inputPath, 0, nil, nil),
-						g.ButtonV("video", 60, 22, handleInputClick),
-					),
-					g.Spacing(),
-					g.Line(
-						g.InputTextV("##output", -55, &outputPath, 0, nil, nil),
-						g.ButtonV("output", 60, 22, handleOutputClick),
-					),
-					g.Spacing(),
-					g.Line(
-						g.Label("Preset"),
-						g.Combo("##preset", presetItems[preset], presetItems, &preset, 85, 0, nil),
+					g.Child("control", false, 724, 90, controlFlas, g.Layout{
+						g.Spacing(),
+						g.Line(
+							g.InputTextV("##video", -55, &inputPath, 0, nil, nil),
+							g.ButtonV("video", 60, 22, handleInputClick),
+						),
+						g.Spacing(),
+						g.Line(
+							g.InputTextV("##output", -55, &outputPath, 0, nil, nil),
+							g.ButtonV("output", 60, 22, handleOutputClick),
+						),
+						g.Spacing(),
+						g.Line(
+							g.Label("Preset"),
+							g.Combo("##preset", presetItems[preset], presetItems, &preset, 85, 0, nil),
 
-						g.Label("RC"),
-						g.Combo("##rc", rcItems[rc], rcItems, &rc, 85, 0, nil),
+							g.Label("RC"),
+							g.Combo("##rc", rcItems[rc], rcItems, &rc, 85, 0, nil),
 
-						g.Label("CQ"),
-						g.InputIntV("##cq", 40, &cq, 0, nil),
+							g.Label("CQ"),
+							g.InputIntV("##cq", 40, &cq, 0, nil),
 
-						g.Label("QMin"),
-						g.InputIntV("##qmin", 40, &qmin, 0, nil),
+							g.Label("QMin"),
+							g.InputIntV("##qmin", 40, &qmin, 0, nil),
 
-						g.Label("QMax"),
-						g.InputIntV("##qmax", 40, &qmax, 0, nil),
+							g.Label("QMax"),
+							g.InputIntV("##qmax", 40, &qmax, 0, nil),
 
-						g.Label("AQ"),
-						g.Combo("##aq", aqItems[aq], aqItems, &aq, 85, 0, nil),
+							g.Label("AQ"),
+							g.Combo("##aq", aqItems[aq], aqItems, &aq, 85, 0, nil),
 
-						g.Label("AQStrength"),
-						g.InputIntV("##aqstrength", 40, &aqStrength, 0, validateAQStrength),
+							g.Label("AQStrength"),
+							g.InputIntV("##aqstrength", 40, &aqStrength, 0, validateAQStrength),
 
-						// g.Label("Bitrate"),
-						// g.InputIntV("k##bitrate", 60, &bitrate, 0, nil),
+							// g.Label("Bitrate"),
+							// g.InputIntV("k##bitrate", 60, &bitrate, 0, nil),
 
-						// g.Label("Maxrate"),
-						// g.InputIntV("k##maxrate", 60, &maxrate, 0, nil),
-					),
+							// g.Label("Maxrate"),
+							// g.InputIntV("k##maxrate", 60, &maxrate, 0, nil),
+						),
+					}),
 					g.Spacing(),
 					g.InputTextMultiline("", &ffmpegLog, 724, 200, 0, nil, func() {
 						imgui.SetScrollHereY(1.0)
@@ -214,7 +222,7 @@ func loop() {
 }
 
 func main() {
-	mw := g.NewMasterWindow("NVENC Video Encoder", 740, 415, g.MasterWindowFlagsNotResizable|g.MasterWindowFlagsTransparent, loadFont)
+	mw := g.NewMasterWindow("NVENC Video Toolbox", 740, 415, g.MasterWindowFlagsNotResizable|g.MasterWindowFlagsTransparent, loadFont)
 	mw.SetBgColor(color.RGBA{0, 0, 0, 0})
 	mw.SetDropCallback(handleDrop)
 	mw.Main(loop)
