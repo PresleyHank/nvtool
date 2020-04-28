@@ -37,7 +37,7 @@ var (
 	preset int32
 	rc     int32
 	aq     int32
-	cq     int32 = 26
+	cq     int32
 	qmin   int32 = 16
 	qmax   int32 = 26
 	// bitrate       int32 = 6000
@@ -92,7 +92,6 @@ func handleRunClick() {
 			// "-rc-lookahead:v", "32",
 			// "-refs:v", "16",
 			// "-bf:v", "3",
-			"-coder:v", "cabac",
 			// "-b:v", fmt.Sprintf("%dk", bitrate),
 			// "-maxrate", fmt.Sprintf("%dk", maxrate),
 			"-map", "0:0",
@@ -163,7 +162,7 @@ func loop() {
 		g.Layout{
 			g.TabBar("maintab", g.Layout{
 				g.TabItem("Encode", g.Layout{
-					g.Child("control", false, 724, 90, shouldDisableInput(isEncoding), g.Layout{
+					g.Child("control", false, 724, 85, shouldDisableInput(isEncoding), g.Layout{
 						g.Spacing(),
 						g.Line(
 							g.InputTextV("##video", -55, &inputPath, 0, nil, nil),
@@ -176,25 +175,25 @@ func loop() {
 						),
 						g.Spacing(),
 						g.Line(
-							g.Label("Preset"),
+							g.Label("preset"),
 							g.Combo("##preset", presetItems[preset], presetItems, &preset, 85, 0, nil),
 
-							g.Label("RC"),
+							g.Label("rc"),
 							g.Combo("##rc", rcItems[rc], rcItems, &rc, 85, 0, nil),
 
-							g.Label("CQ"),
+							g.Label("cq"),
 							g.InputIntV("##cq", 40, &cq, 0, nil),
 
-							g.Label("QMin"),
+							g.Label("qmin"),
 							g.InputIntV("##qmin", 40, &qmin, 0, nil),
 
-							g.Label("QMax"),
+							g.Label("qmax"),
 							g.InputIntV("##qmax", 40, &qmax, 0, nil),
 
-							g.Label("AQ"),
+							g.Label("aq"),
 							g.Combo("##aq", aqItems[aq], aqItems, &aq, 85, 0, nil),
 
-							g.Label("AQStrength"),
+							g.Label("aq-strength"),
 							g.InputIntV("##aqstrength", 40, &aqStrength, 0, validateAQStrength),
 
 							// g.Label("Bitrate"),
