@@ -17,7 +17,6 @@ import (
 
 var (
 	font             = imgui.Font(0)
-	controlFlas      g.WindowFlags
 	selectedTebIndex int
 	inputPath        string
 	outputPath       string
@@ -46,6 +45,11 @@ var (
 	aqStrength int32 = 15
 )
 
+func cleanOutput() {
+	progress = 0
+	ffmpegLog = ""
+}
+
 func handleInputClick() {
 	filePath := selectInputPath()
 	if len(filePath) > 1 {
@@ -69,31 +73,33 @@ func handleRunClick() {
 	if isEncoding || invalidPath(inputPath, outputPath) {
 		return
 	}
-	progress = 0
-	ffmpegLog = ""
-	controlFlas = g.WindowFlagsNoInputs
-	go ffmpeg.RunEncode(inputPath, outputPath, []string{
-		"-c:a", "copy",
-		// "-c:v", "libx264",
-		"-c:v", "h264_nvenc",
-		"-preset", "slow",
-		"-profile:v", "high",
-		"-level", "5.1",
-		"-rc:v", "vbr_hq",
-		"-cq", fmt.Sprint(cq),
-		"-qmin", fmt.Sprint(qmin),
-		"-qmax", fmt.Sprint(qmax),
-		"-temporal-aq", "1",
-		"-aq-strength:v", fmt.Sprint(aqStrength),
-		// "-rc-lookahead:v", "32",
-		// "-refs:v", "16",
-		// "-bf:v", "3",
-		"-coder:v", "cabac",
-		// "-b:v", fmt.Sprintf("%dk", bitrate),
-		// "-maxrate", fmt.Sprintf("%dk", maxrate),
-		"-map", "0:0",
-		"-f", "mp4",
-	}, &progress, &ffmpegLog, &isEncoding, g.Update)
+	cleanOutput()
+	go func() {
+		isEncoding = true
+		ffmpeg.RunEncode(inputPath, outputPath, []string{
+			"-c:a", "copy",
+			// "-c:v", "libx264",
+			"-c:v", "h264_nvenc",
+			"-preset", "slow",
+			"-profile:v", "high",
+			"-level", "5.1",
+			"-rc:v", "vbr_hq",
+			"-cq", fmt.Sprint(cq),
+			"-qmin", fmt.Sprint(qmin),
+			"-qmax", fmt.Sprint(qmax),
+			"-temporal-aq", "1",
+			"-aq-strength:v", fmt.Sprint(aqStrength),
+			// "-rc-lookahead:v", "32",
+			// "-refs:v", "16",
+			// "-bf:v", "3",
+			"-coder:v", "cabac",
+			// "-b:v", fmt.Sprintf("%dk", bitrate),
+			// "-maxrate", fmt.Sprintf("%dk", maxrate),
+			"-map", "0:0",
+			"-f", "mp4",
+		}, &progress, &ffmpegLog, g.Update)
+		isEncoding = false
+	}()
 }
 
 func setMediaInfo(inputPath string) {
@@ -116,21 +122,28 @@ func handleDrop(dropItem []string) {
 }
 
 func handleCancelClick() {
-	ffmpegCmd := ffmpeg.GetFFMpegCmd()
-	var err error
+	proc := ffmpeg.GetProcess()
+	stdin, _ := proc.StdinPipe()
+	if stdin != nil {
+		stdin.Write([]byte("q\n"))
+		isEncoding = false
+		return
+	}
 	if runtime.GOOS == "windows" {
 		cmd := exec.Command("wmic", "process", "where", "name='ffmpeg.exe'", "delete")
 		cmd.SysProcAttr = &syscall.SysProcAttr{HideWindow: true}
-		err = cmd.Run()
+		cmd.Run()
 	} else {
-		err = ffmpegCmd.Process.Kill()
-	}
-	if err != nil {
-		fmt.Print(err)
-		return
+		proc.Process.Kill()
 	}
 	isEncoding = false
-	controlFlas = g.WindowFlagsNone
+}
+
+func shouldDisableInput(b bool) (flag g.WindowFlags) {
+	if b {
+		return g.WindowFlagsNoInputs
+	}
+	return
 }
 
 func loop() {
@@ -148,7 +161,7 @@ func loop() {
 		g.Layout{
 			g.TabBar("maintab", g.Layout{
 				g.TabItem("Encode", g.Layout{
-					g.Child("control", false, 724, 90, controlFlas, g.Layout{
+					g.Child("control", false, 724, 90, shouldDisableInput(isEncoding), g.Layout{
 						g.Spacing(),
 						g.Line(
 							g.InputTextV("##video", -55, &inputPath, 0, nil, nil),
@@ -215,10 +228,6 @@ func loop() {
 		})
 	g.PopStyleColorV(5)
 	imgui.PopStyleVarV(4)
-
-	if g.Context.GetPlatform().ShouldStop() {
-		handleCancelClick()
-	}
 }
 
 func main() {
@@ -226,4 +235,5 @@ func main() {
 	mw.SetBgColor(color.RGBA{0, 0, 0, 0})
 	mw.SetDropCallback(handleDrop)
 	mw.Main(loop)
+	handleCancelClick()
 }
