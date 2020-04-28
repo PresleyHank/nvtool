@@ -25,7 +25,7 @@ func execSync(pwd string, command string, args ...string) ([]byte, []byte, error
 	return buf.Bytes(), bufErr.Bytes(), err
 }
 
-func GetDurationFromTimeParams(time []string) uint {
+func getDurationFromTimeParams(time []string) uint {
 	var (
 		hour     uint64
 		min      uint64

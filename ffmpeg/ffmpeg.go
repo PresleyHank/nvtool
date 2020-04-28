@@ -9,15 +9,22 @@ import (
 	"syscall"
 )
 
+type MatchRule struct {
+	duration     string
+	encodingTime string
+	isEncoding   string
+}
+
 var (
 	binary       = "ffmpeg"
 	prefix       = []string{"-y", "-hide_banner"}
 	process      *exec.Cmd
 	encodingTime uint
-	// metaDataRegexp     = *regexp.MustCompile(`Duration: (\d{2}:\d{2}:\d{2}.\d{2}), start: \d+.\d+, bitrate: (\d+) kb\/s\n`)
-	durationRegexp     = *regexp.MustCompile(`Duration: (\d{2}):(\d{2}):(\d{2})\.(\d{2})`)
-	encodingTimeRegexp = *regexp.MustCompile(`time=(\d{2}):(\d{2}):(\d{2})\.(\d{2})`)
-	isEncodingRegexp   = *regexp.MustCompile(`speed=\d+\.\d+x`)
+	matchRule    = MatchRule{
+		duration:     `Duration: (\d{2}):(\d{2}):(\d{2})\.(\d{2})`,
+		encodingTime: `time=(\d{2}):(\d{2}):(\d{2})\.(\d{2})`,
+		isEncoding:   `speed=\d+\.\d+x`,
+	}
 )
 
 func GetProcess() *exec.Cmd {
@@ -31,8 +38,8 @@ func GetVideoMeta(inputPath string) (uint, []byte, error) {
 	for _, line := range lines {
 		clean := strings.TrimSpace(line)
 		if strings.HasPrefix(clean, "Duration:") {
-			matches := durationRegexp.FindStringSubmatch(clean)
-			duration := GetDurationFromTimeParams(matches)
+			matches := regexp.MustCompile(matchRule.duration).FindStringSubmatch(clean)
+			duration := getDurationFromTimeParams(matches)
 			return duration, nil, nil
 		}
 	}
@@ -67,13 +74,13 @@ func RunEncode(inputPath string, outputPath string, args []string, progress *flo
 		if isEncoding {
 			logList = append(logList, line)
 		}
-		matches := encodingTimeRegexp.FindStringSubmatch(line)
+		matches := regexp.MustCompile(matchRule.encodingTime).FindStringSubmatch(line)
 		if len(matches) == 5 {
-			encodingTime = GetDurationFromTimeParams(matches)
+			encodingTime = getDurationFromTimeParams(matches)
 			*progress = float32(encodingTime) / float32(fullDuration)
 			next()
 		}
-		if isEncodingRegexp.MatchString(line) {
+		if regexp.MustCompile(matchRule.isEncoding).MatchString(line) {
 			isEncoding = true
 			logChunk := strings.Join(logList, " ")
 			logChunk = strings.ReplaceAll(logChunk, "frame=", "\nframe=")
