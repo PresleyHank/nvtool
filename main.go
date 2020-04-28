@@ -122,21 +122,23 @@ func handleDrop(dropItem []string) {
 }
 
 func handleCancelClick() {
+	isEncoding = false
 	proc := ffmpeg.GetProcess()
-	stdin, _ := proc.StdinPipe()
-	if stdin != nil {
+	if proc == nil {
+		return
+	}
+	stdin, err := proc.StdinPipe()
+	if err == nil && stdin != nil {
 		stdin.Write([]byte("q\n"))
-		isEncoding = false
 		return
 	}
 	if runtime.GOOS == "windows" {
 		cmd := exec.Command("wmic", "process", "where", "name='ffmpeg.exe'", "delete")
 		cmd.SysProcAttr = &syscall.SysProcAttr{HideWindow: true}
 		cmd.Run()
-	} else {
-		proc.Process.Kill()
+		return
 	}
-	isEncoding = false
+	proc.Process.Kill()
 }
 
 func shouldDisableInput(b bool) (flag g.WindowFlags) {

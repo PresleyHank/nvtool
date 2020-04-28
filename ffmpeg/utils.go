@@ -19,9 +19,9 @@ func execSync(pwd string, command string, args ...string) ([]byte, []byte, error
 	go io.Copy(buf, stdout)
 	go io.Copy(bufErr, stderr)
 	err := cmd.Run()
-	// if err := cmd.Run(); err != nil {
-	// 	return nil, errors.New(string(bufErr.Bytes()))
-	// }
+	if err := cmd.Run(); err != nil {
+		return nil, bufErr.Bytes(), err
+	}
 	return buf.Bytes(), bufErr.Bytes(), err
 }
 
