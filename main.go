@@ -28,20 +28,20 @@ var (
 )
 
 var (
-	presetItems = []string{"slow", "bd"}
-	rcItems     = []string{"vbr_hq", "vbr"}
+	presetItems = []string{"slow", "medium", "fast", "bd"}
+	rcItems     = []string{"vbr_hq", "cbr_hq"}
 	aqItems     = []string{"spatial", "temporal"}
 )
 
 var (
-	preset int32
-	rc     int32
-	aq     int32
-	cq     int32
-	qmin   int32 = 16
-	qmax   int32 = 26
-	// bitrate       int32 = 6000
-	// maxrate       int32 = 24000
+	preset     int32
+	rc         int32
+	aq         int32
+	cq         int32
+	qmin       int32 = 16
+	qmax       int32 = 24
+	bitrate    int32 = 5850
+	maxrate    int32 = 24000
 	aqStrength int32 = 15
 )
 
@@ -80,20 +80,21 @@ func handleRunClick() {
 			"-c:a", "copy",
 			// "-c:v", "libx264",
 			"-c:v", "h264_nvenc",
-			"-preset", "slow",
+			"-preset", presetItems[preset],
 			"-profile:v", "high",
 			"-level", "5.1",
-			"-rc:v", "vbr_hq",
-			"-cq", fmt.Sprint(cq),
+			"-rc:v", rcItems[rc],
+			// "-cq", fmt.Sprint(cq),
 			"-qmin", fmt.Sprint(qmin),
 			"-qmax", fmt.Sprint(qmax),
-			"-temporal-aq", "1",
+			"-strict_gop", "1",
+			"-" + aqItems[aq] + "-aq", "1",
 			"-aq-strength:v", fmt.Sprint(aqStrength),
 			// "-rc-lookahead:v", "32",
 			// "-refs:v", "16",
 			// "-bf:v", "3",
-			// "-b:v", fmt.Sprintf("%dk", bitrate),
-			// "-maxrate", fmt.Sprintf("%dk", maxrate),
+			"-b:v", fmt.Sprintf("%dk", bitrate),
+			"-maxrate", fmt.Sprintf("%dk", maxrate),
 			"-map", "0:0",
 			"-f", "mp4",
 		}, &progress, &ffmpegLog, g.Update)
@@ -162,15 +163,15 @@ func loop() {
 		g.Layout{
 			g.TabBar("maintab", g.Layout{
 				g.TabItem("Encode", g.Layout{
-					g.Child("control", false, 724, 85, shouldDisableInput(isEncoding), g.Layout{
+					g.Child("control", false, 724, 90, shouldDisableInput(isEncoding), g.Layout{
 						g.Spacing(),
 						g.Line(
-							g.InputTextV("##video", -55, &inputPath, 0, nil, nil),
+							g.InputTextV("##video", 655, &inputPath, 0, nil, nil),
 							g.ButtonV("video", 60, 22, handleInputClick),
 						),
 						g.Spacing(),
 						g.Line(
-							g.InputTextV("##output", -55, &outputPath, 0, nil, nil),
+							g.InputTextV("##output", 655, &outputPath, 0, nil, nil),
 							g.ButtonV("output", 60, 22, handleOutputClick),
 						),
 						g.Spacing(),
@@ -181,8 +182,8 @@ func loop() {
 							g.Label("rc"),
 							g.Combo("##rc", rcItems[rc], rcItems, &rc, 85, 0, nil),
 
-							g.Label("cq"),
-							g.InputIntV("##cq", 40, &cq, 0, nil),
+							// g.Label("cq"),
+							// g.InputIntV("##cq", 40, &cq, 0, nil),
 
 							g.Label("qmin"),
 							g.InputIntV("##qmin", 40, &qmin, 0, nil),
@@ -193,11 +194,11 @@ func loop() {
 							g.Label("aq"),
 							g.Combo("##aq", aqItems[aq], aqItems, &aq, 85, 0, nil),
 
-							g.Label("aq-strength"),
+							// g.Label("aq-strength"),
 							g.InputIntV("##aqstrength", 40, &aqStrength, 0, validateAQStrength),
 
-							// g.Label("Bitrate"),
-							// g.InputIntV("k##bitrate", 60, &bitrate, 0, nil),
+							g.Label("bitrate"),
+							g.InputIntV("k##bitrate", 70, &bitrate, 0, nil),
 
 							// g.Label("Maxrate"),
 							// g.InputIntV("k##maxrate", 60, &maxrate, 0, nil),
@@ -232,7 +233,7 @@ func loop() {
 }
 
 func main() {
-	mw := g.NewMasterWindow("NVENC Video Toolbox", 740, 415, g.MasterWindowFlagsNotResizable|g.MasterWindowFlagsTransparent, loadFont)
+	mw := g.NewMasterWindow("NVENC Video Toolbox 1.1", 740, 415, g.MasterWindowFlagsNotResizable|g.MasterWindowFlagsTransparent, loadFont)
 	mw.SetBgColor(color.RGBA{0, 0, 0, 0})
 	mw.SetDropCallback(handleDrop)
 	mw.Main(loop)

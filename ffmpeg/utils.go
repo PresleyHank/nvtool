@@ -5,10 +5,12 @@ import (
 	"io"
 	"os/exec"
 	"strconv"
+	"syscall"
 )
 
 func execSync(pwd string, command string, args ...string) ([]byte, []byte, error) {
 	cmd := exec.Command(command, args...)
+	cmd.SysProcAttr = &syscall.SysProcAttr{HideWindow: true}
 	cmd.Dir = pwd
 
 	buf := &bytes.Buffer{}
