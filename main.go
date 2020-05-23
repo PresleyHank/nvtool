@@ -30,7 +30,7 @@ var (
 var (
 	presetItems = []string{"slow", "medium", "fast", "bd"}
 	rcItems     = []string{"vbr_hq", "cbr_hq"}
-	aqItems     = []string{"spatial", "temporal"}
+	aqItems     = []string{"temporal", "spatial"}
 )
 
 var (
@@ -76,28 +76,18 @@ func handleRunClick() {
 	cleanOutput()
 	go func() {
 		isEncoding = true
-		ffmpeg.RunEncode(inputPath, outputPath, []string{
-			"-c:a", "copy",
-			// "-c:v", "libx264",
-			"-c:v", "h264_nvenc",
-			"-preset", presetItems[preset],
-			"-profile:v", "high",
-			"-level", "5.1",
-			"-rc:v", rcItems[rc],
-			// "-cq", fmt.Sprint(cq),
-			"-qmin", fmt.Sprint(qmin),
-			"-qmax", fmt.Sprint(qmax),
-			"-strict_gop", "1",
-			"-" + aqItems[aq] + "-aq", "1",
-			"-aq-strength:v", fmt.Sprint(aqStrength),
-			// "-rc-lookahead:v", "32",
-			// "-refs:v", "16",
-			// "-bf:v", "3",
-			"-b:v", fmt.Sprintf("%dk", bitrate),
-			"-maxrate", fmt.Sprintf("%dk", maxrate),
-			"-map", "0:0",
-			"-f", "mp4",
-		}, &progress, &ffmpegLog, g.Update)
+		command := fmt.Sprintf(
+			"-c:a copy -c:v h264_nvenc -preset %s -profile:v high -level 5.1 -rc:v %s -qmin %d -qmax %d -strict_gop 1 -%s-aq 1 -aq-strength:v %d -b:v %dk -maxrate:v %dk -map 0 -f mp4",
+			presetItems[preset],
+			rcItems[rc],
+			qmin,
+			qmax,
+			aqItems[aq],
+			aqStrength,
+			bitrate,
+			maxrate,
+		)
+		ffmpeg.RunEncode(inputPath, outputPath, strings.Split(command, " "), &progress, &ffmpegLog, g.Update)
 		isEncoding = false
 	}()
 }
