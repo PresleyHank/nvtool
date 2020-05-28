@@ -40,8 +40,8 @@ var (
 	cq         int32
 	qmin       int32 = 16
 	qmax       int32 = 24
-	bitrate    int32 = 5850
-	maxrate    int32 = 24000
+	bitrate    int32 = 19850
+	maxrate    int32 = 60000
 	aqStrength int32 = 15
 )
 
