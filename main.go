@@ -24,7 +24,7 @@ var (
 	isEncoding       bool
 	progress         float32
 	ffmpegLog        string
-	mediaInfoLog     string
+	mediaInfoLog     string = "Drag and drop media files here"
 )
 
 var (
@@ -99,6 +99,7 @@ func setMediaInfo(inputPath string) {
 		return
 	}
 	mediaInfoLog = strings.Join(info, "\n")
+	g.Update()
 }
 
 func handleDrop(dropItem []string) {
