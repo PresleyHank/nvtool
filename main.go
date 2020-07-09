@@ -41,7 +41,7 @@ var (
 	qmin       int32 = 16
 	qmax       int32 = 24
 	bitrate    int32 = 19850
-	maxrate    int32 = 60000
+	maxrate    int32 = 59850
 	aqStrength int32 = 15
 )
 
