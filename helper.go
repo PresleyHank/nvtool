@@ -9,7 +9,7 @@ import (
 
 func loadFont() {
 	fonts := g.Context.IO().Fonts()
-	fontPath := "./iosevka-regular.ttf"
+	fontPath := "./agave-regular.ttf"
 	fonts.AddFontFromFileTTFV(fontPath, 16, imgui.DefaultFontConfig, fonts.GlyphRangesDefault())
 }
 
