@@ -15,6 +15,18 @@ import (
 	mediainfo "github.com/Nicify/nvtool/mediainfo"
 )
 
+type encodingArguments struct {
+	preset     int32
+	rc         int32
+	aq         int32
+	cq         int32
+	qmin       int32
+	qmax       int32
+	bitrate    int32
+	maxrate    int32
+	aqStrength int32
+}
+
 var (
 	font             = imgui.Font(0)
 	selectedTebIndex int
@@ -33,17 +45,13 @@ var (
 	aqItems     = []string{"temporal", "spatial"}
 )
 
-var (
-	preset     int32
-	rc         int32
-	aq         int32
-	cq         int32
-	qmin       int32 = 16
-	qmax       int32 = 24
-	bitrate    int32 = 19850
-	maxrate    int32 = 59850
-	aqStrength int32 = 15
-)
+var defaultPreset = encodingArguments{
+	qmin:       16,
+	qmax:       24,
+	bitrate:    19850,
+	maxrate:    59850,
+	aqStrength: 15,
+}
 
 func cleanOutput() {
 	progress = 0
@@ -78,14 +86,14 @@ func handleRunClick() {
 		isEncoding = true
 		command := fmt.Sprintf(
 			"-c:a copy -c:v h264_nvenc -preset %s -profile:v high -level 5.1 -rc:v %s -qmin %d -qmax %d -strict_gop 1 -%s-aq 1 -aq-strength:v %d -b:v %dk -maxrate:v %dk -map 0 -f mp4",
-			presetItems[preset],
-			rcItems[rc],
-			qmin,
-			qmax,
-			aqItems[aq],
-			aqStrength,
-			bitrate,
-			maxrate,
+			presetItems[defaultPreset.preset],
+			rcItems[defaultPreset.rc],
+			defaultPreset.qmin,
+			defaultPreset.qmax,
+			aqItems[defaultPreset.aq],
+			defaultPreset.aqStrength,
+			defaultPreset.bitrate,
+			defaultPreset.maxrate,
 		)
 		ffmpeg.RunEncode(inputPath, outputPath, strings.Split(command, " "), &progress, &ffmpegLog, g.Update)
 		isEncoding = false
@@ -168,31 +176,33 @@ func loop() {
 						g.Spacing(),
 						g.Line(
 							g.Label("preset"),
-							g.Combo("##preset", presetItems[preset], presetItems, &preset, 85, 0, nil),
+							g.Combo("##preset", presetItems[defaultPreset.preset], presetItems, &defaultPreset.preset, 85, 0, nil),
 
 							g.Label("rc"),
-							g.Combo("##rc", rcItems[rc], rcItems, &rc, 85, 0, nil),
+							g.Combo("##rc", rcItems[defaultPreset.rc], rcItems, &defaultPreset.rc, 85, 0, nil),
 
 							// g.Label("cq"),
-							// g.InputIntV("##cq", 40, &cq, 0, nil),
+							// g.InputIntV("##cq", 40, &defaultPreset.cq, 0, nil),
 
 							g.Label("qmin"),
-							g.InputIntV("##qmin", 40, &qmin, 0, nil),
+							g.InputIntV("##qmin", 40, &defaultPreset.qmin, 0, nil),
 
 							g.Label("qmax"),
-							g.InputIntV("##qmax", 40, &qmax, 0, nil),
+							g.InputIntV("##qmax", 40, &defaultPreset.qmax, 0, nil),
 
 							g.Label("aq"),
-							g.Combo("##aq", aqItems[aq], aqItems, &aq, 85, 0, nil),
+							g.Combo("##aq", aqItems[defaultPreset.aq], aqItems, &defaultPreset.aq, 85, 0, nil),
 
 							// g.Label("aq-strength"),
-							g.InputIntV("##aqstrength", 40, &aqStrength, 0, validateAQStrength),
+							g.InputIntV("##aqstrength", 40, &defaultPreset.aqStrength, 0, func() {
+								defaultPreset.aqStrength = limitValue(defaultPreset.aqStrength, 0, 15)
+							}),
 
 							g.Label("bitrate"),
-							g.InputIntV("k##bitrate", 70, &bitrate, 0, nil),
+							g.InputIntV("k##bitrate", 70, &defaultPreset.bitrate, 0, nil),
 
 							// g.Label("Maxrate"),
-							// g.InputIntV("k##maxrate", 60, &maxrate, 0, nil),
+							// g.InputIntV("k##maxrate", 60, &defaultPreset.maxrate, 0, nil),
 						),
 					}),
 					g.Spacing(),
