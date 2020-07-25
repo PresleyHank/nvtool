@@ -162,55 +162,55 @@ func loop() {
 		g.Layout{
 			g.TabBar("maintab", g.Layout{
 				g.TabItem("Encode", g.Layout{
-					g.Child("control", false, 724, 90, shouldDisableInput(isEncoding), g.Layout{
+					g.Child("control", false, 734, 90, shouldDisableInput(isEncoding), g.Layout{
 						g.Spacing(),
 						g.Line(
-							g.InputTextV("##video", 655, &inputPath, 0, nil, nil),
+							g.InputTextV("##video", 665, &inputPath, 0, nil, nil),
 							g.ButtonV("video", 60, 22, handleInputClick),
 						),
 						g.Spacing(),
 						g.Line(
-							g.InputTextV("##output", 655, &outputPath, 0, nil, nil),
+							g.InputTextV("##output", 665, &outputPath, 0, nil, nil),
 							g.ButtonV("output", 60, 22, handleOutputClick),
 						),
 						g.Spacing(),
 						g.Line(
 							g.Label("preset"),
-							g.Combo("##preset", presetItems[defaultPreset.preset], presetItems, &defaultPreset.preset, 85, 0, nil),
+							g.Combo("##preset", presetItems[defaultPreset.preset], presetItems, &defaultPreset.preset, 80, 0, nil),
 
 							g.Label("rc"),
-							g.Combo("##rc", rcItems[defaultPreset.rc], rcItems, &defaultPreset.rc, 85, 0, nil),
+							g.Combo("##rc", rcItems[defaultPreset.rc], rcItems, &defaultPreset.rc, 80, 0, nil),
 
 							// g.Label("cq"),
-							// g.InputIntV("##cq", 40, &defaultPreset.cq, 0, nil),
+							// g.InputIntV("##cq", 25, &defaultPreset.cq, 0, nil),
 
 							g.Label("qmin"),
-							g.InputIntV("##qmin", 40, &defaultPreset.qmin, 0, nil),
+							g.InputIntV("##qmin", 35, &defaultPreset.qmin, 0, nil),
 
 							g.Label("qmax"),
-							g.InputIntV("##qmax", 40, &defaultPreset.qmax, 0, nil),
+							g.InputIntV("##qmax", 35, &defaultPreset.qmax, 0, nil),
 
 							g.Label("aq"),
-							g.Combo("##aq", aqItems[defaultPreset.aq], aqItems, &defaultPreset.aq, 85, 0, nil),
+							g.Combo("##aq", aqItems[defaultPreset.aq], aqItems, &defaultPreset.aq, 95, 0, nil),
 
 							// g.Label("aq-strength"),
-							g.InputIntV("##aqstrength", 40, &defaultPreset.aqStrength, 0, func() {
+							g.InputIntV("##aqstrength", 35, &defaultPreset.aqStrength, 0, func() {
 								defaultPreset.aqStrength = limitValue(defaultPreset.aqStrength, 0, 15)
 							}),
 
 							g.Label("bitrate"),
-							g.InputIntV("k##bitrate", 70, &defaultPreset.bitrate, 0, nil),
+							g.InputIntV("k##bitrate", 65, &defaultPreset.bitrate, 0, nil),
 
 							// g.Label("Maxrate"),
-							// g.InputIntV("k##maxrate", 60, &defaultPreset.maxrate, 0, nil),
+							// g.InputIntV("k##maxrate", 65, &defaultPreset.maxrate, 0, nil),
 						),
 					}),
 					g.Spacing(),
-					g.InputTextMultiline("", &ffmpegLog, 724, 200, 0, nil, func() {
+					g.InputTextMultiline("", &ffmpegLog, 734, 200, 0, nil, func() {
 						imgui.SetScrollHereY(1.0)
 					}),
 					g.Spacing(),
-					g.ProgressBar(progress, 725, 20, ""),
+					g.ProgressBar(progress, 734, 20, ""),
 					g.Line(
 						g.Dummy(0, 5),
 					),
@@ -225,7 +225,7 @@ func loop() {
 				),
 				g.TabItem("MediaInfo", g.Layout{
 					g.Spacing(),
-					g.InputTextMultiline("mediainfo", &mediaInfoLog, 724, 370, g.InputTextFlagsReadOnly, nil, nil),
+					g.InputTextMultiline("mediainfo", &mediaInfoLog, 734, 374, g.InputTextFlagsReadOnly, nil, nil),
 				}),
 			}),
 		})
@@ -234,7 +234,7 @@ func loop() {
 }
 
 func main() {
-	mw := g.NewMasterWindow("NVENC Video Toolbox 1.1", 740, 415, g.MasterWindowFlagsNotResizable|g.MasterWindowFlagsTransparent, loadFont)
+	mw := g.NewMasterWindow("NVENC Video Toolbox 1.1", 750, 420, g.MasterWindowFlagsNotResizable|g.MasterWindowFlagsTransparent, loadFont)
 	mw.SetBgColor(color.RGBA{0, 0, 0, 0})
 	mw.SetDropCallback(handleDrop)
 	mw.Main(loop)
