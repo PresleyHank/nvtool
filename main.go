@@ -58,7 +58,7 @@ func cleanOutput() {
 	ffmpegLog = ""
 }
 
-func handleInputClick() {
+func onInputClick() {
 	filePath := selectInputPath()
 	if len(filePath) > 1 {
 		progress = 0
@@ -70,14 +70,14 @@ func handleInputClick() {
 	}
 }
 
-func handleOutputClick() {
+func onOutputClick() {
 	filePath := selectOutputPath()
 	if len(filePath) > 1 {
 		outputPath = filePath
 	}
 }
 
-func handleRunClick() {
+func onRunClick() {
 	if isEncoding || invalidPath(inputPath, outputPath) {
 		return
 	}
@@ -110,7 +110,7 @@ func setMediaInfo(inputPath string) {
 	g.Update()
 }
 
-func handleDrop(dropItem []string) {
+func onDrop(dropItem []string) {
 	if isEncoding {
 		return
 	}
@@ -120,7 +120,7 @@ func handleDrop(dropItem []string) {
 	go setMediaInfo(inputPath)
 }
 
-func handleCancelClick() {
+func onCancelClick() {
 	isEncoding = false
 	proc := ffmpeg.GetProcess()
 	if proc == nil {
@@ -166,12 +166,12 @@ func loop() {
 						g.Spacing(),
 						g.Line(
 							g.InputTextV("##video", 665, &inputPath, 0, nil, nil),
-							g.ButtonV("video", 60, 22, handleInputClick),
+							g.ButtonV("video", 60, 22, onInputClick),
 						),
 						g.Spacing(),
 						g.Line(
 							g.InputTextV("##output", 665, &outputPath, 0, nil, nil),
-							g.ButtonV("output", 60, 22, handleOutputClick),
+							g.ButtonV("output", 60, 22, onOutputClick),
 						),
 						g.Spacing(),
 						g.Line(
@@ -217,8 +217,8 @@ func loop() {
 					g.Line(
 						g.Dummy(-67, 24),
 						g.Condition(isEncoding,
-							g.Layout{g.ButtonV("Cancel", 60, 24, handleCancelClick)},
-							g.Layout{g.ButtonV("Run", 60, 24, handleRunClick)},
+							g.Layout{g.ButtonV("Cancel", 60, 24, onCancelClick)},
+							g.Layout{g.ButtonV("Run", 60, 24, onRunClick)},
 						),
 					),
 				},
@@ -236,7 +236,7 @@ func loop() {
 func main() {
 	mw := g.NewMasterWindow("NVENC Video Toolbox 1.1", 750, 420, g.MasterWindowFlagsNotResizable|g.MasterWindowFlagsTransparent, loadFont)
 	mw.SetBgColor(color.RGBA{0, 0, 0, 0})
-	mw.SetDropCallback(handleDrop)
+	mw.SetDropCallback(onDrop)
 	mw.Main(loop)
-	handleCancelClick()
+	onCancelClick()
 }

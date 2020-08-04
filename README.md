@@ -15,7 +15,7 @@ scoop install ffmpeg mediainfo
 #### Build
 
 ```sh
-go build --ldflags '-s -w -extldflags "-static" -H=windowsgui' .
+go build -ldflags='-s -w -H windowsgui -linkmode external -extldflags -static' .
 ```
 
 #### Screenshots

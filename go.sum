@@ -1,5 +1,5 @@
-github.com/AllenDang/giu v0.0.0-20200715023355-b46939da8698 h1:gwzQvGV1DekX4xXgvv/KOIgNnhIht4/LsXVUCUMLgN4=
-github.com/AllenDang/giu v0.0.0-20200715023355-b46939da8698/go.mod h1:I5APP3KkERnp+ERQVVaGOrUcSrgvt0s2lEh4+ap6SdI=
+github.com/AllenDang/giu v0.0.0-20200804060420-963edfd87915 h1:CNbDbDTOHjheoJr5lHOk6A2tuqyAONY4paQUFOhKFBc=
+github.com/AllenDang/giu v0.0.0-20200804060420-963edfd87915/go.mod h1:I5APP3KkERnp+ERQVVaGOrUcSrgvt0s2lEh4+ap6SdI=
 github.com/BurntSushi/freetype-go v0.0.0-20160129220410-b763ddbfe298/go.mod h1:D+QujdIlUNfa0igpNMk6UIvlb6C252URs4yupRUV4lQ=
 github.com/BurntSushi/graphics-go v0.0.0-20160129215708-b43f31a4a966/go.mod h1:Mid70uvE93zn9wgF92A/r5ixgnvX8Lh68fxp9KQBaI0=
 github.com/BurntSushi/xgb v0.0.0-20160522181843-27f122750802/go.mod h1:IVnqGOEym/WlBOVXweHU+Q+/VP0lqqI8lqeDx9IjBqo=
