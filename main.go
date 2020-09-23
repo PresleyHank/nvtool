@@ -12,6 +12,7 @@ import (
 	g "github.com/AllenDang/giu"
 	"github.com/AllenDang/giu/imgui"
 	ffmpeg "github.com/Nicify/nvtool/ffmpeg"
+	gpu "github.com/Nicify/nvtool/gpu"
 	mediainfo "github.com/Nicify/nvtool/mediainfo"
 )
 
@@ -35,6 +36,7 @@ var (
 	fullDuration     uint
 	isEncoding       bool
 	progress         float32
+	gpuInfo          string
 	ffmpegLog        string
 	mediaInfoLog     string = "Drag and drop media files here"
 )
@@ -215,7 +217,8 @@ func loop() {
 						g.Dummy(0, 5),
 					),
 					g.Line(
-						g.Dummy(-67, 24),
+						g.Label(gpuInfo),
+						g.Dummy(-68, 24),
 						g.Condition(isEncoding,
 							g.Layout{g.ButtonV("Cancel", 60, 24, onCancelClick)},
 							g.Layout{g.ButtonV("Run", 60, 24, onRunClick)},
@@ -234,6 +237,11 @@ func loop() {
 }
 
 func main() {
+	gpuList, err := gpu.GetGPUInfo()
+	if err != nil {
+		fmt.Printf("Error getting GPU info: %v", err)
+	}
+	gpuInfo = strings.Join(gpuList, " ")
 	mw := g.NewMasterWindow("NVENC Video Toolbox 1.2", 750, 420, g.MasterWindowFlagsNotResizable|g.MasterWindowFlagsTransparent, loadFont)
 	mw.SetBgColor(color.RGBA{0, 0, 0, 0})
 	mw.SetDropCallback(onDrop)
