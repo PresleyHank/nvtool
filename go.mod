@@ -3,7 +3,6 @@ module github.com/Nicify/nvtool
 go 1.14
 
 require (
-	github.com/AllenDang/giu v0.0.0-20200804060420-963edfd87915
-	github.com/gotk3/gotk3 v0.4.0 // indirect
-	github.com/sqweek/dialog v0.0.0-20200601143742-43ea34326190
+	github.com/AllenDang/giu v0.0.0-20200916021420-55328eeee68b
+	github.com/sqweek/dialog v0.0.0-20200911184034-8a3d98e8211d
 )

@@ -85,7 +85,7 @@ func onRunClick() {
 	go func() {
 		isEncoding = true
 		command := fmt.Sprintf(
-			"-c:a copy -c:v h264_nvenc -preset %s -profile:v high -level 5.1 -rc:v %s -qmin %d -qmax %d -strict_gop 1 -%s-aq 1 -aq-strength:v %d -b:v %dk -maxrate:v %dk -map 0 -f mp4",
+			"-c:a copy -c:v h264_nvenc -preset %s -profile:v high -rc:v %s -qmin %d -qmax %d -strict_gop 1 -%s-aq 1 -aq-strength:v %d -b:v %dk -maxrate:v %dk -map 0 -f mp4",
 			presetItems[defaultPreset.preset],
 			rcItems[defaultPreset.rc],
 			defaultPreset.qmin,
@@ -162,7 +162,7 @@ func loop() {
 		g.Layout{
 			g.TabBar("maintab", g.Layout{
 				g.TabItem("Encode", g.Layout{
-					g.Child("control", false, 734, 90, shouldDisableInput(isEncoding), g.Layout{
+					g.Child("control", false, 734, 92, shouldDisableInput(isEncoding), g.Layout{
 						g.Spacing(),
 						g.Line(
 							g.InputTextV("##video", 665, &inputPath, 0, nil, nil),
@@ -199,7 +199,7 @@ func loop() {
 							}),
 
 							g.Label("bitrate"),
-							g.InputIntV("k##bitrate", 65, &defaultPreset.bitrate, 0, nil),
+							g.InputIntV("k##bitrate", 70, &defaultPreset.bitrate, 0, nil),
 
 							// g.Label("Maxrate"),
 							// g.InputIntV("k##maxrate", 65, &defaultPreset.maxrate, 0, nil),
@@ -234,7 +234,7 @@ func loop() {
 }
 
 func main() {
-	mw := g.NewMasterWindow("NVENC Video Toolbox 1.1", 750, 420, g.MasterWindowFlagsNotResizable|g.MasterWindowFlagsTransparent, loadFont)
+	mw := g.NewMasterWindow("NVENC Video Toolbox 1.2", 750, 420, g.MasterWindowFlagsNotResizable|g.MasterWindowFlagsTransparent, loadFont)
 	mw.SetBgColor(color.RGBA{0, 0, 0, 0})
 	mw.SetDropCallback(onDrop)
 	mw.Main(loop)
