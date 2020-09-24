@@ -167,12 +167,12 @@ func loop() {
 					g.Child("control", false, 734, 92, shouldDisableInput(isEncoding), g.Layout{
 						g.Spacing(),
 						g.Line(
-							g.InputTextV("##video", 665, &inputPath, 0, nil, nil),
+							g.InputTextV("##video", -68, &inputPath, 0, nil, nil),
 							g.ButtonV("video", 60, 22, onInputClick),
 						),
 						g.Spacing(),
 						g.Line(
-							g.InputTextV("##output", 665, &outputPath, 0, nil, nil),
+							g.InputTextV("##output", -68, &outputPath, 0, nil, nil),
 							g.ButtonV("output", 60, 22, onOutputClick),
 						),
 						g.Spacing(),

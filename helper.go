@@ -9,8 +9,8 @@ import (
 
 func loadFont() {
 	fonts := g.Context.IO().Fonts()
-	fontPath := "./iosevka.ttf"
-	fonts.AddFontFromFileTTFV(fontPath, 18, imgui.DefaultFontConfig, fonts.GlyphRangesDefault())
+	font, _ := box.Find("iosevka.ttf")
+	fonts.AddFontFromMemoryTTFV(font, 18, imgui.DefaultFontConfig, fonts.GlyphRangesDefault())
 }
 
 func selectInputPath() string {
