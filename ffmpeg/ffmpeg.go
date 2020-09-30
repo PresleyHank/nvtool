@@ -10,9 +10,26 @@ import (
 )
 
 const (
-	durationRegexString      = `Duration: (\d{2}):(\d{2}):(\d{2})\.(\d{2})`
-	encodingTimeRegexString  = `time=(\d{2}):(\d{2}):(\d{2})\.(\d{2})`
-	encodingSpeedRegexString = `speed=\d+\.\d+x`
+	PresetSlow = iota
+	PresetMedium
+	PresetFast
+	PresetBD
+)
+
+const (
+	CQVbrHQ = iota
+	CQCbrHQ
+)
+
+const (
+	AQTemporal = iota
+	AQSpatial
+)
+
+var (
+	PresetOptions = []string{"slow", "medium", "fast", "bd"}
+	RCOptions     = []string{"vbr_hq", "cbr_hq"}
+	AQOptions     = []string{"temporal", "spatial"}
 )
 
 var (

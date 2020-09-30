@@ -8,6 +8,12 @@ import (
 	"syscall"
 )
 
+const (
+	durationRegexString      = `Duration: (\d{2}):(\d{2}):(\d{2})\.(\d{2})`
+	encodingTimeRegexString  = `time=(\d{2}):(\d{2}):(\d{2})\.(\d{2})`
+	encodingSpeedRegexString = `speed=\d+\.\d+x`
+)
+
 func execSync(pwd string, command string, args ...string) ([]byte, []byte, error) {
 	cmd := exec.Command(command, args...)
 	cmd.SysProcAttr = &syscall.SysProcAttr{HideWindow: true}

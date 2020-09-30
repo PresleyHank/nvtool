@@ -16,7 +16,7 @@ import (
 	mediainfo "github.com/Nicify/nvtool/mediainfo"
 )
 
-type encodingArguments struct {
+type encodingPresets struct {
 	preset     int32
 	rc         int32
 	aq         int32
@@ -41,13 +41,7 @@ var (
 	mediaInfoLog     string = "Drag and drop media files here"
 )
 
-var (
-	presetItems = []string{"slow", "medium", "fast", "bd"}
-	rcItems     = []string{"vbr_hq", "cbr_hq"}
-	aqItems     = []string{"temporal", "spatial"}
-)
-
-var defaultPreset = encodingArguments{
+var defaultPreset = encodingPresets{
 	qmin:       16,
 	qmax:       24,
 	bitrate:    19850,
@@ -88,11 +82,11 @@ func onRunClick() {
 		isEncoding = true
 		command := fmt.Sprintf(
 			"-c:a copy -c:v h264_nvenc -preset %s -profile:v high -rc:v %s -qmin %d -qmax %d -strict_gop 1 -%s-aq 1 -aq-strength:v %d -b:v %dk -maxrate:v %dk -map 0 -f mp4",
-			presetItems[defaultPreset.preset],
-			rcItems[defaultPreset.rc],
+			ffmpeg.PresetOptions[defaultPreset.preset],
+			ffmpeg.RCOptions[defaultPreset.rc],
 			defaultPreset.qmin,
 			defaultPreset.qmax,
-			aqItems[defaultPreset.aq],
+			ffmpeg.AQOptions[defaultPreset.aq],
 			defaultPreset.aqStrength,
 			defaultPreset.bitrate,
 			defaultPreset.maxrate,
@@ -178,10 +172,10 @@ func loop() {
 						g.Spacing(),
 						g.Line(
 							g.Label("preset"),
-							g.Combo("##preset", presetItems[defaultPreset.preset], presetItems, &defaultPreset.preset, 80, 0, nil),
+							g.Combo("##preset", ffmpeg.PresetOptions[defaultPreset.preset], ffmpeg.PresetOptions, &defaultPreset.preset, 80, 0, nil),
 
 							g.Label("rc"),
-							g.Combo("##rc", rcItems[defaultPreset.rc], rcItems, &defaultPreset.rc, 80, 0, nil),
+							g.Combo("##rc", ffmpeg.RCOptions[defaultPreset.rc], ffmpeg.RCOptions, &defaultPreset.rc, 80, 0, nil),
 
 							// g.Label("cq"),
 							// g.InputIntV("##cq", 25, &defaultPreset.cq, 0, nil),
@@ -193,7 +187,7 @@ func loop() {
 							g.InputIntV("##qmax", 35, &defaultPreset.qmax, 0, nil),
 
 							g.Label("aq"),
-							g.Combo("##aq", aqItems[defaultPreset.aq], aqItems, &defaultPreset.aq, 95, 0, nil),
+							g.Combo("##aq", ffmpeg.AQOptions[defaultPreset.aq], ffmpeg.AQOptions, &defaultPreset.aq, 95, 0, nil),
 
 							// g.Label("aq-strength"),
 							g.InputIntV("##aqstrength", 35, &defaultPreset.aqStrength, 0, func() {
