@@ -116,7 +116,7 @@ func onDrop(dropItem []string) {
 	go setMediaInfo(inputPath)
 }
 
-func onCancelClick() {
+func dispose() {
 	isEncoding = false
 	proc := ffmpeg.GetProcess()
 	if proc == nil {
@@ -161,12 +161,12 @@ func loop() {
 					g.Child("control", false, 734, 92, shouldDisableInput(isEncoding), g.Layout{
 						g.Spacing(),
 						g.Line(
-							g.InputTextV("##video", -68, &inputPath, 0, nil, nil),
+							g.InputTextV("##video", -68/imgui.DPIScale, &inputPath, 0, nil, nil),
 							g.ButtonV("video", 60, 22, onInputClick),
 						),
 						g.Spacing(),
 						g.Line(
-							g.InputTextV("##output", -68, &outputPath, 0, nil, nil),
+							g.InputTextV("##output", -68/imgui.DPIScale, &outputPath, 0, nil, nil),
 							g.ButtonV("output", 60, 22, onOutputClick),
 						),
 						g.Spacing(),
@@ -214,7 +214,7 @@ func loop() {
 						g.Label(gpuInfo),
 						g.Dummy(-68, 24),
 						g.Condition(isEncoding,
-							g.Layout{g.ButtonV("Cancel", 60, 24, onCancelClick)},
+							g.Layout{g.ButtonV("Cancel", 60, 24, dispose)},
 							g.Layout{g.ButtonV("Run", 60, 24, onRunClick)},
 						),
 					),
@@ -240,5 +240,5 @@ func main() {
 	mw.SetBgColor(color.RGBA{0, 0, 0, 0})
 	mw.SetDropCallback(onDrop)
 	mw.Main(loop)
-	onCancelClick()
+	dispose()
 }
