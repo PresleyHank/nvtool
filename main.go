@@ -12,7 +12,6 @@ import (
 	g "github.com/AllenDang/giu"
 	"github.com/AllenDang/giu/imgui"
 	ffmpeg "github.com/Nicify/nvtool/ffmpeg"
-	gpu "github.com/Nicify/nvtool/gpu"
 	mediainfo "github.com/Nicify/nvtool/mediainfo"
 )
 
@@ -29,6 +28,10 @@ type encodingPresets struct {
 }
 
 var (
+	mw               *g.MasterWindow
+	mwMoveable       bool
+	prevMouseX       int
+	prevMouseY       int
 	font             = imgui.Font(0)
 	selectedTebIndex int
 	inputPath        string
@@ -143,12 +146,30 @@ func shouldDisableInput(b bool) (flag g.WindowFlags) {
 	return
 }
 
+func shouldMoveWindow() {
+	mousePos := g.GetMousePos()
+	prevPosX, prevPosY := mw.GetPos()
+	if g.IsMouseClicked(0) {
+		mwMoveable = float32(mousePos.X) > 250*imgui.DPIScale && float32(mousePos.Y) < 28*imgui.DPIScale
+		prevMouseX = mousePos.X
+		prevMouseY = mousePos.Y
+	}
+	if mwMoveable && g.IsMouseDown(0) {
+		offsetX := mousePos.X - prevMouseX
+		offsetY := mousePos.Y - prevMouseY
+		mw.SetPos(prevPosX+int(offsetX), prevPosY+int(offsetY))
+	}
+}
+
 func loop() {
+	shouldMoveWindow()
+	io := g.Context.IO()
+	io.SetFontGlobalScale(1)
 	imgui.PushStyleVarFloat(imgui.StyleVarWindowBorderSize, 0)
 	imgui.PushStyleVarFloat(imgui.StyleVarFrameBorderSize, 0)
 	imgui.PushStyleVarFloat(imgui.StyleVarChildBorderSize, 0)
 	imgui.PushStyleVarFloat(imgui.StyleVarFrameRounding, 3)
-	g.Context.IO().SetFontGlobalScale(1)
+	imgui.PushStyleVarFloat(imgui.StyleVarChildRounding, 3)
 	g.PushColorWindowBg(color.RGBA{50, 50, 50, 250})
 	g.PushColorFrameBg(color.RGBA{10, 10, 10, 240})
 	g.PushColorButton(color.RGBA{100, 100, 100, 255})
@@ -164,11 +185,13 @@ func loop() {
 							g.InputTextV("##video", -68/imgui.DPIScale, &inputPath, 0, nil, nil),
 							g.ButtonV("video", 60, 22, onInputClick),
 						),
+
 						g.Spacing(),
 						g.Line(
 							g.InputTextV("##output", -68/imgui.DPIScale, &outputPath, 0, nil, nil),
 							g.ButtonV("output", 60, 22, onOutputClick),
 						),
+
 						g.Spacing(),
 						g.Line(
 							g.Label("preset"),
@@ -201,12 +224,15 @@ func loop() {
 							// g.InputIntV("k##maxrate", 65, &defaultPreset.maxrate, 0, nil),
 						),
 					}),
+
 					g.Spacing(),
 					g.InputTextMultiline("", &ffmpegLog, 734, 200, 0, nil, func() {
 						imgui.SetScrollHereY(1.0)
 					}),
+
 					g.Spacing(),
 					g.ProgressBar(progress, 734, 20, ""),
+
 					g.Line(
 						g.Dummy(0, 5),
 					),
@@ -220,23 +246,45 @@ func loop() {
 					),
 				},
 				),
+
 				g.TabItem("MediaInfo", g.Layout{
 					g.Spacing(),
 					g.InputTextMultiline("mediainfo", &mediaInfoLog, 734, 374, g.InputTextFlagsReadOnly, nil, nil),
 				}),
+
+				// g.TabItem("Settings", g.Layout{
+				// 	g.Custom(func() {
+				// 		imgui.PushStyleColor(imgui.StyleColorChildBg, imgui.Vec4{X: 0.12, Y: 0.12, Z: 0.12, W: 0.99})
+				// 	}),
+
+				// 	g.Spacing(),
+				// 	g.Label("Interface"),
+				// 	g.Child("Interface", true, 734, 95, g.WindowFlagsAlwaysUseWindowPadding, g.Layout{}),
+
+				// 	g.Spacing(),
+				// 	g.Label("Encoding"),
+				// 	g.Child("Encoding", true, 734, 95, g.WindowFlagsAlwaysUseWindowPadding, g.Layout{}),
+
+				// 	g.Spacing(),
+				// 	g.Label("Binary"),
+				// 	g.Child("Binary", true, 734, 95, g.WindowFlagsAlwaysUseWindowPadding, g.Layout{}),
+
+				// 	g.Custom(func() {
+				// 		imgui.PopStyleColorV(1)
+				// 	}),
+				// }),
 			}),
 		})
 	g.PopStyleColorV(5)
-	imgui.PopStyleVarV(4)
+	imgui.PopStyleVarV(5)
+}
+
+func init() {
+	gpuInfo = getGpuNames()
 }
 
 func main() {
-	gpuList, err := gpu.GetGPUInfo()
-	if err != nil {
-		fmt.Printf("Error getting GPU info: %v", err)
-	}
-	gpuInfo = strings.Join(gpuList, " ")
-	mw := g.NewMasterWindow("NVENC Video Toolbox 1.2", 750, 420, g.MasterWindowFlagsNotResizable|g.MasterWindowFlagsTransparent, loadFont)
+	mw = g.NewMasterWindow("NVENC Video Toolbox 1.2", 750, 420, g.MasterWindowFlagsNotResizable|g.MasterWindowFlagsFrameless|g.MasterWindowFlagsTransparent, loadFont)
 	mw.SetBgColor(color.RGBA{0, 0, 0, 0})
 	mw.SetDropCallback(onDrop)
 	mw.Main(loop)

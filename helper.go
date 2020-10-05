@@ -1,11 +1,21 @@
 package main
 
 import (
-	g "github.com/AllenDang/giu"
+	"strings"
 
+	g "github.com/AllenDang/giu"
 	"github.com/AllenDang/giu/imgui"
+	gpu "github.com/Nicify/nvtool/gpu"
 	"github.com/sqweek/dialog"
 )
+
+func getGpuNames() string {
+	gpuList, err := gpu.GetGPUInfo()
+	if err != nil {
+		return "Error getting GPU info"
+	}
+	return strings.Join(gpuList, " ")
+}
 
 func loadFont() {
 	fonts := g.Context.IO().Fonts()
