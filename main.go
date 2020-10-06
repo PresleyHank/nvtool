@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"image/color"
+	"os"
 	"os/exec"
 	"path"
 	"runtime"
@@ -26,6 +27,10 @@ type encodingPresets struct {
 	maxrate    int32
 	aqStrength int32
 }
+
+var (
+	textureCloseBTN *g.Texture
+)
 
 var (
 	mw               *g.MasterWindow
@@ -150,7 +155,7 @@ func shouldMoveWindow() {
 	mousePos := g.GetMousePos()
 	prevPosX, prevPosY := mw.GetPos()
 	if g.IsMouseClicked(0) {
-		mwMoveable = float32(mousePos.X) > 250*imgui.DPIScale && float32(mousePos.Y) < 28*imgui.DPIScale
+		mwMoveable = float32(mousePos.Y) < 50*imgui.DPIScale
 		prevMouseX = mousePos.X
 		prevMouseY = mousePos.Y
 	}
@@ -163,128 +168,136 @@ func shouldMoveWindow() {
 
 func loop() {
 	shouldMoveWindow()
-	io := g.Context.IO()
-	io.SetFontGlobalScale(1)
-	imgui.PushStyleVarFloat(imgui.StyleVarWindowBorderSize, 0)
-	imgui.PushStyleVarFloat(imgui.StyleVarFrameBorderSize, 0)
-	imgui.PushStyleVarFloat(imgui.StyleVarChildBorderSize, 0)
-	imgui.PushStyleVarFloat(imgui.StyleVarFrameRounding, 3)
-	imgui.PushStyleVarFloat(imgui.StyleVarChildRounding, 3)
-	g.PushColorWindowBg(color.RGBA{50, 50, 50, 250})
-	g.PushColorFrameBg(color.RGBA{10, 10, 10, 240})
-	g.PushColorButton(color.RGBA{100, 100, 100, 255})
-	g.PushColorButtonHovered(color.RGBA{120, 120, 120, 240})
-	g.PushColorButtonActive(color.RGBA{80, 80, 80, 245})
-	g.SingleWindow("NVENC Video Toolbox",
-		g.Layout{
-			g.TabBar("maintab", g.Layout{
-				g.TabItem("Encode", g.Layout{
-					g.Child("control", false, 734, 92, shouldDisableInput(isEncoding), g.Layout{
-						g.Spacing(),
-						g.Line(
-							g.InputTextV("##video", -68/imgui.DPIScale, &inputPath, 0, nil, nil),
-							g.ButtonV("video", 60, 22, onInputClick),
-						),
-
-						g.Spacing(),
-						g.Line(
-							g.InputTextV("##output", -68/imgui.DPIScale, &outputPath, 0, nil, nil),
-							g.ButtonV("output", 60, 22, onOutputClick),
-						),
-
-						g.Spacing(),
-						g.Line(
-							g.Label("preset"),
-							g.Combo("##preset", ffmpeg.PresetOptions[defaultPreset.preset], ffmpeg.PresetOptions, &defaultPreset.preset, 80, 0, nil),
-
-							g.Label("rc"),
-							g.Combo("##rc", ffmpeg.RCOptions[defaultPreset.rc], ffmpeg.RCOptions, &defaultPreset.rc, 80, 0, nil),
-
-							// g.Label("cq"),
-							// g.InputIntV("##cq", 25, &defaultPreset.cq, 0, nil),
-
-							g.Label("qmin"),
-							g.InputIntV("##qmin", 35, &defaultPreset.qmin, 0, nil),
-
-							g.Label("qmax"),
-							g.InputIntV("##qmax", 35, &defaultPreset.qmax, 0, nil),
-
-							g.Label("aq"),
-							g.Combo("##aq", ffmpeg.AQOptions[defaultPreset.aq], ffmpeg.AQOptions, &defaultPreset.aq, 95, 0, nil),
-
-							// g.Label("aq-strength"),
-							g.InputIntV("##aqstrength", 35, &defaultPreset.aqStrength, 0, func() {
-								defaultPreset.aqStrength = limitValue(defaultPreset.aqStrength, 0, 15)
-							}),
-
-							g.Label("bitrate"),
-							g.InputIntV("k##bitrate", 70, &defaultPreset.bitrate, 0, nil),
-
-							// g.Label("Maxrate"),
-							// g.InputIntV("k##maxrate", 65, &defaultPreset.maxrate, 0, nil),
-						),
+	WithDarkTheme(func() {
+		g.SingleWindow("NVENC Video Toolbox",
+			g.Layout{
+				g.Line(
+					g.LabelV("NVENC Video Toolbox 1.2", false, &color.RGBA{255, 255, 255, 255}, &font),
+					g.Dummy(-83, 0),
+					g.Custom(BeginStyleButtonDark),
+					g.ButtonV(".", 20, 20, func() {}),
+					g.ButtonV("_", 20, 20, func() {}),
+					g.ImageButton(textureCloseBTN, 20, 20, func() {
+						dispose()
+						os.Exit(0)
 					}),
-
-					g.Spacing(),
-					g.InputTextMultiline("", &ffmpegLog, 734, 200, 0, nil, func() {
-						imgui.SetScrollHereY(1.0)
-					}),
-
-					g.Spacing(),
-					g.ProgressBar(progress, 734, 20, ""),
-
-					g.Line(
-						g.Dummy(0, 5),
-					),
-					g.Line(
-						g.Label(gpuInfo),
-						g.Dummy(-68, 24),
-						g.Condition(isEncoding,
-							g.Layout{g.ButtonV("Cancel", 60, 24, dispose)},
-							g.Layout{g.ButtonV("Run", 60, 24, onRunClick)},
-						),
-					),
-				},
+					g.Custom(EndStyleButtonDark),
 				),
+				g.TabBar("maintab", g.Layout{
+					g.TabItem("Encode", g.Layout{
+						g.Child("control", false, 734, 92, shouldDisableInput(isEncoding), g.Layout{
+							g.Spacing(),
+							g.Line(
+								g.InputTextV("##video", -68/imgui.DPIScale, &inputPath, 0, nil, nil),
+								g.ButtonV("video", 60, 22, onInputClick),
+							),
 
-				g.TabItem("MediaInfo", g.Layout{
-					g.Spacing(),
-					g.InputTextMultiline("mediainfo", &mediaInfoLog, 734, 374, g.InputTextFlagsReadOnly, nil, nil),
+							g.Spacing(),
+							g.Line(
+								g.InputTextV("##output", -68/imgui.DPIScale, &outputPath, 0, nil, nil),
+								g.ButtonV("output", 60, 22, onOutputClick),
+							),
+
+							g.Spacing(),
+							g.Line(
+								g.Label("preset"),
+								g.Combo("##preset", ffmpeg.PresetOptions[defaultPreset.preset], ffmpeg.PresetOptions, &defaultPreset.preset, 80, 0, nil),
+
+								g.Label("rc"),
+								g.Combo("##rc", ffmpeg.RCOptions[defaultPreset.rc], ffmpeg.RCOptions, &defaultPreset.rc, 80, 0, nil),
+
+								// g.Label("cq"),
+								// g.InputIntV("##cq", 25, &defaultPreset.cq, 0, nil),
+
+								g.Label("qmin"),
+								g.InputIntV("##qmin", 35, &defaultPreset.qmin, 0, nil),
+
+								g.Label("qmax"),
+								g.InputIntV("##qmax", 35, &defaultPreset.qmax, 0, nil),
+
+								g.Label("aq"),
+								g.Combo("##aq", ffmpeg.AQOptions[defaultPreset.aq], ffmpeg.AQOptions, &defaultPreset.aq, 95, 0, nil),
+
+								// g.Label("aq-strength"),
+								g.InputIntV("##aqstrength", 35, &defaultPreset.aqStrength, 0, func() {
+									defaultPreset.aqStrength = limitValue(defaultPreset.aqStrength, 0, 15)
+								}),
+
+								g.Label("bitrate"),
+								g.InputIntV("k##bitrate", 70, &defaultPreset.bitrate, 0, nil),
+
+								// g.Label("Maxrate"),
+								// g.InputIntV("k##maxrate", 65, &defaultPreset.maxrate, 0, nil),
+							),
+						}),
+
+						g.Spacing(),
+						g.InputTextMultiline("", &ffmpegLog, 734, 200, 0, nil, func() {
+							imgui.SetScrollHereY(1.0)
+						}),
+
+						g.Spacing(),
+						g.ProgressBar(progress, 734, 20, ""),
+
+						g.Line(
+							g.Dummy(0, 5),
+						),
+						g.Line(
+							g.Label(gpuInfo),
+							g.Dummy(-68, 24),
+							g.Condition(isEncoding,
+								g.Layout{g.ButtonV("Cancel", 60, 24, dispose)},
+								g.Layout{g.ButtonV("Run", 60, 24, onRunClick)},
+							),
+						),
+					},
+					),
+
+					g.TabItem("MediaInfo", g.Layout{
+						g.Spacing(),
+						g.InputTextMultiline("mediainfo", &mediaInfoLog, 734, 374, g.InputTextFlagsReadOnly, nil, nil),
+					}),
+
+					g.TabItem("Settings", g.Layout{
+						g.Custom(func() {
+							imgui.PushStyleColor(imgui.StyleColorChildBg, imgui.Vec4{X: 0.12, Y: 0.12, Z: 0.12, W: 0.99})
+						}),
+
+						g.Spacing(),
+						g.Label("Interface"),
+						g.Child("Interface", true, 734, 95, g.WindowFlagsAlwaysUseWindowPadding, g.Layout{}),
+
+						g.Spacing(),
+						g.Label("Encoding"),
+						g.Child("Encoding", true, 734, 95, g.WindowFlagsAlwaysUseWindowPadding, g.Layout{}),
+
+						g.Spacing(),
+						g.Label("Binary"),
+						g.Child("Binary", true, 734, 95, g.WindowFlagsAlwaysUseWindowPadding, g.Layout{}),
+
+						g.Custom(func() {
+							imgui.PopStyleColorV(1)
+						}),
+					}),
 				}),
+			})
+	})
 
-				// g.TabItem("Settings", g.Layout{
-				// 	g.Custom(func() {
-				// 		imgui.PushStyleColor(imgui.StyleColorChildBg, imgui.Vec4{X: 0.12, Y: 0.12, Z: 0.12, W: 0.99})
-				// 	}),
-
-				// 	g.Spacing(),
-				// 	g.Label("Interface"),
-				// 	g.Child("Interface", true, 734, 95, g.WindowFlagsAlwaysUseWindowPadding, g.Layout{}),
-
-				// 	g.Spacing(),
-				// 	g.Label("Encoding"),
-				// 	g.Child("Encoding", true, 734, 95, g.WindowFlagsAlwaysUseWindowPadding, g.Layout{}),
-
-				// 	g.Spacing(),
-				// 	g.Label("Binary"),
-				// 	g.Child("Binary", true, 734, 95, g.WindowFlagsAlwaysUseWindowPadding, g.Layout{}),
-
-				// 	g.Custom(func() {
-				// 		imgui.PopStyleColorV(1)
-				// 	}),
-				// }),
-			}),
-		})
-	g.PopStyleColorV(5)
-	imgui.PopStyleVarV(5)
 }
 
 func init() {
+	go func() {
+		imageByte, err := box.Find("close.png")
+		if err == nil {
+			closeBTNImage, _ := loadImageFromMemory(imageByte)
+			textureCloseBTN, _ = g.NewTextureFromRgba(closeBTNImage)
+		}
+	}()
 	gpuInfo = getGpuNames()
 }
 
 func main() {
-	mw = g.NewMasterWindow("NVENC Video Toolbox 1.2", 750, 420, g.MasterWindowFlagsNotResizable|g.MasterWindowFlagsFrameless|g.MasterWindowFlagsTransparent, loadFont)
+	mw = g.NewMasterWindow("NVENC Video Toolbox", 750, 435, g.MasterWindowFlagsNotResizable|g.MasterWindowFlagsFrameless|g.MasterWindowFlagsTransparent, loadFont)
 	mw.SetBgColor(color.RGBA{0, 0, 0, 0})
 	mw.SetDropCallback(onDrop)
 	mw.Main(loop)

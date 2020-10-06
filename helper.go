@@ -1,6 +1,10 @@
 package main
 
 import (
+	"bytes"
+	"image"
+	"image/draw"
+	"image/png"
 	"strings"
 
 	g "github.com/AllenDang/giu"
@@ -20,7 +24,24 @@ func getGpuNames() string {
 func loadFont() {
 	fonts := g.Context.IO().Fonts()
 	font, _ := box.Find("iosevka.ttf")
-	fonts.AddFontFromMemoryTTFV(font, 18, imgui.DefaultFontConfig, fonts.GlyphRangesDefault())
+	fonts.AddFontFromMemoryTTFV(font, 18, imgui.DefaultFontConfig, fonts.GlyphRangesChineseFull())
+}
+
+func loadImageFromMemory(imageData []byte) (imageRGBA *image.RGBA, err error) {
+	r := bytes.NewReader(imageData)
+	img, err := png.Decode(r)
+	if err != nil {
+		return nil, err
+	}
+
+	switch trueImg := img.(type) {
+	case *image.RGBA:
+		return trueImg, nil
+	default:
+		rgba := image.NewRGBA(trueImg.Bounds())
+		draw.Draw(rgba, trueImg.Bounds(), trueImg, image.Pt(0, 0), draw.Src)
+		return rgba, nil
+	}
 }
 
 func selectInputPath() string {
