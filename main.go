@@ -172,7 +172,7 @@ func loop() {
 		g.SingleWindow("NVENC Video Toolbox",
 			g.Layout{
 				g.Line(
-					g.LabelV("NVENC Video Toolbox 1.2", false, &color.RGBA{255, 255, 255, 255}, &font),
+					g.LabelV("NVENC Video Toolbox 1.2 beta", false, &color.RGBA{255, 255, 255, 255}, &font),
 					g.Dummy(-83, 0),
 					g.Custom(BeginStyleButtonDark),
 					g.ButtonV(".", 20, 20, func() {}),
@@ -255,30 +255,30 @@ func loop() {
 
 					g.TabItem("MediaInfo", g.Layout{
 						g.Spacing(),
-						g.InputTextMultiline("mediainfo", &mediaInfoLog, 734, 374, g.InputTextFlagsReadOnly, nil, nil),
+						g.InputTextMultiline("mediainfo", &mediaInfoLog, 734, 364, g.InputTextFlagsReadOnly, nil, nil),
 					}),
 
-					g.TabItem("Settings", g.Layout{
-						g.Custom(func() {
-							imgui.PushStyleColor(imgui.StyleColorChildBg, imgui.Vec4{X: 0.12, Y: 0.12, Z: 0.12, W: 0.99})
-						}),
+					// g.TabItem("Settings", g.Layout{
+					// 	g.Custom(func() {
+					// 		imgui.PushStyleColor(imgui.StyleColorChildBg, imgui.Vec4{X: 0.12, Y: 0.12, Z: 0.12, W: 0.99})
+					// 	}),
 
-						g.Spacing(),
-						g.Label("Interface"),
-						g.Child("Interface", true, 734, 95, g.WindowFlagsAlwaysUseWindowPadding, g.Layout{}),
+					// 	g.Spacing(),
+					// 	g.Label("Interface"),
+					// 	g.Child("Interface", true, 734, 95, g.WindowFlagsAlwaysUseWindowPadding, g.Layout{}),
 
-						g.Spacing(),
-						g.Label("Encoding"),
-						g.Child("Encoding", true, 734, 95, g.WindowFlagsAlwaysUseWindowPadding, g.Layout{}),
+					// 	g.Spacing(),
+					// 	g.Label("Encoding"),
+					// 	g.Child("Encoding", true, 734, 95, g.WindowFlagsAlwaysUseWindowPadding, g.Layout{}),
 
-						g.Spacing(),
-						g.Label("Binary"),
-						g.Child("Binary", true, 734, 95, g.WindowFlagsAlwaysUseWindowPadding, g.Layout{}),
+					// 	g.Spacing(),
+					// 	g.Label("Binary"),
+					// 	g.Child("Binary", true, 734, 95, g.WindowFlagsAlwaysUseWindowPadding, g.Layout{}),
 
-						g.Custom(func() {
-							imgui.PopStyleColorV(1)
-						}),
-					}),
+					// 	g.Custom(func() {
+					// 		imgui.PopStyleColorV(1)
+					// 	}),
+					// }),
 				}),
 			})
 	})
