@@ -10,7 +10,12 @@ import (
 	g "github.com/AllenDang/giu"
 	"github.com/AllenDang/giu/imgui"
 	gpu "github.com/Nicify/nvtool/gpu"
+	"github.com/gobuffalo/packr/v2"
 	"github.com/sqweek/dialog"
+)
+
+var (
+	box = packr.New("assets", "./assets")
 )
 
 func getGpuNames() string {
