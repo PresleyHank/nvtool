@@ -2,8 +2,6 @@ module github.com/Nicify/nvtool
 
 go 1.15
 
-replace github.com/AllenDang/giu => github.com/Nicify/giu v0.0.0-20201006120725-c979cfed847f
-
 require (
 	github.com/AllenDang/giu v0.0.0-20201006120440-6554c03069e0
 	github.com/gobuffalo/packr/v2 v2.8.0

@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"image/color"
-	"os"
 	"os/exec"
 	"path"
 	"runtime"
@@ -14,6 +13,7 @@ import (
 	"github.com/AllenDang/giu/imgui"
 	ffmpeg "github.com/Nicify/nvtool/ffmpeg"
 	mediainfo "github.com/Nicify/nvtool/mediainfo"
+	theme "github.com/Nicify/nvtool/theme"
 )
 
 type encodingPresets struct {
@@ -29,11 +29,12 @@ type encodingPresets struct {
 }
 
 var (
-	textureCloseBTN *g.Texture
+	texButtonClose *g.Texture
 )
 
 var (
 	mw               *g.MasterWindow
+	platform         *imgui.GLFW
 	mwMoveable       bool
 	prevMouseX       int
 	prevMouseY       int
@@ -151,9 +152,10 @@ func shouldDisableInput(b bool) (flag g.WindowFlags) {
 	return
 }
 
-func shouldMoveWindow() {
+func shouldWindowMove() {
+	nativeWindow := platform.GetWindow()
 	mousePos := g.GetMousePos()
-	prevPosX, prevPosY := mw.GetPos()
+	prevPosX, prevPosY := nativeWindow.GetPos()
 	if g.IsMouseClicked(0) {
 		mwMoveable = float32(mousePos.Y) < 50*imgui.DPIScale
 		prevMouseX = mousePos.X
@@ -162,26 +164,25 @@ func shouldMoveWindow() {
 	if mwMoveable && g.IsMouseDown(0) {
 		offsetX := mousePos.X - prevMouseX
 		offsetY := mousePos.Y - prevMouseY
-		mw.SetPos(prevPosX+int(offsetX), prevPosY+int(offsetY))
+		nativeWindow.SetPos(prevPosX+int(offsetX), prevPosY+int(offsetY))
 	}
 }
 
 func loop() {
-	shouldMoveWindow()
-	WithDarkTheme(func() {
+	shouldWindowMove()
+	theme.WithDarkTheme(func() {
 		g.SingleWindow("NVENC Video Toolbox",
 			g.Layout{
 				g.Line(
 					g.LabelV("NVENC Video Toolbox 1.2 beta", false, &color.RGBA{255, 255, 255, 255}, &font),
 					g.Dummy(-83, 0),
-					g.Custom(BeginStyleButtonDark),
+					g.Custom(theme.BeginStyleButtonDark),
 					g.ButtonV(".", 20, 20, func() {}),
 					g.ButtonV("_", 20, 20, func() {}),
-					g.ImageButton(textureCloseBTN, 20, 20, func() {
-						dispose()
-						os.Exit(0)
+					g.ImageButton(texButtonClose, 20, 20, func() {
+						platform.GetWindow().SetShouldClose(true)
 					}),
-					g.Custom(EndStyleButtonDark),
+					g.Custom(theme.EndStyleButtonDark),
 				),
 				g.TabBar("maintab", g.Layout{
 					g.TabItem("Encode", g.Layout{
@@ -285,19 +286,18 @@ func loop() {
 
 }
 
+func loadingTexture() {
+	texButtonClose, _ = imageToTexture("close.png")
+}
+
 func init() {
-	go func() {
-		imageByte, err := box.Find("close.png")
-		if err == nil {
-			closeBTNImage, _ := loadImageFromMemory(imageByte)
-			textureCloseBTN, _ = g.NewTextureFromRgba(closeBTNImage)
-		}
-	}()
+	go loadingTexture()
 	gpuInfo = getGpuNames()
 }
 
 func main() {
 	mw = g.NewMasterWindow("NVENC Video Toolbox", 750, 435, g.MasterWindowFlagsNotResizable|g.MasterWindowFlagsFrameless|g.MasterWindowFlagsTransparent, loadFont)
+	platform = g.Context.GetPlatform().(*imgui.GLFW)
 	mw.SetBgColor(color.RGBA{0, 0, 0, 0})
 	mw.SetDropCallback(onDrop)
 	mw.Main(loop)

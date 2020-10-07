@@ -1,7 +1,7 @@
 cloud.google.com/go v0.26.0/go.mod h1:aQUYkXzVsufM+DwF1aE+0xfcU+56JwCaLick0ClmMTw=
+github.com/AllenDang/giu v0.0.0-20201006120440-6554c03069e0 h1:PE5rmpDBGOQoWDdO7EJcJ0xNoIKynren6UTp4MHJMAc=
+github.com/AllenDang/giu v0.0.0-20201006120440-6554c03069e0/go.mod h1:I5APP3KkERnp+ERQVVaGOrUcSrgvt0s2lEh4+ap6SdI=
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
-github.com/Nicify/giu v0.0.0-20201006120725-c979cfed847f h1:dp0JAMc47yflLc/UgXHPRYFfKu3sswEFQsQL287S63A=
-github.com/Nicify/giu v0.0.0-20201006120725-c979cfed847f/go.mod h1:I5APP3KkERnp+ERQVVaGOrUcSrgvt0s2lEh4+ap6SdI=
 github.com/OneOfOne/xxhash v1.2.2/go.mod h1:HSdplMjZKSmBqAxg5vPj2TmRDmfkzw+cTzAElWljhcU=
 github.com/StackExchange/wmi v0.0.0-20190523213315-cbe66965904d h1:G0m3OIz70MZUWq3EgK3CesDbo8upS2Vm9/P3FtgI+Jk=
 github.com/StackExchange/wmi v0.0.0-20190523213315-cbe66965904d/go.mod h1:3eOhrUMpNV+6aFIbp5/iudMxNCF27Vw2OZgy4xEx0Fg=

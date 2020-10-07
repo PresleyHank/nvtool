@@ -44,6 +44,16 @@ func loadImageFromMemory(imageData []byte) (imageRGBA *image.RGBA, err error) {
 	}
 }
 
+func imageToTexture(filename string) (*g.Texture, error) {
+	imageByte, err := box.Find(filename)
+	if err != nil {
+		return nil, err
+	}
+	imageRGBA, _ := loadImageFromMemory(imageByte)
+	textureID, err := g.NewTextureFromRgba(imageRGBA)
+	return textureID, err
+}
+
 func selectInputPath() string {
 	path, _ := dialog.File().Filter("video file", "mp4", "mkv", "mov", "flv", "avi").Load()
 	return path
