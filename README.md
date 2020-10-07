@@ -1,8 +1,9 @@
 # NVTool
 
-> 基于 FFMpeg 的 NVENC 视频压制工具
+> NVENC video encoding tool based on FFMpeg
 
-使用前请确保显卡支持 NVENC 编码器且 FFMpeg 与 MediaInfo 已正确安装，如未安装建议使用 windows 包管理工具 [scoop](https://scoop.sh)来安装:
+Make sure that the graphics card supports NVENC encoders and that FFMpeg and MediaInfo are properly installed before using it.
+If not, we recommend using the windows package management tool [scoop](https://scoop.sh) to install it:
 
 #### Install requirements
 
@@ -20,12 +21,12 @@ go build -ldflags='-s -w -H windowsgui -linkmode external -extldflags -static' .
 
 #### Screenshots
 
-![图片](https://uploader.shimo.im/f/l2Jc4yLrJSUdBEzW.png!thumbnail)
+![图片](https://images-cdn.shimo.im/nXrLjx6Sm8rufqat__original.png)
 
-![图片](https://uploader.shimo.im/f/BjgbrHlAiuQe8TwM.png!thumbnail)
+![图片](https://images-cdn.shimo.im/rQnQ5c9NOyEv9PPv__original.png)
 
 ---
 
 #### Release
 
-- Windows [NVTool.zip](https://attachments-cdn.shimo.im/sZZHbm7aVeceNHhK/NVTool.zip)
+- Windows [NVTool.zip](https://attachments-cdn.shimo.im/XErIszdTagxUpyqr.zip?attname=nvtool.zip)
