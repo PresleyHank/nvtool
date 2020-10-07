@@ -15,6 +15,7 @@ import (
 	ffmpeg "github.com/Nicify/nvtool/ffmpeg"
 	mediainfo "github.com/Nicify/nvtool/mediainfo"
 	theme "github.com/Nicify/nvtool/theme"
+	win "github.com/Nicify/nvtool/win"
 	"github.com/go-gl/glfw/v3.3/glfw"
 )
 
@@ -179,7 +180,9 @@ func loop() {
 					g.Dummy(-83, 0),
 					g.Custom(theme.BeginStyleButtonDark),
 					g.ButtonV(".", 20, 20, func() {}),
-					g.ButtonV("_", 20, 20, func() {}),
+					g.ButtonV("_", 20, 20, func() {
+						win.ShowWindow(win.HWND(unsafe.Pointer(glfwWindow.GetWin32Window())), win.SW_FORCEMINIMIZE)
+					}),
 					g.ImageButton(texButtonClose, 20, 20, func() {
 						glfwWindow.SetShouldClose(true)
 					}),
@@ -300,7 +303,7 @@ func main() {
 	mw = g.NewMasterWindow("NVENC Video Toolbox", 750, 435, g.MasterWindowFlagsNotResizable|g.MasterWindowFlagsFrameless|g.MasterWindowFlagsTransparent, loadFont)
 	platform := g.Context.GetPlatform().(*imgui.GLFW)
 	glfwWindow = platform.GetWindow()
-	setWindowCompositionAttribute(hwnd(unsafe.Pointer(glfwWindow.GetWin32Window())))
+	win.SetWindowCompositionAttribute(win.HWND(unsafe.Pointer(glfwWindow.GetWin32Window())))
 	glfwWindow.SetFocusCallback(func(w *glfw.Window, focused bool) {
 		if focused {
 			glfwWindow.SetOpacity(1)
