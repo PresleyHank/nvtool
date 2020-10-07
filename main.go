@@ -300,13 +300,13 @@ func main() {
 	mw = g.NewMasterWindow("NVENC Video Toolbox", 750, 435, g.MasterWindowFlagsNotResizable|g.MasterWindowFlagsFrameless|g.MasterWindowFlagsTransparent, loadFont)
 	platform := g.Context.GetPlatform().(*imgui.GLFW)
 	glfwWindow = platform.GetWindow()
-	setWindowCompositionAttribute(hwnd(uintptr(unsafe.Pointer(glfwWindow.GetWin32Window()))))
+	setWindowCompositionAttribute(hwnd(unsafe.Pointer(glfwWindow.GetWin32Window())))
 	glfwWindow.SetFocusCallback(func(w *glfw.Window, focused bool) {
 		if focused {
-			platform.GetWindow().SetOpacity(1)
+			glfwWindow.SetOpacity(1)
 			return
 		}
-		platform.GetWindow().SetOpacity(0.97)
+		glfwWindow.SetOpacity(0.97)
 	})
 	mw.SetBgColor(color.RGBA{0, 0, 0, 0})
 	mw.SetDropCallback(onDrop)
