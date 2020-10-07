@@ -6,6 +6,9 @@ import (
 	"image/draw"
 	"image/png"
 	"strings"
+	"unsafe"
+
+	"golang.org/x/sys/windows"
 
 	g "github.com/AllenDang/giu"
 	"github.com/AllenDang/giu/imgui"
@@ -14,9 +17,35 @@ import (
 	"github.com/sqweek/dialog"
 )
 
+type hwnd uintptr
+
+type accentpolicy struct {
+	nAccentState int
+	nFlags       int
+	nColor       int
+	nAnimationID int
+}
+
+type wincompattrdata struct {
+	nAttribute int
+	pData      *accentpolicy
+	ulDataSize uintptr
+}
+
 var (
-	box = packr.New("assets", "./assets")
+	box                               = packr.New("assets", "./assets")
+	mod                               = windows.NewLazyDLL("user32.dll")
+	procSetWindowCompositionAttribute = mod.NewProc("SetWindowCompositionAttribute")
 )
+
+func setWindowCompositionAttribute(hwnd hwnd) {
+	accent := accentpolicy{3, 0, 0, 0}
+	data := wincompattrdata{19, &accent, unsafe.Sizeof(accent)}
+	procSetWindowCompositionAttribute.Call(
+		uintptr(hwnd),
+		uintptr(unsafe.Pointer(&data)),
+	)
+}
 
 func getGpuNames() string {
 	gpuList, err := gpu.GetGPUInfo()

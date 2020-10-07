@@ -8,12 +8,14 @@ import (
 	"runtime"
 	"strings"
 	"syscall"
+	"unsafe"
 
 	g "github.com/AllenDang/giu"
 	"github.com/AllenDang/giu/imgui"
 	ffmpeg "github.com/Nicify/nvtool/ffmpeg"
 	mediainfo "github.com/Nicify/nvtool/mediainfo"
 	theme "github.com/Nicify/nvtool/theme"
+	"github.com/go-gl/glfw/v3.3/glfw"
 )
 
 type encodingPresets struct {
@@ -34,7 +36,7 @@ var (
 
 var (
 	mw               *g.MasterWindow
-	platform         *imgui.GLFW
+	glfwWindow       *glfw.Window
 	mwMoveable       bool
 	prevMouseX       int
 	prevMouseY       int
@@ -153,9 +155,8 @@ func shouldDisableInput(b bool) (flag g.WindowFlags) {
 }
 
 func shouldWindowMove() {
-	nativeWindow := platform.GetWindow()
 	mousePos := g.GetMousePos()
-	prevPosX, prevPosY := nativeWindow.GetPos()
+	prevPosX, prevPosY := glfwWindow.GetPos()
 	if g.IsMouseClicked(0) {
 		mwMoveable = float32(mousePos.Y) < 50*imgui.DPIScale
 		prevMouseX = mousePos.X
@@ -164,7 +165,7 @@ func shouldWindowMove() {
 	if mwMoveable && g.IsMouseDown(0) {
 		offsetX := mousePos.X - prevMouseX
 		offsetY := mousePos.Y - prevMouseY
-		nativeWindow.SetPos(prevPosX+int(offsetX), prevPosY+int(offsetY))
+		glfwWindow.SetPos(prevPosX+int(offsetX), prevPosY+int(offsetY))
 	}
 }
 
@@ -180,7 +181,7 @@ func loop() {
 					g.ButtonV(".", 20, 20, func() {}),
 					g.ButtonV("_", 20, 20, func() {}),
 					g.ImageButton(texButtonClose, 20, 20, func() {
-						platform.GetWindow().SetShouldClose(true)
+						glfwWindow.SetShouldClose(true)
 					}),
 					g.Custom(theme.EndStyleButtonDark),
 				),
@@ -297,7 +298,16 @@ func init() {
 
 func main() {
 	mw = g.NewMasterWindow("NVENC Video Toolbox", 750, 435, g.MasterWindowFlagsNotResizable|g.MasterWindowFlagsFrameless|g.MasterWindowFlagsTransparent, loadFont)
-	platform = g.Context.GetPlatform().(*imgui.GLFW)
+	platform := g.Context.GetPlatform().(*imgui.GLFW)
+	glfwWindow = platform.GetWindow()
+	setWindowCompositionAttribute(hwnd(uintptr(unsafe.Pointer(glfwWindow.GetWin32Window()))))
+	glfwWindow.SetFocusCallback(func(w *glfw.Window, focused bool) {
+		if focused {
+			platform.GetWindow().SetOpacity(1)
+			return
+		}
+		platform.GetWindow().SetOpacity(0.97)
+	})
 	mw.SetBgColor(color.RGBA{0, 0, 0, 0})
 	mw.SetDropCallback(onDrop)
 	mw.Main(loop)
