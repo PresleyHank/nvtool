@@ -14,7 +14,7 @@ func WithDarkTheme(builder func()) {
 	imgui.PushStyleVarFloat(imgui.StyleVarChildBorderSize, 0)
 	imgui.PushStyleVarFloat(imgui.StyleVarFrameRounding, 0)
 	imgui.PushStyleVarFloat(imgui.StyleVarChildRounding, 0)
-	imgui.PushStyleVarVec2(imgui.StyleVarWindowPadding, imgui.Vec2{X: 10, Y: 6})
+	imgui.PushStyleVarVec2(imgui.StyleVarWindowPadding, imgui.Vec2{X: 8, Y: 6})
 	imgui.PushStyleColor(imgui.StyleColorTab, imgui.Vec4{X: 0.125, Y: 0.125, Z: 0.125, W: 1.0})
 	imgui.PushStyleColor(imgui.StyleColorTabActive, imgui.Vec4{X: 0.19, Y: 0.19, Z: 0.19, W: 0.941})
 	imgui.PushStyleColor(imgui.StyleColorTabHovered, imgui.Vec4{X: 0.125, Y: 0.125, Z: 0.125, W: 0.941})

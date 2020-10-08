@@ -31,11 +31,10 @@ type encodingPresets struct {
 	aqStrength int32
 }
 
-var (
-	texButtonClose *g.Texture
-)
+const contentWidth = 734.0
 
 var (
+	texButtonClose   *g.Texture
 	mw               *g.MasterWindow
 	glfwWindow       *glfw.Window
 	mwMoveable       bool
@@ -190,7 +189,7 @@ func loop() {
 				),
 				g.TabBar("maintab", g.Layout{
 					g.TabItem("Encode", g.Layout{
-						g.Child("control", false, 734, 92, shouldDisableInput(isEncoding), g.Layout{
+						g.Child("control", false, contentWidth, 92, shouldDisableInput(isEncoding), g.Layout{
 							g.Spacing(),
 							g.Line(
 								g.InputTextV("##video", -68/imgui.DPIScale, &inputPath, 0, nil, nil),
@@ -237,12 +236,12 @@ func loop() {
 						}),
 
 						g.Spacing(),
-						g.InputTextMultiline("", &ffmpegLog, 734, 200, 0, nil, func() {
+						g.InputTextMultiline("##ffmpegLog", &ffmpegLog, contentWidth, 200, 0, nil, func() {
 							imgui.SetScrollHereY(1.0)
 						}),
 
 						g.Spacing(),
-						g.ProgressBar(progress, 734, 20, ""),
+						g.ProgressBar(progress, contentWidth, 20, ""),
 
 						g.Line(
 							g.Dummy(0, 5),
@@ -260,7 +259,7 @@ func loop() {
 
 					g.TabItem("MediaInfo", g.Layout{
 						g.Spacing(),
-						g.InputTextMultiline("mediainfo", &mediaInfoLog, 734, 364, g.InputTextFlagsReadOnly, nil, nil),
+						g.InputTextMultiline("##mediaInfoLog", &mediaInfoLog, contentWidth, 360, g.InputTextFlagsReadOnly, nil, nil),
 					}),
 
 					// g.TabItem("Settings", g.Layout{
@@ -270,15 +269,15 @@ func loop() {
 
 					// 	g.Spacing(),
 					// 	g.Label("Interface"),
-					// 	g.Child("Interface", true, 734, 95, g.WindowFlagsAlwaysUseWindowPadding, g.Layout{}),
+					// 	g.Child("Interface", true, contentWidth, 95, g.WindowFlagsAlwaysUseWindowPadding, g.Layout{}),
 
 					// 	g.Spacing(),
 					// 	g.Label("Encoding"),
-					// 	g.Child("Encoding", true, 734, 95, g.WindowFlagsAlwaysUseWindowPadding, g.Layout{}),
+					// 	g.Child("Encoding", true, contentWidth, 95, g.WindowFlagsAlwaysUseWindowPadding, g.Layout{}),
 
 					// 	g.Spacing(),
 					// 	g.Label("Binary"),
-					// 	g.Child("Binary", true, 734, 95, g.WindowFlagsAlwaysUseWindowPadding, g.Layout{}),
+					// 	g.Child("Binary", true, contentWidth, 95, g.WindowFlagsAlwaysUseWindowPadding, g.Layout{}),
 
 					// 	g.Custom(func() {
 					// 		imgui.PopStyleColorV(1)
