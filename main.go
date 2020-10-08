@@ -175,7 +175,7 @@ func loop() {
 		g.SingleWindow("NVENC Video Toolbox",
 			g.Layout{
 				g.Line(
-					g.LabelV("NVENC Video Toolbox 1.2 beta", false, &color.RGBA{255, 255, 255, 255}, &font),
+					g.LabelV("NVENC Video Toolbox 1.3", false, &color.RGBA{255, 255, 255, 255}, &font),
 					g.Dummy(-83, 0),
 					g.Custom(theme.BeginStyleButtonDark),
 					g.ButtonV(".", 20, 20, func() {}),
@@ -193,13 +193,13 @@ func loop() {
 							g.Spacing(),
 							g.Line(
 								g.InputTextV("##video", -68/imgui.DPIScale, &inputPath, 0, nil, nil),
-								g.ButtonV("video", 60, 22, onInputClick),
+								g.ButtonV("video", 60, 24, onInputClick),
 							),
 
 							g.Spacing(),
 							g.Line(
 								g.InputTextV("##output", -68/imgui.DPIScale, &outputPath, 0, nil, nil),
-								g.ButtonV("output", 60, 22, onOutputClick),
+								g.ButtonV("output", 60, 24, onOutputClick),
 							),
 
 							g.Spacing(),
