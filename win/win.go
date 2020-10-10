@@ -8,16 +8,16 @@ import (
 
 type HWND uintptr
 
-type AccentPolicy struct {
+type accentPolicy struct {
 	nAccentState int
 	nFlags       int
 	nColor       int
 	nAnimationID int
 }
 
-type WinCompAttrData struct {
+type winCompAttrData struct {
 	nAttribute int
-	pData      *AccentPolicy
+	pData      *accentPolicy
 	ulDataSize uintptr
 }
 
@@ -51,9 +51,9 @@ func init() {
 }
 
 // SetWindowCompositionAttribute set the composition attribute of window
-func SetWindowCompositionAttribute(hwnd HWND) (r1 uintptr, r2 uintptr, lastErr error) {
-	accent := AccentPolicy{3, 0, 0, 0}
-	data := WinCompAttrData{19, &accent, unsafe.Sizeof(accent)}
+func SetWindowCompositionAttribute(hwnd HWND, nAccentState int, nFlags int, nColor int, nAnimationID int) (r1 uintptr, r2 uintptr, lastErr error) {
+	accent := accentPolicy{nAccentState, nFlags, nColor, nAnimationID}
+	data := winCompAttrData{19, &accent, unsafe.Sizeof(accent)}
 	return setWindowCompositionAttribute.Call(
 		uintptr(hwnd),
 		uintptr(unsafe.Pointer(&data)),
