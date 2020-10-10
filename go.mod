@@ -4,6 +4,7 @@ go 1.15
 
 require (
 	github.com/AllenDang/giu v0.0.0-20201007094520-fa0ebc55e872
+	github.com/fsnotify/fsnotify v1.4.9
 	github.com/go-gl/glfw/v3.3/glfw v0.0.0-20200707082815-5321531c36a2
 	github.com/gobuffalo/packr/v2 v2.8.0
 	github.com/jaypipes/ghw v0.6.1

@@ -2,12 +2,22 @@ package ffmpeg
 
 import (
 	"bufio"
-	"fmt"
+	"bytes"
+	"io"
 	"os/exec"
 	"regexp"
 	"strings"
 	"syscall"
 )
+
+// Progress ...
+type Progress struct {
+	FramesProcessed string
+	CurrentTime     string
+	CurrentBitrate  string
+	Progress        float64
+	Speed           string
+}
 
 const (
 	PresetSlow = iota
@@ -35,16 +45,30 @@ var (
 var (
 	binary       = "ffmpeg"
 	prefix       = []string{"-y", "-hide_banner"}
-	process      *exec.Cmd
 	encodingTime uint
 )
 
-func GetProcess() *exec.Cmd {
-	return process
+func spit(data []byte, atEOF bool) (advance int, token []byte, spliterror error) {
+	if atEOF && len(data) == 0 {
+		return 0, nil, nil
+	}
+	if i := bytes.IndexByte(data, '\n'); i >= 0 {
+		// We have a full newline-terminated line.
+		return i + 1, data[0:i], nil
+	}
+	if i := bytes.IndexByte(data, '\r'); i >= 0 {
+		// We have a cr terminated line
+		return i + 1, data[0:i], nil
+	}
+	if atEOF {
+		return len(data), data, nil
+	}
+
+	return 0, nil, nil
 }
 
 func GetVideoMeta(inputPath string) (uint, []byte, error) {
-	args := append(prefix, "-hide_banner", "-ss", "3", "-skip_frame", "nokey", "-i", inputPath, "-vf", "thumbnail=10", "-frames:v", "1", "-vsync", "0", "-f", "image2", "-")
+	args := append(prefix, "-ss", "3", "-skip_frame", "nokey", "-i", inputPath, "-vf", "thumbnail=10", "-frames:v", "1", "-vsync", "0", "-f", "image2", "-")
 	preview, output, err := execSync(".", binary, args...)
 	lines := strings.Split(string(output), "\n")
 	for _, line := range lines {
@@ -58,48 +82,90 @@ func GetVideoMeta(inputPath string) (uint, []byte, error) {
 	return 0, preview, err
 }
 
-func RunEncode(inputPath string, outputPath string, args []string, progress *float32, log *string, next func()) {
-	fullDuration, _, err := GetVideoMeta(inputPath)
-	if err != nil {
-		fmt.Println(err)
-		return
+func progress(stream io.ReadCloser, dursec float64, out chan Progress) {
+	scanner := bufio.NewScanner(stream)
+	scanner.Split(spit)
+
+	buf := make([]byte, 2)
+	scanner.Buffer(buf, bufio.MaxScanTokenSize)
+
+	for scanner.Scan() {
+		Progress := new(Progress)
+		line := scanner.Text()
+
+		if strings.Contains(line, "frame=") && strings.Contains(line, "time=") && strings.Contains(line, "bitrate=") {
+			var re = regexp.MustCompile(`=\s+`)
+			st := re.ReplaceAllString(line, `=`)
+
+			f := strings.Fields(st)
+
+			var framesProcessed string
+			var currentTime string
+			var currentBitrate string
+			var currentSpeed string
+
+			for j := 0; j < len(f); j++ {
+				field := f[j]
+				fieldSplit := strings.Split(field, "=")
+
+				if len(fieldSplit) > 1 {
+					fieldname := strings.Split(field, "=")[0]
+					fieldvalue := strings.Split(field, "=")[1]
+
+					if fieldname == "frame" {
+						framesProcessed = fieldvalue
+					}
+
+					if fieldname == "time" {
+						currentTime = fieldvalue
+					}
+
+					if fieldname == "bitrate" {
+						currentBitrate = fieldvalue
+					}
+					if fieldname == "speed" {
+						currentSpeed = fieldvalue
+					}
+				}
+			}
+
+			timesec := DurToSec(currentTime)
+
+			progress := (timesec * 100) / float64(dursec)
+			Progress.Progress = progress
+
+			Progress.CurrentBitrate = currentBitrate
+			Progress.FramesProcessed = framesProcessed
+			Progress.CurrentTime = currentTime
+			Progress.Speed = currentSpeed
+
+			out <- *Progress
+		}
 	}
+}
+
+// RunEncode ...
+func RunEncode(inputPath string, outputPath string, args []string) (*exec.Cmd, <-chan Progress, error) {
+	dursec, _, err := GetVideoMeta(inputPath)
+	out := make(chan Progress)
 	args = append([]string{"-i", inputPath}, args...)
 	args = append(prefix, args...)
 	args = append(args, outputPath)
-	process = exec.Command(binary, args...)
-	process.SysProcAttr = &syscall.SysProcAttr{HideWindow: true}
-	stderr, err := process.StderrPipe()
+	cmd := exec.Command(binary, args...)
+	cmd.SysProcAttr = &syscall.SysProcAttr{HideWindow: true}
+	stderr, _ := cmd.StderrPipe()
+	err = cmd.Start()
 	if err != nil {
-		fmt.Println(err)
 	}
-	err = process.Start()
-	if err != nil {
-		fmt.Println(err)
-	}
-	var isEncoding bool
-	var logList []string
-	scanner := bufio.NewScanner(stderr)
-	scanner.Split(bufio.ScanWords)
-	for scanner.Scan() {
-		line := scanner.Text()
-		if isEncoding {
-			logList = append(logList, line)
-		}
-		matches := regexp.MustCompile(encodingTimeRegexString).FindStringSubmatch(line)
-		if len(matches) == 5 {
-			encodingTime = getDurationFromTimeParams(matches)
-			*progress = float32(encodingTime) / float32(fullDuration)
-			next()
-		}
-		if regexp.MustCompile(encodingSpeedRegexString).MatchString(line) {
-			isEncoding = true
-			logChunk := strings.Join(logList, " ")
-			logChunk = strings.ReplaceAll(logChunk, "frame=", "\nframe=")
-			logChunk = strings.ReplaceAll(logChunk, "= ", "=")
-			*log += logChunk
-			logList = logList[:0]
-			next()
-		}
-	}
+
+	go func() {
+		progress(stderr, float64(dursec), out)
+	}()
+
+	go func() {
+		defer close(out)
+		err = cmd.Wait()
+	}()
+
+	return cmd, out, nil
 }

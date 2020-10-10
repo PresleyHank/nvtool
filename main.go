@@ -4,7 +4,9 @@ import (
 	"fmt"
 	"image"
 	"image/color"
+	"io/ioutil"
 	"log"
+	"os"
 	"os/exec"
 	"path"
 	"runtime"
@@ -42,6 +44,8 @@ const (
 )
 
 var (
+	lockFile           = path.Join(os.TempDir(), "nvtool.lock")
+	ffmpegCmd          *exec.Cmd
 	texLogo            *g.Texture
 	texButtonClose     *g.Texture
 	texGraphicsCard    *g.Texture
@@ -112,7 +116,11 @@ func onRunClick() {
 			defaultPreset.bitrate,
 			defaultPreset.maxrate,
 		)
-		ffmpeg.RunEncode(inputPath, outputPath, strings.Split(command, " "), &progress, &ffmpegLog, g.Update)
+		cmd, progress, _ := ffmpeg.RunEncode(inputPath, outputPath, strings.Split(command, " "))
+		ffmpegCmd = cmd
+		for msg := range progress {
+			log.Printf("%+v", msg)
+		}
 		isEncoding = false
 	}()
 }
@@ -138,23 +146,22 @@ func onDrop(dropItem []string) {
 }
 
 func dispose() {
-	isEncoding = false
-	proc := ffmpeg.GetProcess()
-	if proc == nil {
+	if ffmpegCmd == nil {
 		return
 	}
-	stdin, err := proc.StdinPipe()
-	if err == nil && stdin != nil {
+	stdin, err := ffmpegCmd.StdinPipe()
+	if err == nil {
 		stdin.Write([]byte("q\n"))
-		return
 	}
+	// ffmpegCmd.Process.Signal(os.Interrupt)
 	if runtime.GOOS == "windows" {
 		cmd := exec.Command("wmic", "process", "where", "name='ffmpeg.exe'", "delete")
 		cmd.SysProcAttr = &syscall.SysProcAttr{HideWindow: true}
 		cmd.Run()
 		return
 	}
-	proc.Process.Kill()
+	go ffmpegCmd.Wait()
+	isEncoding = false
 }
 
 func shouldDisableInput(b bool) (flag g.WindowFlags) {
@@ -329,13 +336,19 @@ func loadTexture() {
 func init() {
 	runtime.LockOSThread()
 
-	go loadTexture()
-	gpuList, _ := gpu.GetGPUList()
-	gpuName = gpuList[0]
+	if err := os.Remove(lockFile); err != nil && !os.IsNotExist(err) {
+		ioutil.WriteFile(lockFile, []byte("focus"), 0644)
+		os.Exit(0)
+	}
 }
 
 func main() {
 	defer dispose()
+	unlock := initSingleInstanceLock()
+	defer unlock()
+	go loadTexture()
+	gpuList, _ := gpu.GetGPUList()
+	gpuName = gpuList[0]
 	mw = g.NewMasterWindow("NVTool", 750, 435, g.MasterWindowFlagsNotResizable|g.MasterWindowFlagsFrameless|g.MasterWindowFlagsTransparent, loadFont)
 	currentStyle := imgui.CurrentStyle()
 	theme.SetThemeDark(&currentStyle)

@@ -5,9 +5,15 @@ import (
 	"image"
 	"image/draw"
 	"image/png"
+	"io/ioutil"
+	"log"
+	"os"
+	"unsafe"
 
 	g "github.com/AllenDang/giu"
 	"github.com/AllenDang/giu/imgui"
+	win "github.com/Nicify/nvtool/win"
+	"github.com/fsnotify/fsnotify"
 	"github.com/gobuffalo/packr/v2"
 	"github.com/sqweek/dialog"
 )
@@ -71,4 +77,43 @@ func limitValue(val int32, min int32, max int32) int32 {
 
 func invalidPath(inputPath string, outputPath string) bool {
 	return inputPath == outputPath || inputPath == "" || outputPath == ""
+}
+
+func initSingleInstanceLock() (unlock func()) {
+	f, _ := os.Create(lockFile)
+	watcher, err := fsnotify.NewWatcher()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	go func() {
+		for {
+			select {
+			case event, ok := <-watcher.Events:
+				if !ok {
+					return
+				}
+				if event.Op&fsnotify.Write == fsnotify.Write {
+					command, _ := ioutil.ReadFile(lockFile)
+					if string(command) == "focus" {
+						win.ShowWindow(win.HWND(unsafe.Pointer(glfwWindow.GetWin32Window())), win.SW_RESTORE)
+					}
+				}
+			case err, ok := <-watcher.Errors:
+				if !ok {
+					return
+				}
+				log.Println("error:", err)
+			}
+		}
+	}()
+
+	err = watcher.Add(lockFile)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return func() {
+		f.Close()
+		watcher.Close()
+	}
 }
