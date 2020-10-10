@@ -15,6 +15,7 @@ import (
 	g "github.com/AllenDang/giu"
 	"github.com/AllenDang/giu/imgui"
 	ffmpeg "github.com/Nicify/nvtool/ffmpeg"
+	"github.com/Nicify/nvtool/gpu"
 	mediainfo "github.com/Nicify/nvtool/mediainfo"
 	theme "github.com/Nicify/nvtool/theme"
 	win "github.com/Nicify/nvtool/win"
@@ -43,6 +44,7 @@ const (
 var (
 	texLogo          *g.Texture
 	texButtonClose   *g.Texture
+	texGraphicsCard  *g.Texture
 	mw               *g.MasterWindow
 	glfwWindow       *glfw.Window
 	mwMoveable       bool
@@ -205,37 +207,37 @@ func loop() {
 						g.Spacing(),
 						g.Line(
 							g.InputTextV("##video", -((windowPadding+buttonWidth)/imgui.DPIScale), &inputPath, 0, nil, nil),
-							g.ButtonV("video", buttonWidth, buttonHeight, onInputClick),
+							g.ButtonV("Video", buttonWidth, buttonHeight, onInputClick),
 						),
 
 						g.Spacing(),
 						g.Line(
 							g.InputTextV("##output", -((windowPadding+buttonWidth)/imgui.DPIScale), &outputPath, g.InputTextFlagsReadOnly, nil, nil),
-							g.ButtonV("output", buttonWidth, buttonHeight, onOutputClick),
+							g.ButtonV("Output", buttonWidth, buttonHeight, onOutputClick),
 						),
 
 						g.Spacing(),
 						g.Line(
-							g.Label("preset"),
+							g.Label("Preset"),
 							g.Combo("##preset", ffmpeg.PresetOptions[defaultPreset.preset], ffmpeg.PresetOptions, &defaultPreset.preset, 80, 0, nil),
 
-							g.Label("rc"),
+							g.Label("RC"),
 							g.Combo("##rc", ffmpeg.RCOptions[defaultPreset.rc], ffmpeg.RCOptions, &defaultPreset.rc, 80, 0, nil),
 
-							g.Label("qmin"),
+							g.Label("QMin"),
 							g.InputIntV("##qmin", 40, &defaultPreset.qmin, 0, nil),
 
-							g.Label("qmax"),
+							g.Label("QMax"),
 							g.InputIntV("##qmax", 40, &defaultPreset.qmax, 0, nil),
 
-							g.Label("aq"),
+							g.Label("AQ"),
 							g.Combo("##aq", ffmpeg.AQOptions[defaultPreset.aq], ffmpeg.AQOptions, &defaultPreset.aq, 95, 0, nil),
 
 							g.InputIntV("##aqstrength", 40, &defaultPreset.aqStrength, 0, func() {
 								defaultPreset.aqStrength = limitValue(defaultPreset.aqStrength, 0, 15)
 							}),
 
-							g.Label("bitrate"),
+							g.Label("Bitrate"),
 							g.InputIntV("##bitrate", 70, &defaultPreset.bitrate, 0, nil),
 
 							// g.Label("Maxrate"),
@@ -255,7 +257,12 @@ func loop() {
 						g.Dummy(0, 5),
 					),
 					g.Line(
-						g.Label(gpuInfo),
+						g.Condition(gpuInfo != "", g.Layout{
+							g.Line(
+								g.Image(texGraphicsCard, 18, 18),
+								g.Label(gpuInfo),
+							),
+						}, nil),
 						g.Dummy(-(windowPadding+buttonWidth), 24),
 						g.Condition(isEncoding,
 							g.Layout{g.ButtonV("Cancel", buttonWidth, buttonHeight, dispose)},
@@ -313,14 +320,18 @@ func applyWindowProperties(window *glfw.Window) {
 	})
 }
 
+func loadTexture() {
+	texButtonClose, _ = imageToTexture("close_white.png")
+	texLogo, _ = imageToTexture("icon.png")
+	texGraphicsCard, _ = imageToTexture("graphics_card.png")
+}
+
 func init() {
 	runtime.LockOSThread()
-	go func() {
-		texButtonClose, _ = imageToTexture("close_white.png")
-		texLogo, _ = imageToTexture("icon.png")
-	}()
+	go loadTexture()
 	font = imgui.Font(0)
-	gpuInfo = getGpuNames()
+	gpuList, _ := gpu.GetGPUInfo()
+	gpuInfo = gpuList[0]
 }
 
 func main() {

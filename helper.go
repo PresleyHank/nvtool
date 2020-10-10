@@ -5,11 +5,9 @@ import (
 	"image"
 	"image/draw"
 	"image/png"
-	"strings"
 
 	g "github.com/AllenDang/giu"
 	"github.com/AllenDang/giu/imgui"
-	gpu "github.com/Nicify/nvtool/gpu"
 	"github.com/gobuffalo/packr/v2"
 	"github.com/sqweek/dialog"
 )
@@ -18,13 +16,13 @@ var (
 	box = packr.New("assets", "./assets")
 )
 
-func getGpuNames() string {
-	gpuList, err := gpu.GetGPUInfo()
-	if err != nil {
-		return "Error getting GPU info"
-	}
-	return strings.Join(gpuList, " ")
-}
+// func getGpuNames() string {
+// 	gpuList, err := gpu.GetGPUInfo()
+// 	if err != nil {
+// 		return "Error getting GPU info"
+// 	}
+// 	return strings.Join(gpuList, " ")
+// }
 
 func loadFont() {
 	fonts := g.Context.IO().Fonts()
