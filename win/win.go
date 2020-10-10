@@ -45,24 +45,25 @@ var (
 )
 
 func init() {
+	// is64bit := unsafe.Sizeof(uintptr(0)) == 8
 	libuser32 = windows.NewLazySystemDLL("user32.dll")
 	showWindow = libuser32.NewProc("ShowWindow")
 	setWindowCompositionAttribute = libuser32.NewProc("SetWindowCompositionAttribute")
-}
-
-// SetWindowCompositionAttribute set the composition attribute of window
-func SetWindowCompositionAttribute(hwnd HWND, nAccentState int, nFlags int, nColor int, nAnimationID int) (r1 uintptr, r2 uintptr, lastErr error) {
-	accent := accentPolicy{nAccentState, nFlags, nColor, nAnimationID}
-	data := winCompAttrData{19, &accent, unsafe.Sizeof(accent)}
-	return setWindowCompositionAttribute.Call(
-		uintptr(hwnd),
-		uintptr(unsafe.Pointer(&data)),
-	)
 }
 
 func ShowWindow(hWnd HWND, nCmdShow int32) (r1 uintptr, r2 uintptr, lastErr error) {
 	return showWindow.Call(
 		uintptr(hWnd),
 		uintptr(nCmdShow),
+	)
+}
+
+// SetWindowCompositionAttribute set the composition attribute of window
+func SetWindowCompositionAttribute(hWnd HWND, nAccentState int, nFlags int, nColor int, nAnimationID int) (r1 uintptr, r2 uintptr, lastErr error) {
+	accent := accentPolicy{nAccentState, nFlags, nColor, nAnimationID}
+	data := winCompAttrData{19, &accent, unsafe.Sizeof(accent)}
+	return setWindowCompositionAttribute.Call(
+		uintptr(hWnd),
+		uintptr(unsafe.Pointer(&data)),
 	)
 }

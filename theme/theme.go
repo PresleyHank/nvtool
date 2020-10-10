@@ -38,30 +38,16 @@ func SetThemeDark(style *imgui.Style) {
 	style.SetColor(imgui.StyleColorWindowBg, RGBAToVec4(color.RGBA{50, 50, 50, 250}))
 	style.SetColor(imgui.StyleColorFrameBg, RGBAToVec4(color.RGBA{10, 10, 10, 240}))
 	style.SetColor(imgui.StyleColorButton, RGBAToVec4(color.RGBA{100, 100, 100, 255}))
-	style.SetColor(imgui.StyleColorButtonHovered, RGBAToVec4(color.RGBA{100, 100, 100, 255}))
-	style.SetColor(imgui.StyleColorButtonActive, RGBAToVec4(color.RGBA{100, 100, 100, 255}))
-	style.SetColor(imgui.StyleColorTab, RGBAToVec4(color.RGBA{32, 32, 32, 255}))
-	style.SetColor(imgui.StyleColorTabActive, RGBAToVec4(color.RGBA{48, 48, 48, 240}))
-	style.SetColor(imgui.StyleColorTabHovered, RGBAToVec4(color.RGBA{32, 32, 32, 240}))
+	style.SetColor(imgui.StyleColorButtonHovered, RGBAToVec4(color.RGBA{120, 120, 120, 240}))
+	style.SetColor(imgui.StyleColorButtonActive, RGBAToVec4(color.RGBA{80, 80, 80, 245}))
+	style.SetColor(imgui.StyleColorTab, RGBAToVec4(color.RGBA{50, 50, 50, 250}))
+	style.SetColor(imgui.StyleColorTabActive, RGBAToVec4(color.RGBA{18, 150, 219, 255}))
+	style.SetColor(imgui.StyleColorTabHovered, RGBAToVec4(color.RGBA{18, 150, 219, 255}))
+	style.SetColor(imgui.StyleColorScrollbarGrab, RGBAToVec4(color.RGBA{73, 73, 73, 255}))
+	style.SetColor(imgui.StyleColorScrollbarGrabActive, RGBAToVec4(color.RGBA{164, 164, 164, 255}))
+	style.SetColor(imgui.StyleColorScrollbarGrabHovered, RGBAToVec4(color.RGBA{140, 140, 140, 250}))
+	style.SetColor(imgui.StyleColorScrollbarBg, RGBAToVec4(color.RGBA{27, 27, 27, 250}))
 	style.SetColor(imgui.StyleColorText, RGBAToVec4(color.RGBA{204, 204, 204, 255}))
-}
-
-func UseThemeDark() StyleMethod {
-	return StyleMethod{
-		func() {
-			imgui.PushStyleColor(imgui.StyleColorWindowBg, RGBAToVec4(color.RGBA{50, 50, 50, 250}))
-			imgui.PushStyleColor(imgui.StyleColorFrameBg, RGBAToVec4(color.RGBA{10, 10, 10, 240}))
-			imgui.PushStyleColor(imgui.StyleColorButton, RGBAToVec4(color.RGBA{100, 100, 100, 255}))
-			imgui.PushStyleColor(imgui.StyleColorButtonHovered, RGBAToVec4(color.RGBA{100, 100, 100, 255}))
-			imgui.PushStyleColor(imgui.StyleColorButtonActive, RGBAToVec4(color.RGBA{100, 100, 100, 255}))
-			imgui.PushStyleColor(imgui.StyleColorTab, RGBAToVec4(color.RGBA{32, 32, 32, 255}))
-			imgui.PushStyleColor(imgui.StyleColorTabActive, RGBAToVec4(color.RGBA{48, 48, 48, 240}))
-			imgui.PushStyleColor(imgui.StyleColorTabHovered, RGBAToVec4(color.RGBA{32, 32, 32, 240}))
-			imgui.PushStyleColor(imgui.StyleColorText, RGBAToVec4(color.RGBA{204, 204, 204, 255}))
-		},
-		func() { imgui.PopStyleColorV(9) },
-	}
-
 }
 
 func UseStyleButtonDark() StyleMethod {
