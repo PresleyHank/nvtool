@@ -58,9 +58,8 @@ var (
 	selectedTebIndex   int
 	inputPath          string
 	outputPath         string
-	fullDuration       uint
 	isEncoding         bool
-	progress           float32
+	precent            float32
 	gpuName            string
 	ffmpegLog          string
 	mediaInfoLog       string = "Drag and drop media files here"
@@ -75,14 +74,14 @@ var defaultPreset = encodingPresets{
 }
 
 func cleanOutput() {
-	progress = 0
+	precent = 0
 	ffmpegLog = ""
 }
 
 func onInputClick() {
 	filePath := selectInputPath()
 	if len(filePath) > 1 {
-		progress = 0
+		precent = 0
 		ffmpegLog = ""
 		inputPath = filePath
 		fileExt := path.Ext(inputPath)
@@ -119,7 +118,9 @@ func onRunClick() {
 		cmd, progress, _ := ffmpeg.RunEncode(inputPath, outputPath, strings.Split(command, " "))
 		ffmpegCmd = cmd
 		for msg := range progress {
-			log.Printf("%+v", msg)
+			precent = float32(msg.Progress)
+			ffmpegLog += fmt.Sprintf("%+v\n", msg)
+			g.Update()
 		}
 		isEncoding = false
 	}()
@@ -158,7 +159,6 @@ func dispose() {
 		cmd := exec.Command("wmic", "process", "where", "name='ffmpeg.exe'", "delete")
 		cmd.SysProcAttr = &syscall.SysProcAttr{HideWindow: true}
 		cmd.Run()
-		return
 	}
 	go ffmpegCmd.Wait()
 	isEncoding = false
@@ -258,7 +258,7 @@ func loop() {
 					}),
 
 					g.Spacing(),
-					g.ProgressBar(progress, contentWidth, 20, ""),
+					g.ProgressBar(precent, contentWidth, 20, ""),
 
 					g.Line(
 						g.Dummy(0, 5),

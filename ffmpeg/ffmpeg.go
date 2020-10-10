@@ -36,6 +36,8 @@ const (
 	AQSpatial
 )
 
+const durationRegexString = `(\d{2}):(\d{2}):(\d{2})\.(\d{2})`
+
 var (
 	PresetOptions = []string{"slow", "medium", "fast", "bd"}
 	RCOptions     = []string{"vbr_hq", "cbr_hq"}
@@ -75,14 +77,14 @@ func GetVideoMeta(inputPath string) (uint, []byte, error) {
 		clean := strings.TrimSpace(line)
 		if strings.HasPrefix(clean, "Duration:") {
 			matches := regexp.MustCompile(durationRegexString).FindStringSubmatch(clean)
-			duration := getDurationFromTimeParams(matches)
+			duration := DurationToSec(matches)
 			return duration, nil, nil
 		}
 	}
 	return 0, preview, err
 }
 
-func progress(stream io.ReadCloser, dursec float64, out chan Progress) {
+func progress(stream io.ReadCloser, durationInMs uint, out chan Progress) {
 	scanner := bufio.NewScanner(stream)
 	scanner.Split(spit)
 
@@ -92,7 +94,8 @@ func progress(stream io.ReadCloser, dursec float64, out chan Progress) {
 	for scanner.Scan() {
 		Progress := new(Progress)
 		line := scanner.Text()
-
+		line = strings.ReplaceAll(line, "frame=", "\nframe=")
+		line = strings.ReplaceAll(line, "= ", "=")
 		if strings.Contains(line, "frame=") && strings.Contains(line, "time=") && strings.Contains(line, "bitrate=") {
 			var re = regexp.MustCompile(`=\s+`)
 			st := re.ReplaceAllString(line, `=`)
@@ -129,9 +132,10 @@ func progress(stream io.ReadCloser, dursec float64, out chan Progress) {
 				}
 			}
 
-			timesec := DurToSec(currentTime)
+			matches := regexp.MustCompile(durationRegexString).FindStringSubmatch(currentTime)
+			timesec := DurationToSec(matches)
 
-			progress := (timesec * 100) / float64(dursec)
+			progress := float64(timesec) / float64(durationInMs)
 			Progress.Progress = progress
 
 			Progress.CurrentBitrate = currentBitrate
@@ -146,7 +150,7 @@ func progress(stream io.ReadCloser, dursec float64, out chan Progress) {
 
 // RunEncode ...
 func RunEncode(inputPath string, outputPath string, args []string) (*exec.Cmd, <-chan Progress, error) {
-	dursec, _, err := GetVideoMeta(inputPath)
+	durationInMs, _, err := GetVideoMeta(inputPath)
 	out := make(chan Progress)
 	args = append([]string{"-i", inputPath}, args...)
 	args = append(prefix, args...)
@@ -159,7 +163,7 @@ func RunEncode(inputPath string, outputPath string, args []string) (*exec.Cmd, <
 	}
 
 	go func() {
-		progress(stderr, float64(dursec), out)
+		progress(stderr, durationInMs, out)
 	}()
 
 	go func() {
