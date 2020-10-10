@@ -42,24 +42,24 @@ const (
 )
 
 var (
-	texLogo          *g.Texture
-	texButtonClose   *g.Texture
-	texGraphicsCard  *g.Texture
-	mw               *g.MasterWindow
-	glfwWindow       *glfw.Window
-	mwMoveable       bool
-	prevMouseX       int
-	prevMouseY       int
-	font             imgui.Font
-	selectedTebIndex int
-	inputPath        string
-	outputPath       string
-	fullDuration     uint
-	isEncoding       bool
-	progress         float32
-	gpuInfo          string
-	ffmpegLog        string
-	mediaInfoLog     string = "Drag and drop media files here"
+	texLogo            *g.Texture
+	texButtonClose     *g.Texture
+	texGraphicsCard    *g.Texture
+	texLoadingfinished = make(chan bool)
+	mw                 *g.MasterWindow
+	glfwWindow         *glfw.Window
+	mwMoveable         bool
+	prevMouseX         int
+	prevMouseY         int
+	selectedTebIndex   int
+	inputPath          string
+	outputPath         string
+	fullDuration       uint
+	isEncoding         bool
+	progress           float32
+	gpuName            string
+	ffmpegLog          string
+	mediaInfoLog       string = "Drag and drop media files here"
 )
 
 var defaultPreset = encodingPresets{
@@ -189,7 +189,7 @@ func loop() {
 		g.Layout{
 			g.Line(
 				g.Image(texLogo, 18, 18),
-				g.LabelV("NVTool 1.5", false, &color.RGBA{255, 255, 255, 255}, &font),
+				g.Label("NVTool 1.5"),
 				g.Dummy(-83, 0),
 				g.Custom(useStyleButtonDark.Push),
 				g.ButtonV(".", 20, 20, func() {}),
@@ -257,10 +257,10 @@ func loop() {
 						g.Dummy(0, 5),
 					),
 					g.Line(
-						g.Condition(gpuInfo != "", g.Layout{
+						g.Condition(gpuName != "", g.Layout{
 							g.Line(
 								g.Image(texGraphicsCard, 18, 18),
-								g.Label(gpuInfo),
+								g.Label(gpuName),
 							),
 						}, nil),
 						g.Dummy(-(windowPadding+buttonWidth), 24),
@@ -328,10 +328,10 @@ func loadTexture() {
 
 func init() {
 	runtime.LockOSThread()
+
 	go loadTexture()
-	font = imgui.Font(0)
-	gpuList, _ := gpu.GetGPUInfo()
-	gpuInfo = gpuList[0]
+	gpuList, _ := gpu.GetGPUList()
+	gpuName = gpuList[0]
 }
 
 func main() {

@@ -16,14 +16,6 @@ var (
 	box = packr.New("assets", "./assets")
 )
 
-// func getGpuNames() string {
-// 	gpuList, err := gpu.GetGPUInfo()
-// 	if err != nil {
-// 		return "Error getting GPU info"
-// 	}
-// 	return strings.Join(gpuList, " ")
-// }
-
 func loadFont() {
 	fonts := g.Context.IO().Fonts()
 	font, _ := box.Find("iosevka.ttf")
