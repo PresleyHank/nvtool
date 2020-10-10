@@ -2,7 +2,9 @@ package main
 
 import (
 	"fmt"
+	"image"
 	"image/color"
+	"log"
 	"os/exec"
 	"path"
 	"runtime"
@@ -293,6 +295,24 @@ func loop() {
 		})
 }
 
+func applyWindowProperties(window *glfw.Window) {
+	data, err := box.Find("icon_48px.png")
+	if err != nil {
+		log.Fatal("icon_48px.png read failed.")
+	}
+	icon48px, _ := loadImageFromMemory(data)
+	glfwWindow.SetIcon([]image.Image{icon48px})
+	hwnd := win.HWND(unsafe.Pointer(glfwWindow.GetWin32Window()))
+	win.SetWindowCompositionAttribute(hwnd, 3, 0, 0, 0)
+	glfwWindow.SetFocusCallback(func(w *glfw.Window, focused bool) {
+		if focused {
+			glfwWindow.SetOpacity(0.98)
+			return
+		}
+		glfwWindow.SetOpacity(1)
+	})
+}
+
 func init() {
 	runtime.LockOSThread()
 	go func() {
@@ -310,15 +330,7 @@ func main() {
 	theme.SetThemeDark(&currentStyle)
 	platform := g.Context.GetPlatform().(*imgui.GLFW)
 	glfwWindow = platform.GetWindow()
-	hwnd := win.HWND(unsafe.Pointer(glfwWindow.GetWin32Window()))
-	win.SetWindowCompositionAttribute(hwnd, 3, 0, 0, 0)
-	glfwWindow.SetFocusCallback(func(w *glfw.Window, focused bool) {
-		if focused {
-			glfwWindow.SetOpacity(0.98)
-			return
-		}
-		glfwWindow.SetOpacity(1)
-	})
+	applyWindowProperties(glfwWindow)
 	mw.SetBgColor(color.RGBA{0, 0, 0, 0})
 	mw.SetDropCallback(onDrop)
 	mw.Main(loop)
