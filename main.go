@@ -108,20 +108,21 @@ func onRunClick() {
 		return
 	}
 	resetState()
+	ffmpegLog = fmt.Sprintf("Initializing...\nInputFile is %s\nOutputFile is %s\nStart transcoding...", inputPath, outputPath)
+	command := fmt.Sprintf(
+		"-c:a copy -c:v h264_nvenc -preset %s -profile:v high -rc:v %s -qmin %d -qmax %d -strict_gop 1 -%s-aq 1 -aq-strength:v %d -b:v %dk -maxrate:v %dk -map 0 -f mp4",
+		ffmpeg.PresetOptions[defaultPreset.preset],
+		ffmpeg.RCOptions[defaultPreset.rc],
+		defaultPreset.qmin,
+		defaultPreset.qmax,
+		ffmpeg.AQOptions[defaultPreset.aq],
+		defaultPreset.aqStrength,
+		defaultPreset.bitrate,
+		defaultPreset.maxrate,
+	)
+	cmd, progress, _ := ffmpeg.RunEncode(inputPath, outputPath, strings.Split(command, " "))
+	ffmpegCmd = cmd
 	go func() {
-		command := fmt.Sprintf(
-			"-c:a copy -c:v h264_nvenc -preset %s -profile:v high -rc:v %s -qmin %d -qmax %d -strict_gop 1 -%s-aq 1 -aq-strength:v %d -b:v %dk -maxrate:v %dk -map 0 -f mp4",
-			ffmpeg.PresetOptions[defaultPreset.preset],
-			ffmpeg.RCOptions[defaultPreset.rc],
-			defaultPreset.qmin,
-			defaultPreset.qmax,
-			ffmpeg.AQOptions[defaultPreset.aq],
-			defaultPreset.aqStrength,
-			defaultPreset.bitrate,
-			defaultPreset.maxrate,
-		)
-		cmd, progress, _ := ffmpeg.RunEncode(inputPath, outputPath, strings.Split(command, " "))
-		ffmpegCmd = cmd
 		for msg := range progress {
 			precent = float32(msg.Progress)
 			rawSize, _ := strconv.Atoi(strings.ReplaceAll(msg.CurrentSize, "kB", ""))
@@ -129,6 +130,11 @@ func onRunClick() {
 			ffmpegLog += fmt.Sprintf("\nframe=%v fps=%v q=%v size=%v time=%v bitrate=%v speed=%v", msg.FramesProcessed, msg.FPS, msg.Q, currentSize, msg.CurrentTime, msg.CurrentBitrate, msg.Speed)
 			g.Update()
 		}
+		if ffmpegCmd.ProcessState != nil && ffmpegCmd.ProcessState.Success() {
+			ffmpegLog += "\ntranscoding success.\n"
+			return
+		}
+		ffmpegLog += "\ntranscoding failed.\n"
 	}()
 }
 
