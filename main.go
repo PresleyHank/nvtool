@@ -81,6 +81,7 @@ func isEncoding() bool {
 func resetState() {
 	precent = 0
 	ffmpegLog = ""
+	g.Update()
 }
 
 func onInputClick() {
@@ -103,28 +104,38 @@ func onOutputClick() {
 }
 
 func onRunClick() {
-	defer g.Update()
-	if isEncoding() || invalidPath(inputPath, outputPath) {
+	if isEncoding() ||
+		invalidPath(inputPath, outputPath) ||
+		strings.HasSuffix(ffmpegLog, "Get input file information...") {
 		return
 	}
-	resetState()
-	ffmpegLog = fmt.Sprintf("Initializing...\nInputFile is %s\nOutputFile is %s\nStart transcoding...", inputPath, outputPath)
-	command := fmt.Sprintf(
-		"-c:a copy -c:v h264_nvenc -preset %s -profile:v high -rc:v %s -qmin %d -qmax %d -strict_gop 1 -%s-aq 1 -aq-strength:v %d -b:v %dk -maxrate:v %dk -map 0 -f mp4",
-		ffmpeg.PresetOptions[defaultPreset.preset],
-		ffmpeg.RCOptions[defaultPreset.rc],
-		defaultPreset.qmin,
-		defaultPreset.qmax,
-		ffmpeg.AQOptions[defaultPreset.aq],
-		defaultPreset.aqStrength,
-		defaultPreset.bitrate,
-		defaultPreset.maxrate,
-	)
-	cmd, progress, _ := ffmpeg.RunEncode(inputPath, outputPath, strings.Split(command, " "))
-	ffmpegCmd = cmd
 	go func() {
+		defer g.Update()
+		resetState()
+		ffmpegLog = fmt.Sprintf("Initializing...\nInputFile is %s\nOutputFile is %s\nGet input file information...", inputPath, outputPath)
+		duration, _, err := ffmpeg.GetVideoMeta(inputPath)
+		if err != nil {
+			fmt.Println(err)
+			ffmpegLog += "failed , abort transcoding.\n"
+			return
+		}
+		ffmpegLog += "success, start transcoding..."
+		command := fmt.Sprintf(
+			"-c:a copy -c:v h264_nvenc -preset %s -profile:v high -rc:v %s -qmin %d -qmax %d -strict_gop 1 -%s-aq 1 -aq-strength:v %d -b:v %dk -maxrate:v %dk -map 0 -f mp4",
+			ffmpeg.PresetOptions[defaultPreset.preset],
+			ffmpeg.RCOptions[defaultPreset.rc],
+			defaultPreset.qmin,
+			defaultPreset.qmax,
+			ffmpeg.AQOptions[defaultPreset.aq],
+			defaultPreset.aqStrength,
+			defaultPreset.bitrate,
+			defaultPreset.maxrate,
+		)
+		cmd, progress, _ := ffmpeg.RunEncode(inputPath, outputPath, strings.Split(command, " "))
+		ffmpegCmd = cmd
+
 		for msg := range progress {
-			precent = float32(msg.Progress)
+			precent = float32(ffmpeg.DurationToSec(msg.CurrentTime)) / float32(duration)
 			rawSize, _ := strconv.Atoi(strings.ReplaceAll(msg.CurrentSize, "kB", ""))
 			currentSize := byteCountDecimal(int64(rawSize) * 1024)
 			ffmpegLog += fmt.Sprintf("\nframe=%v fps=%v q=%v size=%v time=%v bitrate=%v speed=%v", msg.FramesProcessed, msg.FPS, msg.Q, currentSize, msg.CurrentTime, msg.CurrentBitrate, msg.Speed)
@@ -231,7 +242,7 @@ func loop() {
 
 						g.Spacing(),
 						g.Line(
-							g.InputTextV("##output", -((windowPadding+buttonWidth)/imgui.DPIScale), &outputPath, g.InputTextFlagsReadOnly, nil, nil),
+							g.InputTextV("##output", -((windowPadding+buttonWidth)/imgui.DPIScale), &outputPath, 0, nil, nil),
 							g.ButtonV("Output", buttonWidth, buttonHeight, onOutputClick),
 						),
 

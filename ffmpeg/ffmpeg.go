@@ -18,7 +18,6 @@ type Progress struct {
 	CurrentSize     string
 	CurrentTime     string
 	CurrentBitrate  string
-	Progress        float64
 	Q               float64
 	FPS             int
 	Speed           string
@@ -40,8 +39,6 @@ const (
 	AQTemporal = iota
 	AQSpatial
 )
-
-const durationRegexString = `(\d{2}):(\d{2}):(\d{2})\.(\d{2})`
 
 var (
 	PresetOptions = []string{"slow", "medium", "fast", "bd"}
@@ -74,22 +71,22 @@ func spit(data []byte, atEOF bool) (advance int, token []byte, spliterror error)
 	return 0, nil, nil
 }
 
-func GetVideoMeta(inputPath string) (uint, []byte, error) {
+func GetVideoMeta(inputPath string) (duration uint, preview []byte, err error) {
 	args := append(prefix, "-ss", "3", "-skip_frame", "nokey", "-i", inputPath, "-vf", "thumbnail=10", "-frames:v", "1", "-vsync", "0", "-f", "image2", "-")
-	preview, output, err := execSync(".", binary, args...)
+	var output []byte
+	preview, output, err = execSync(".", binary, args...)
 	lines := strings.Split(string(output), "\n")
 	for _, line := range lines {
 		clean := strings.TrimSpace(line)
 		if strings.HasPrefix(clean, "Duration:") {
-			matches := regexp.MustCompile(durationRegexString).FindStringSubmatch(clean)
-			duration := DurationToSec(matches)
-			return duration, nil, nil
+			duration = DurationToSec(clean)
+			return
 		}
 	}
-	return 0, preview, err
+	return
 }
 
-func progress(stream io.ReadCloser, durationInMs uint, out chan Progress) {
+func progress(stream io.ReadCloser, out chan Progress) {
 	scanner := bufio.NewScanner(stream)
 	scanner.Split(spit)
 
@@ -111,7 +108,6 @@ func progress(stream io.ReadCloser, durationInMs uint, out chan Progress) {
 			var currentSize string
 			var currentTime string
 			var currentBitrate string
-			var progress float64
 			var q float64
 			var fps int
 			var speed string
@@ -147,11 +143,6 @@ func progress(stream io.ReadCloser, durationInMs uint, out chan Progress) {
 				}
 			}
 
-			matches := regexp.MustCompile(durationRegexString).FindStringSubmatch(currentTime)
-			timesec := DurationToSec(matches)
-			progress = float64(timesec) / float64(durationInMs)
-			Progress.Progress = progress
-
 			Progress.FramesProcessed = framesProcessed
 			Progress.FPS = fps
 			Progress.Q = q
@@ -167,7 +158,6 @@ func progress(stream io.ReadCloser, durationInMs uint, out chan Progress) {
 
 // RunEncode ...
 func RunEncode(inputPath string, outputPath string, args []string) (*exec.Cmd, <-chan Progress, error) {
-	durationInMs, _, err := GetVideoMeta(inputPath)
 	out := make(chan Progress)
 	args = append([]string{"-i", inputPath}, args...)
 	args = append(prefix, args...)
@@ -175,12 +165,12 @@ func RunEncode(inputPath string, outputPath string, args []string) (*exec.Cmd, <
 	cmd := exec.Command(binary, args...)
 	cmd.SysProcAttr = &syscall.SysProcAttr{HideWindow: true}
 	stderr, _ := cmd.StderrPipe()
-	err = cmd.Start()
+	err := cmd.Start()
 	if err != nil {
 	}
 
 	go func() {
-		progress(stderr, durationInMs, out)
+		progress(stderr, out)
 	}()
 
 	go func() {
