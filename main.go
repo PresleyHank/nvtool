@@ -10,6 +10,7 @@ import (
 	"os/exec"
 	"path"
 	"runtime"
+	"strconv"
 	"strings"
 	"syscall"
 	"unsafe"
@@ -44,25 +45,22 @@ const (
 )
 
 var (
-	lockFile           = path.Join(os.TempDir(), "nvtool.lock")
-	ffmpegCmd          *exec.Cmd
-	texLogo            *g.Texture
-	texButtonClose     *g.Texture
-	texGraphicsCard    *g.Texture
-	texLoadingfinished = make(chan bool)
-	mw                 *g.MasterWindow
-	glfwWindow         *glfw.Window
-	mwMoveable         bool
-	prevMouseX         int
-	prevMouseY         int
-	selectedTebIndex   int
-	inputPath          string
-	outputPath         string
-	isEncoding         bool
-	precent            float32
-	gpuName            string
-	ffmpegLog          string
-	mediaInfoLog       string = "Drag and drop media files here"
+	lockFile        = path.Join(os.TempDir(), "nvtool.lock")
+	ffmpegCmd       *exec.Cmd
+	texLogo         *g.Texture
+	texButtonClose  *g.Texture
+	texGraphicsCard *g.Texture
+	mw              *g.MasterWindow
+	glfwWindow      *glfw.Window
+	mwMoveable      bool
+	prevMouseX      int
+	prevMouseY      int
+	inputPath       string
+	outputPath      string
+	precent         float32
+	gpuName         string
+	ffmpegLog       string
+	mediaInfoLog    string = "Drag and drop media files here"
 )
 
 var defaultPreset = encodingPresets{
@@ -73,7 +71,14 @@ var defaultPreset = encodingPresets{
 	aqStrength: 15,
 }
 
-func cleanOutput() {
+func isEncoding() bool {
+	if ffmpegCmd == nil || (ffmpegCmd.ProcessState != nil && ffmpegCmd.ProcessState.Exited()) {
+		return false
+	}
+	return true
+}
+
+func resetState() {
 	precent = 0
 	ffmpegLog = ""
 }
@@ -98,12 +103,12 @@ func onOutputClick() {
 }
 
 func onRunClick() {
-	if isEncoding || invalidPath(inputPath, outputPath) {
+	defer g.Update()
+	if isEncoding() || invalidPath(inputPath, outputPath) {
 		return
 	}
-	cleanOutput()
+	resetState()
 	go func() {
-		isEncoding = true
 		command := fmt.Sprintf(
 			"-c:a copy -c:v h264_nvenc -preset %s -profile:v high -rc:v %s -qmin %d -qmax %d -strict_gop 1 -%s-aq 1 -aq-strength:v %d -b:v %dk -maxrate:v %dk -map 0 -f mp4",
 			ffmpeg.PresetOptions[defaultPreset.preset],
@@ -119,10 +124,11 @@ func onRunClick() {
 		ffmpegCmd = cmd
 		for msg := range progress {
 			precent = float32(msg.Progress)
-			ffmpegLog += fmt.Sprintf("%+v\n", msg)
+			rawSize, _ := strconv.Atoi(strings.ReplaceAll(msg.CurrentSize, "kB", ""))
+			currentSize := byteCountDecimal(int64(rawSize) * 1024)
+			ffmpegLog += fmt.Sprintf("\nframe=%v fps=%v q=%v size=%v time=%v bitrate=%v speed=%v", msg.FramesProcessed, msg.FPS, msg.Q, currentSize, msg.CurrentTime, msg.CurrentBitrate, msg.Speed)
 			g.Update()
 		}
-		isEncoding = false
 	}()
 }
 
@@ -137,7 +143,7 @@ func setMediaInfo(inputPath string) {
 }
 
 func onDrop(dropItem []string) {
-	if isEncoding {
+	if isEncoding() {
 		return
 	}
 	inputPath = dropItem[0]
@@ -161,7 +167,6 @@ func dispose() {
 		cmd.Run()
 	}
 	go ffmpegCmd.Wait()
-	isEncoding = false
 }
 
 func shouldDisableInput(b bool) (flag g.WindowFlags) {
@@ -188,6 +193,7 @@ func shouldWindowMove() {
 
 func loop() {
 	shouldWindowMove()
+	isEncoding := isEncoding()
 	useLayoutFlat := theme.UseLayoutFlat()
 	useStyleButtonDark := theme.UseStyleButtonDark()
 	defer useLayoutFlat.Pop()

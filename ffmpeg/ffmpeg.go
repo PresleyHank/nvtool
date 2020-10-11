@@ -4,18 +4,23 @@ import (
 	"bufio"
 	"bytes"
 	"io"
+	"log"
 	"os/exec"
 	"regexp"
+	"strconv"
 	"strings"
 	"syscall"
 )
 
 // Progress ...
 type Progress struct {
-	FramesProcessed string
+	FramesProcessed int
+	CurrentSize     string
 	CurrentTime     string
 	CurrentBitrate  string
 	Progress        float64
+	Q               float64
+	FPS             int
 	Speed           string
 }
 
@@ -102,10 +107,14 @@ func progress(stream io.ReadCloser, durationInMs uint, out chan Progress) {
 
 			f := strings.Fields(st)
 
-			var framesProcessed string
+			var framesProcessed int
+			var currentSize string
 			var currentTime string
 			var currentBitrate string
-			var currentSpeed string
+			var progress float64
+			var q float64
+			var fps int
+			var speed string
 
 			for j := 0; j < len(f); j++ {
 				field := f[j]
@@ -115,33 +124,41 @@ func progress(stream io.ReadCloser, durationInMs uint, out chan Progress) {
 					fieldname := strings.Split(field, "=")[0]
 					fieldvalue := strings.Split(field, "=")[1]
 
-					if fieldname == "frame" {
-						framesProcessed = fieldvalue
-					}
-
-					if fieldname == "time" {
+					switch fieldname {
+					case "frame":
+						framesProcessed, _ = strconv.Atoi(fieldvalue)
+					case "fps":
+						fps, _ = strconv.Atoi(fieldvalue)
+					case "q":
+						q, _ = strconv.ParseFloat(fieldvalue, 64)
+					case "size":
+						currentSize = fieldvalue
+					case "Lsize":
+						currentSize = fieldvalue
+					case "time":
 						currentTime = fieldvalue
-					}
-
-					if fieldname == "bitrate" {
+					case "bitrate":
 						currentBitrate = fieldvalue
-					}
-					if fieldname == "speed" {
-						currentSpeed = fieldvalue
+					case "speed":
+						speed = fieldvalue
+					default:
+						log.Printf("%s: %v", fieldname, fieldvalue)
 					}
 				}
 			}
 
 			matches := regexp.MustCompile(durationRegexString).FindStringSubmatch(currentTime)
 			timesec := DurationToSec(matches)
-
-			progress := float64(timesec) / float64(durationInMs)
+			progress = float64(timesec) / float64(durationInMs)
 			Progress.Progress = progress
 
-			Progress.CurrentBitrate = currentBitrate
 			Progress.FramesProcessed = framesProcessed
+			Progress.FPS = fps
+			Progress.Q = q
+			Progress.CurrentSize = currentSize
 			Progress.CurrentTime = currentTime
-			Progress.Speed = currentSpeed
+			Progress.CurrentBitrate = currentBitrate
+			Progress.Speed = speed
 
 			out <- *Progress
 		}

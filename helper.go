@@ -2,12 +2,14 @@ package main
 
 import (
 	"bytes"
+	"fmt"
 	"image"
 	"image/draw"
 	"image/png"
 	"io/ioutil"
 	"log"
 	"os"
+	"syscall"
 	"unsafe"
 
 	g "github.com/AllenDang/giu"
@@ -22,6 +24,31 @@ var (
 	box = packr.New("assets", "./assets")
 )
 
+func byteCountDecimal(b int64) string {
+	const unit = 1000
+	if b < unit {
+		return fmt.Sprintf("%d B", b)
+	}
+	div, exp := int64(unit), 0
+	for n := b / unit; n >= unit; n /= unit {
+		div *= unit
+		exp++
+	}
+	return fmt.Sprintf("%.1f %cB", float64(b)/float64(div), "kMGTPE"[exp])
+}
+
+func byteCountBinary(b int64) string {
+	const unit = 1024
+	if b < unit {
+		return fmt.Sprintf("%d B", b)
+	}
+	div, exp := int64(unit), 0
+	for n := b / unit; n >= unit; n /= unit {
+		div *= unit
+		exp++
+	}
+	return fmt.Sprintf("%.1f %ciB", float64(b)/float64(div), "KMGTPE"[exp])
+}
 func loadFont() {
 	fonts := g.Context.IO().Fonts()
 	font, _ := box.Find("iosevka.ttf")
@@ -77,6 +104,16 @@ func limitValue(val int32, min int32, max int32) int32 {
 
 func invalidPath(inputPath string, outputPath string) bool {
 	return inputPath == outputPath || inputPath == "" || outputPath == ""
+}
+
+func getErrorLevel(processState *os.ProcessState) (int, bool) {
+	if processState.Success() {
+		return 0, true
+	} else if t, ok := processState.Sys().(syscall.WaitStatus); ok {
+		return t.ExitStatus(), true
+	} else {
+		return 255, false
+	}
 }
 
 func initSingleInstanceLock() (unlock func()) {
