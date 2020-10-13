@@ -33,7 +33,7 @@ func SetThemeDark(style *imgui.Style) {
 	style.SetColor(imgui.StyleColorScrollbarGrabActive, RGBAToVec4(color.RGBA{164, 164, 164, 255}))
 	style.SetColor(imgui.StyleColorScrollbarGrabHovered, RGBAToVec4(color.RGBA{140, 140, 140, 250}))
 	style.SetColor(imgui.StyleColorScrollbarBg, RGBAToVec4(color.RGBA{27, 27, 27, 250}))
-	style.SetColor(imgui.StyleColorText, RGBAToVec4(color.RGBA{204, 204, 204, 255}))
+	style.SetColor(imgui.StyleColorText, RGBAToVec4(color.RGBA{240, 240, 240, 240}))
 }
 
 func UseLayoutFlat() EffectMethod {

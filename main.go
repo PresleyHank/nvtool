@@ -305,7 +305,7 @@ func loop() {
 						g.Condition(gpuName != "", g.Layout{
 							g.Line(
 								g.Image(texGraphicsCard, 18, 18),
-								g.Label(gpuName),
+								g.LabelV(gpuName, false, &color.RGBA{240, 240, 240, 255}, &fontIosevka),
 							),
 						}, nil),
 						g.Dummy(-(windowPadding+buttonWidth), 24),
