@@ -21,6 +21,7 @@ func RGBAToVec4(rgba color.RGBA) imgui.Vec4 {
 }
 
 func SetThemeDark(style *imgui.Style) {
+	style.SetColor(imgui.StyleColorText, RGBAToVec4(color.RGBA{230, 230, 230, 230}))
 	style.SetColor(imgui.StyleColorWindowBg, RGBAToVec4(color.RGBA{50, 50, 50, 250}))
 	style.SetColor(imgui.StyleColorFrameBg, RGBAToVec4(color.RGBA{10, 10, 10, 240}))
 	style.SetColor(imgui.StyleColorButton, RGBAToVec4(color.RGBA{100, 100, 100, 255}))
@@ -29,11 +30,10 @@ func SetThemeDark(style *imgui.Style) {
 	style.SetColor(imgui.StyleColorTab, RGBAToVec4(color.RGBA{50, 50, 50, 250}))
 	style.SetColor(imgui.StyleColorTabActive, RGBAToVec4(color.RGBA{18, 150, 219, 255}))
 	style.SetColor(imgui.StyleColorTabHovered, RGBAToVec4(color.RGBA{18, 150, 219, 255}))
+	style.SetColor(imgui.StyleColorScrollbarBg, RGBAToVec4(color.RGBA{27, 27, 27, 250}))
 	style.SetColor(imgui.StyleColorScrollbarGrab, RGBAToVec4(color.RGBA{73, 73, 73, 255}))
 	style.SetColor(imgui.StyleColorScrollbarGrabActive, RGBAToVec4(color.RGBA{164, 164, 164, 255}))
 	style.SetColor(imgui.StyleColorScrollbarGrabHovered, RGBAToVec4(color.RGBA{140, 140, 140, 250}))
-	style.SetColor(imgui.StyleColorScrollbarBg, RGBAToVec4(color.RGBA{27, 27, 27, 250}))
-	style.SetColor(imgui.StyleColorText, RGBAToVec4(color.RGBA{240, 240, 240, 240}))
 }
 
 func UseLayoutFlat() EffectMethod {

@@ -17,7 +17,7 @@ import (
 
 	g "github.com/AllenDang/giu"
 	"github.com/AllenDang/giu/imgui"
-	c "github.com/Nicify/nvtool/components"
+	c "github.com/Nicify/nvtool/customwidget"
 	ffmpeg "github.com/Nicify/nvtool/ffmpeg"
 	"github.com/Nicify/nvtool/gpu"
 	mediainfo "github.com/Nicify/nvtool/mediainfo"
@@ -222,7 +222,6 @@ func loop() {
 	shouldWindowMove()
 	isEncoding := isEncoding()
 	useLayoutFlat := theme.UseLayoutFlat()
-	useIosevkaFont := theme.UseFont(fontIosevka)
 	useStyleDarkButton := theme.UseStyleDarkButton()
 	defer useLayoutFlat.Pop()
 	useLayoutFlat.Push()
@@ -232,7 +231,6 @@ func loop() {
 				g.Image(texLogo, 18, 18),
 				g.Label("NVTool 1.5"),
 				g.Dummy(-83, 0),
-				g.Custom(useIosevkaFont.Push),
 				g.Custom(useStyleDarkButton.Push),
 				g.ButtonV(".", 20, 20, func() {}),
 				g.ButtonV("_", 20, 20, func() {
@@ -242,25 +240,23 @@ func loop() {
 					glfwWindow.SetShouldClose(true)
 				}),
 				g.Custom(useStyleDarkButton.Pop),
-				g.Custom(useIosevkaFont.Pop),
 			),
 			g.TabBar("maintab", g.Layout{
 				g.TabItem("Encode", g.Layout{
 					g.Child("control", false, contentWidth, 92, shouldDisableInput(isEncoding), g.Layout{
 						g.Spacing(),
 						g.Line(
-							c.InputTextVWithFont("##video", -((windowPadding+buttonWidth)/imgui.DPIScale), &inputPath, 0, fontIosevka, nil, nil),
-							g.ButtonV("Video", buttonWidth, buttonHeight, onInputClick),
+							g.InputTextV("##video", -((windowPadding+buttonWidth)/imgui.DPIScale), &inputPath, 0, nil, nil),
+							c.WithHiDPIFont(fontIosevka, fontTamzenb, g.Layout{g.ButtonV("Video", buttonWidth, buttonHeight, onInputClick)}),
 						),
 
 						g.Spacing(),
 						g.Line(
-							c.InputTextVWithFont("##output", -((windowPadding+buttonWidth)/imgui.DPIScale), &outputPath, 0, fontIosevka, nil, nil),
-							g.ButtonV("Output", buttonWidth, buttonHeight, onOutputClick),
+							g.InputTextV("##output", -((windowPadding+buttonWidth)/imgui.DPIScale), &outputPath, 0, nil, nil),
+							c.WithHiDPIFont(fontIosevka, fontTamzenb, g.Layout{g.ButtonV("Output", buttonWidth, buttonHeight, onOutputClick)}),
 						),
 
 						g.Spacing(),
-						// g.Custom(useIosevkaFont.Push),
 						g.Line(
 							g.Label("Preset"),
 							g.Combo("##preset", ffmpeg.PresetOptions[defaultPreset.preset], ffmpeg.PresetOptions, &defaultPreset.preset, 80, 0, nil),
@@ -287,11 +283,10 @@ func loop() {
 							// g.Label("Maxrate"),
 							// g.InputIntV("k##maxrate", 65, &defaultPreset.maxrate, 0, nil),
 						),
-						// g.Custom(useIosevkaFont.Pop),
 					}),
 
 					g.Spacing(),
-					c.InputTextMultilineWithFont("##ffmpegLog", &ffmpegLog, contentWidth, 200, g.InputTextFlagsReadOnly, fontIosevka, nil, func() {
+					g.InputTextMultiline("##ffmpegLog", &ffmpegLog, contentWidth, 200, g.InputTextFlagsReadOnly, nil, func() {
 						imgui.SetScrollHereY(1.0)
 					}),
 
@@ -305,21 +300,21 @@ func loop() {
 						g.Condition(gpuName != "", g.Layout{
 							g.Line(
 								g.Image(texGraphicsCard, 18, 18),
-								g.LabelV(gpuName, false, &color.RGBA{240, 240, 240, 255}, &fontIosevka),
+								g.Label(gpuName),
 							),
 						}, nil),
 						g.Dummy(-(windowPadding+buttonWidth), 24),
-						g.Condition(isEncoding,
+						c.WithHiDPIFont(fontIosevka, fontTamzenb, g.Layout{g.Condition(isEncoding,
 							g.Layout{g.ButtonV("Cancel", buttonWidth, buttonHeight, dispose)},
 							g.Layout{g.ButtonV("Run", buttonWidth, buttonHeight, onRunClick)},
-						),
+						)}),
 					),
 				},
 				),
 
 				g.TabItem("MediaInfo", g.Layout{
 					g.Spacing(),
-					c.InputTextMultilineWithFont("##mediaInfoLog", &mediaInfoLog, contentWidth, 360, g.InputTextFlagsReadOnly, fontIosevka, nil, nil),
+					g.InputTextMultiline("##mediaInfoLog", &mediaInfoLog, contentWidth, 360, g.InputTextFlagsReadOnly, nil, nil),
 				}),
 
 				// g.TabItem("Settings", g.Layout{
@@ -367,17 +362,17 @@ func applyWindowProperties(window *glfw.Window) {
 
 func loadFont() {
 	fonts := g.Context.IO().Fonts()
+	fontIosevkaTTF, _ := box.Find("iosevka.ttf")
+	fontIosevka = fonts.AddFontFromMemoryTTFV(fontIosevkaTTF, 18, imgui.DefaultFontConfig, fonts.GlyphRangesChineseFull())
 	fontTamzenbTTF, _ := box.Find("tamzen8x16b.ttf")
 	fontTamzenb = fonts.AddFontFromMemoryTTFV(fontTamzenbTTF, 16, imgui.DefaultFontConfig, fonts.GlyphRangesChineseFull())
 	fontTamzenrTTF, _ := box.Find("tamzen8x16r.ttf")
-	fontTamzenb = fonts.AddFontFromMemoryTTFV(fontTamzenrTTF, 16, imgui.DefaultFontConfig, fonts.GlyphRangesChineseFull())
-	fontIosevkaTTF, _ := box.Find("iosevka.ttf")
-	fontIosevka = fonts.AddFontFromMemoryTTFV(fontIosevkaTTF, 16, imgui.DefaultFontConfig, fonts.GlyphRangesChineseFull())
+	fontTamzenr = fonts.AddFontFromMemoryTTFV(fontTamzenrTTF, 16, imgui.DefaultFontConfig, fonts.GlyphRangesChineseFull())
 }
 
 func loadTexture() {
-	texButtonClose, _ = imageToTexture("close_white.png")
 	texLogo, _ = imageToTexture("icon.png")
+	texButtonClose, _ = imageToTexture("close_white.png")
 	texGraphicsCard, _ = imageToTexture("graphics_card.png")
 }
 
