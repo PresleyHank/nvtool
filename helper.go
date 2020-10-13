@@ -13,7 +13,6 @@ import (
 	"unsafe"
 
 	g "github.com/AllenDang/giu"
-	"github.com/AllenDang/giu/imgui"
 	win "github.com/Nicify/nvtool/win"
 	"github.com/fsnotify/fsnotify"
 	"github.com/gobuffalo/packr/v2"
@@ -48,11 +47,6 @@ func byteCountBinary(b int64) string {
 		exp++
 	}
 	return fmt.Sprintf("%.1f %ciB", float64(b)/float64(div), "KMGTPE"[exp])
-}
-func loadFont() {
-	fonts := g.Context.IO().Fonts()
-	font, _ := box.Find("iosevka.ttf")
-	fonts.AddFontFromMemoryTTFV(font, 18, imgui.DefaultFontConfig, fonts.GlyphRangesChineseFull())
 }
 
 func loadImageFromMemory(imageData []byte) (imageRGBA *image.RGBA, err error) {

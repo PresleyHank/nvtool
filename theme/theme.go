@@ -6,7 +6,7 @@ import (
 	"github.com/AllenDang/giu/imgui"
 )
 
-type StyleMethod struct {
+type EffectMethod struct {
 	Push func()
 	Pop  func()
 }
@@ -17,20 +17,6 @@ func RGBAToVec4(rgba color.RGBA) imgui.Vec4 {
 		Y: float32(rgba.G) / 255,
 		Z: float32(rgba.B) / 255,
 		W: float32(rgba.A) / 255,
-	}
-}
-
-func UseLayoutFlat() StyleMethod {
-	return StyleMethod{
-		func() {
-			imgui.PushStyleVarFloat(imgui.StyleVarWindowBorderSize, 0)
-			imgui.PushStyleVarFloat(imgui.StyleVarFrameBorderSize, 0)
-			imgui.PushStyleVarFloat(imgui.StyleVarChildBorderSize, 0)
-			imgui.PushStyleVarFloat(imgui.StyleVarFrameRounding, 0)
-			imgui.PushStyleVarFloat(imgui.StyleVarChildRounding, 0)
-			imgui.PushStyleVarVec2(imgui.StyleVarWindowPadding, imgui.Vec2{X: 8, Y: 6})
-		},
-		func() { imgui.PopStyleVarV(6) },
 	}
 }
 
@@ -50,8 +36,22 @@ func SetThemeDark(style *imgui.Style) {
 	style.SetColor(imgui.StyleColorText, RGBAToVec4(color.RGBA{204, 204, 204, 255}))
 }
 
-func UseStyleButtonDark() StyleMethod {
-	return StyleMethod{
+func UseLayoutFlat() EffectMethod {
+	return EffectMethod{
+		func() {
+			imgui.PushStyleVarFloat(imgui.StyleVarWindowBorderSize, 0)
+			imgui.PushStyleVarFloat(imgui.StyleVarFrameBorderSize, 0)
+			imgui.PushStyleVarFloat(imgui.StyleVarChildBorderSize, 0)
+			imgui.PushStyleVarFloat(imgui.StyleVarFrameRounding, 0)
+			imgui.PushStyleVarFloat(imgui.StyleVarChildRounding, 0)
+			imgui.PushStyleVarVec2(imgui.StyleVarWindowPadding, imgui.Vec2{X: 8, Y: 6})
+		},
+		func() { imgui.PopStyleVarV(6) },
+	}
+}
+
+func UseStyleDarkButton() EffectMethod {
+	return EffectMethod{
 		func() {
 			imgui.PushStyleVarFloat(imgui.StyleVarFrameRounding, 0)
 			imgui.PushStyleVarVec2(imgui.StyleVarFramePadding, imgui.Vec2{X: 0, Y: 0})
@@ -62,6 +62,17 @@ func UseStyleButtonDark() StyleMethod {
 		func() {
 			imgui.PopStyleVarV(2)
 			imgui.PopStyleColorV(3)
+		},
+	}
+}
+
+func UseFont(font imgui.Font) EffectMethod {
+	return EffectMethod{
+		func() {
+			imgui.PushFont(font)
+		},
+		func() {
+			imgui.PopFont()
 		},
 	}
 }
