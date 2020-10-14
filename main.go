@@ -271,7 +271,7 @@ func loop() {
 							g.InputIntV("##qmax", 40, &defaultPreset.qmax, 0, nil),
 
 							g.Label("AQ"),
-							g.Combo("##aq", ffmpeg.AQOptions[defaultPreset.aq], ffmpeg.AQOptions, &defaultPreset.aq, 90, 0, nil),
+							g.Combo("##aq", ffmpeg.AQOptions[defaultPreset.aq], ffmpeg.AQOptions, &defaultPreset.aq, 95, 0, nil),
 
 							g.InputIntV("##aqstrength", 40, &defaultPreset.aqStrength, 0, func() {
 								defaultPreset.aqStrength = limitValue(defaultPreset.aqStrength, 0, 15)
