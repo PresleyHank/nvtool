@@ -6,15 +6,6 @@ import (
 	theme "github.com/Nicify/nvtool/theme"
 )
 
-// func ButtonVHiDPIFont() g.Layout {
-// 	useFont := theme.UseFont(font)
-// 	return g.Layout{
-// 		g.Custom(useFont.Push),
-// 		g.ButtonV(),
-// 		g.Custom(useFont.Pop),
-// 	}
-// }
-
 func InputTextVHiPDIFont(label string, width float32, value *string, flags g.InputTextFlags, font imgui.Font, cb imgui.InputTextCallback, onChange func()) g.Layout {
 	useFont := theme.UseFont(font)
 	return g.Layout{
