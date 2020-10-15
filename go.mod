@@ -2,8 +2,6 @@ module github.com/Nicify/nvtool
 
 go 1.15
 
-replace github.com/AllenDang/giu => ../giu
-
 require (
 	github.com/AllenDang/giu v0.0.0-20201013041703-ec1448f8c506
 	github.com/fsnotify/fsnotify v1.4.9
@@ -11,5 +9,5 @@ require (
 	github.com/gobuffalo/packr/v2 v2.8.0
 	github.com/jaypipes/ghw v0.6.1
 	github.com/sqweek/dialog v0.0.0-20200911184034-8a3d98e8211d
-	golang.org/x/sys v0.0.0-20201013132646-2da7054afaeb
+	golang.org/x/sys v0.0.0-20201015000850-e3ed0017c211
 )

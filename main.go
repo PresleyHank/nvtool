@@ -229,7 +229,7 @@ func loop() {
 		g.Layout{
 			g.Line(
 				g.Image(texLogo, 18, 18),
-				g.Label("NVTool 1.5"),
+				g.Label("NVENC Video Toolbox 1.5"),
 				g.Dummy(-83, 0),
 				g.Custom(useStyleDarkButton.Push),
 				g.ButtonV(".", 20, 20, func() {}),
