@@ -121,14 +121,14 @@ func onRunClick() {
 	go func() {
 		defer g.Update()
 		resetState()
-		ffmpegLog = fmt.Sprintf("Initializing...\nInputFile is %s\nOutputFile is %s\nGet input file information...", inputPath, outputPath)
+		ffmpegLog = fmt.Sprintf("Initializing...\nGet input file information...\n")
 		duration, _, err := ffmpeg.GetVideoMeta(inputPath)
 		if err != nil {
 			fmt.Println(err)
-			ffmpegLog += "failed , abort transcoding.\n"
+			ffmpegLog += "Failed , abort transcoding.\n"
 			return
 		}
-		ffmpegLog += "success, start transcoding..."
+		ffmpegLog += "Start transcoding..."
 		command := fmt.Sprintf(
 			"-c:a copy -c:v h264_nvenc -preset %s -profile:v high -rc:v %s -qmin %d -qmax %d -strict_gop 1 -%s-aq 1 -aq-strength:v %d -b:v %dk -maxrate:v %dk -map 0 -f mp4",
 			ffmpeg.PresetOptions[defaultPreset.preset],
@@ -151,10 +151,10 @@ func onRunClick() {
 			g.Update()
 		}
 		if ffmpegCmd.ProcessState != nil && ffmpegCmd.ProcessState.Success() {
-			ffmpegLog += "\ntranscoding success.\n"
+			ffmpegLog += "\nTranscoding success.\n"
 			return
 		}
-		ffmpegLog += "\ntranscoding failed.\n"
+		ffmpegLog += "\nTranscoding failed.\n"
 	}()
 }
 
