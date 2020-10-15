@@ -19,7 +19,6 @@ import (
 	"github.com/AllenDang/giu/imgui"
 	c "github.com/Nicify/nvtool/customwidget"
 	ffmpeg "github.com/Nicify/nvtool/ffmpeg"
-	"github.com/Nicify/nvtool/gpu"
 	mediainfo "github.com/Nicify/nvtool/mediainfo"
 	theme "github.com/Nicify/nvtool/theme"
 	win "github.com/Nicify/nvtool/win"
@@ -390,7 +389,7 @@ func main() {
 	unlock := initSingleInstanceLock()
 	defer unlock()
 	go loadTexture()
-	gpuList, _ := gpu.GetGPUList()
+	gpuList, _ := getGPUList()
 	gpuName = gpuList[0]
 	mw = g.NewMasterWindow("NVTool", 750, 435, g.MasterWindowFlagsNotResizable|g.MasterWindowFlagsFrameless|g.MasterWindowFlagsTransparent, loadFont)
 	currentStyle := imgui.CurrentStyle()
