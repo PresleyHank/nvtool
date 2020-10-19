@@ -130,7 +130,7 @@ func onRunClick() {
 		}
 		ffmpegLog += "Start transcoding..."
 		command := fmt.Sprintf(
-			"-c:a copy -c:v h264_nvenc -preset %s -profile:v high -rc:v %s -qmin %d -qmax %d -strict_gop 1 -%s-aq 1 -aq-strength:v %d -b:v %dk -maxrate:v %dk -map 0 -f mp4",
+			"-c:a copy -c:v h264_nvenc -preset %s -profile:v high -rc:v %s -qmin %d -qmax %d -strict_gop 1 -%s-aq 1 -aq-strength:v %d -b:v %dk -maxrate:v %dk -map 0",
 			ffmpeg.PresetOptions[defaultPreset.preset],
 			ffmpeg.RCOptions[defaultPreset.rc],
 			defaultPreset.qmin,
