@@ -16,17 +16,11 @@ scoop install ffmpeg mediainfo
 #### Build
 
 ```sh
-go build -ldflags='-s -w -H windowsgui -linkmode external -extldflags -static' .
+bash build_win.sh
 ```
 
 #### Screenshots
 
-![图片](https://images-cdn.shimo.im/nXrLjx6Sm8rufqat__original.png)
+![图片](https://images-cdn.shimo.im/clz5A7fc57SDBHzu__original.png)
 
-![图片](https://images-cdn.shimo.im/rQnQ5c9NOyEv9PPv__original.png)
-
----
-
-#### Release
-
-- Windows [NVTool.zip](https://attachments-cdn.shimo.im/XErIszdTagxUpyqr.zip?attname=nvtool.zip)
+![图片](https://images-cdn.shimo.im/dLiWypVO9fbgAXPb__original.png)
