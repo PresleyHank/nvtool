@@ -10,7 +10,6 @@ import (
 	"os/exec"
 	"path"
 	"runtime"
-	"strconv"
 	"strings"
 	"syscall"
 	"unsafe"
@@ -18,8 +17,8 @@ import (
 	g "github.com/AllenDang/giu"
 	"github.com/AllenDang/giu/imgui"
 	c "github.com/Nicify/nvtool/customwidget"
-	ffmpeg "github.com/Nicify/nvtool/ffmpeg"
 	mediainfo "github.com/Nicify/nvtool/mediainfo"
+	nvenc "github.com/Nicify/nvtool/nvenc"
 	theme "github.com/Nicify/nvtool/theme"
 	win "github.com/Nicify/nvtool/win"
 	"github.com/go-gl/glfw/v3.3/glfw"
@@ -45,8 +44,8 @@ const (
 )
 
 var (
-	lockFile  = path.Join(os.TempDir(), "nvtool.lock")
-	ffmpegCmd *exec.Cmd
+	lockFile = path.Join(os.TempDir(), "nvtool.lock")
+	nvencCmd *exec.Cmd
 
 	fontTamzenr imgui.Font
 	fontTamzenb imgui.Font
@@ -65,10 +64,10 @@ var (
 
 	inputPath  string
 	outputPath string
-	precent    float32
+	percent    float32
 	gpuName    string
 
-	ffmpegLog    string
+	nvencLog     string
 	mediaInfoLog string = "Drag and drop media files here"
 )
 
@@ -81,23 +80,23 @@ var defaultPreset = encodingPresets{
 }
 
 func isEncoding() bool {
-	if ffmpegCmd == nil || (ffmpegCmd.ProcessState != nil && ffmpegCmd.ProcessState.Exited()) {
+	if nvencCmd == nil || (nvencCmd.ProcessState != nil && nvencCmd.ProcessState.Exited()) {
 		return false
 	}
 	return true
 }
 
 func resetState() {
-	precent = 0
-	ffmpegLog = ""
+	percent = 0
+	nvencLog = ""
 	g.Update()
 }
 
 func onInputClick() {
 	filePath := selectInputPath()
 	if len(filePath) > 1 {
-		precent = 0
-		ffmpegLog = ""
+		percent = 0
+		nvencLog = ""
 		inputPath = filePath
 		fileExt := path.Ext(inputPath)
 		outputPath = strings.Replace(inputPath, fileExt, "_x264.mp4", 1)
@@ -115,46 +114,26 @@ func onOutputClick() {
 func onRunClick() {
 	if isEncoding() ||
 		invalidPath(inputPath, outputPath) ||
-		strings.HasSuffix(ffmpegLog, "Get input file information...") {
+		strings.HasSuffix(nvencLog, "Get input file information...") {
 		return
 	}
 	go func() {
 		defer g.Update()
 		resetState()
-		ffmpegLog = fmt.Sprintf("Initializing...\nGet input file information...\n")
-		duration, _, err := ffmpeg.GetVideoMeta(inputPath)
-		if err != nil {
-			fmt.Println(err)
-			ffmpegLog += "Failed , abort transcoding.\n"
-			return
-		}
-		ffmpegLog += "Start transcoding..."
 		command := fmt.Sprintf(
-			"-c:a copy -c:v h264_nvenc -preset %s -profile:v high -rc:v %s -qmin %d -qmax %d -strict_gop 1 -%s-aq 1 -aq-strength:v %d -b:v %dk -maxrate:v %dk -map 0",
-			ffmpeg.PresetOptions[defaultPreset.preset],
-			ffmpeg.RCOptions[defaultPreset.rc],
-			defaultPreset.qmin,
-			defaultPreset.qmax,
-			ffmpeg.AQOptions[defaultPreset.aq],
-			defaultPreset.aqStrength,
-			defaultPreset.bitrate,
-			defaultPreset.maxrate,
-		)
-		cmd, progress, _ := ffmpeg.RunEncode(inputPath, outputPath, strings.Split(command, " "))
-		ffmpegCmd = cmd
-
+			"--profile high --audio-codec aac:aac_coder=twoloop --audio-bitrate 320 --preset P7 --vbr 0 --vbr-quality 12 --max-bitrate 60000 --lookahead 16 --strict-gop --aq-temporal --aq-strength 15 --mv-precision Q-pel --vpp-resize lanczos4 --vpp-perf-monitor --ssim --output-buf 128 --output-res 1280x720")
+		cmd, progress, _ := nvenc.RunEncode(inputPath, outputPath, strings.Split(command, " "))
+		nvencCmd = cmd
 		for msg := range progress {
-			precent = float32(ffmpeg.DurationToSec(msg.CurrentTime)) / float32(duration)
-			rawSize, _ := strconv.Atoi(strings.ReplaceAll(msg.CurrentSize, "kB", ""))
-			currentSize := byteCountDecimal(int64(rawSize) * 1024)
-			ffmpegLog += fmt.Sprintf("\nframe=%v fps=%v q=%v size=%v time=%v bitrate=%v speed=%v", msg.FramesProcessed, msg.FPS, msg.Q, currentSize, msg.CurrentTime, msg.CurrentBitrate, msg.Speed)
+			percent = float32(msg.Percent) / 100
+			nvencLog += fmt.Sprintf("%v frames: %.0f fps, %v kb/s, remain %s, est out size %s\n", msg.FramesProcessed, msg.FPS, msg.Bitrate, msg.Remain, msg.EstOutSize)
 			g.Update()
 		}
-		if ffmpegCmd.ProcessState != nil && ffmpegCmd.ProcessState.Success() {
-			ffmpegLog += "\nTranscoding success.\n"
-			return
-		}
-		ffmpegLog += "\nTranscoding failed.\n"
+		// if nvencCmd.ProcessState != nil && nvencCmd.ProcessState.Success() {
+		// 	nvencLog += "\nTranscoding success.\n"
+		// 	return
+		// }
+		// nvencLog += "\nTranscoding failed.\n"
 	}()
 }
 
@@ -179,20 +158,16 @@ func onDrop(dropItem []string) {
 }
 
 func dispose() {
-	if ffmpegCmd == nil {
+	if nvencCmd == nil {
 		return
 	}
-	stdin, err := ffmpegCmd.StdinPipe()
-	if err == nil {
-		stdin.Write([]byte("q\n"))
-	}
-	// ffmpegCmd.Process.Signal(os.Interrupt)
+	// nvencCmd.Process.Signal(os.Interrupt)
 	if runtime.GOOS == "windows" {
-		cmd := exec.Command("wmic", "process", "where", "name='ffmpeg.exe'", "delete")
+		cmd := exec.Command("wmic", "process", "where", "name='NVEncC64.exe'", "delete")
 		cmd.SysProcAttr = &syscall.SysProcAttr{HideWindow: true}
 		cmd.Run()
 	}
-	go ffmpegCmd.Wait()
+	go nvencCmd.Wait()
 }
 
 func shouldDisableInput(b bool) (flag g.WindowFlags) {
@@ -258,10 +233,10 @@ func loop() {
 						g.Spacing(),
 						g.Line(
 							g.Label("Preset"),
-							g.Combo("##preset", ffmpeg.PresetOptions[defaultPreset.preset], ffmpeg.PresetOptions, &defaultPreset.preset, 80, 0, nil),
+							g.Combo("##preset", nvenc.PresetOptions[defaultPreset.preset], nvenc.PresetOptions, &defaultPreset.preset, 80, 0, nil),
 
-							g.Label("RC"),
-							g.Combo("##rc", ffmpeg.RCOptions[defaultPreset.rc], ffmpeg.RCOptions, &defaultPreset.rc, 80, 0, nil),
+							// g.Label("RC"),
+							// g.Combo("##rc", nvenc.RCOptions[defaultPreset.rc], nvenc.RCOptions, &defaultPreset.rc, 80, 0, nil),
 
 							g.Label("QMin"),
 							g.InputIntV("##qmin", 40, &defaultPreset.qmin, 0, nil),
@@ -270,7 +245,7 @@ func loop() {
 							g.InputIntV("##qmax", 40, &defaultPreset.qmax, 0, nil),
 
 							g.Label("AQ"),
-							g.Combo("##aq", ffmpeg.AQOptions[defaultPreset.aq], ffmpeg.AQOptions, &defaultPreset.aq, 95, 0, nil),
+							g.Combo("##aq", nvenc.AQOptions[defaultPreset.aq], nvenc.AQOptions, &defaultPreset.aq, 95, 0, nil),
 
 							g.InputIntV("##aqstrength", 40, &defaultPreset.aqStrength, 0, func() {
 								defaultPreset.aqStrength = limitValue(defaultPreset.aqStrength, 0, 15)
@@ -285,12 +260,12 @@ func loop() {
 					}),
 
 					g.Spacing(),
-					g.InputTextMultiline("##ffmpegLog", &ffmpegLog, contentWidth, 200, g.InputTextFlagsReadOnly, nil, func() {
+					g.InputTextMultiline("##nvencLog", &nvencLog, contentWidth, 200, g.InputTextFlagsReadOnly, nil, func() {
 						imgui.SetScrollHereY(1.0)
 					}),
 
 					g.Spacing(),
-					g.ProgressBar(precent, contentWidth, 20, ""),
+					g.ProgressBar(percent, contentWidth, 20, ""),
 
 					g.Line(
 						g.Dummy(0, 5),
@@ -389,8 +364,6 @@ func main() {
 	unlock := initSingleInstanceLock()
 	defer unlock()
 	go loadTexture()
-	gpuList, _ := getGPUList()
-	gpuName = gpuList[0]
 	mw = g.NewMasterWindow("NVTool", 750, 435, g.MasterWindowFlagsNotResizable|g.MasterWindowFlagsFrameless|g.MasterWindowFlagsTransparent, loadFont)
 	currentStyle := imgui.CurrentStyle()
 	theme.SetThemeDark(&currentStyle)

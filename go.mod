@@ -9,5 +9,5 @@ require (
 	github.com/gobuffalo/packr/v2 v2.8.0
 	github.com/jaypipes/ghw v0.6.1
 	github.com/sqweek/dialog v0.0.0-20200911184034-8a3d98e8211d
-	golang.org/x/sys v0.0.0-20201015000850-e3ed0017c211
+	golang.org/x/sys v0.0.0-20201018230417-eeed37f84f13
 )

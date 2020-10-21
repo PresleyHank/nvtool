@@ -16,21 +16,12 @@ import (
 	win "github.com/Nicify/nvtool/win"
 	"github.com/fsnotify/fsnotify"
 	"github.com/gobuffalo/packr/v2"
-	"github.com/jaypipes/ghw"
 	"github.com/sqweek/dialog"
 )
 
 var (
 	box = packr.New("assets", "./assets")
 )
-
-func getGPUList() (gpuList []string, err error) {
-	gpu, err := ghw.GPU()
-	for _, card := range gpu.GraphicsCards {
-		gpuList = append(gpuList, card.DeviceInfo.Product.Name)
-	}
-	return
-}
 
 func byteCountDecimal(b int64) string {
 	const unit = 1000
