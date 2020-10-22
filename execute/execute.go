@@ -1,4 +1,4 @@
-package nvenc
+package execute
 
 import (
 	"bytes"
@@ -8,7 +8,7 @@ import (
 	"syscall"
 )
 
-func spit(data []byte, atEOF bool) (advance int, token []byte, spliterror error) {
+func Spit(data []byte, atEOF bool) (advance int, token []byte, spliterror error) {
 	if atEOF && len(data) == 0 {
 		return 0, nil, nil
 	}
@@ -27,7 +27,7 @@ func spit(data []byte, atEOF bool) (advance int, token []byte, spliterror error)
 	return 0, nil, nil
 }
 
-func execSync(pwd string, command string, args ...string) ([]byte, []byte, error) {
+func ExecSync(pwd string, command string, args ...string) ([]byte, []byte, error) {
 	cmd := exec.Command(command, args...)
 	cmd.SysProcAttr = &syscall.SysProcAttr{HideWindow: true}
 	cmd.Dir = pwd

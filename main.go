@@ -120,8 +120,7 @@ func onRunClick() {
 	go func() {
 		defer g.Update()
 		resetState()
-		command := fmt.Sprintf(
-			"--profile high --audio-codec aac:aac_coder=twoloop --audio-bitrate 320 --preset P7 --vbr 0 --vbr-quality 12 --max-bitrate 60000 --lookahead 16 --strict-gop --aq-temporal --aq-strength 15 --mv-precision Q-pel --vpp-resize lanczos4 --vpp-perf-monitor --ssim --output-buf 128 --output-res 1280x720")
+		command := fmt.Sprintf("--profile high --audio-codec aac:aac_coder=twoloop --audio-bitrate 320 --preset P7 --vbr 0 --vbr-quality 12 --max-bitrate 60000 --lookahead 16 --strict-gop --aq-temporal --aq-strength 15 --mv-precision Q-pel --vpp-resize lanczos4 --vpp-perf-monitor --ssim --output-buf 128 --output-res 1280x720")
 		cmd, progress, _ := nvenc.RunEncode(inputPath, outputPath, strings.Split(command, " "))
 		nvencCmd = cmd
 		for msg := range progress {
@@ -271,12 +270,17 @@ func loop() {
 						g.Dummy(0, 5),
 					),
 					g.Line(
-						g.Condition(gpuName != "", g.Layout{
-							g.Line(
-								g.Image(texGraphicsCard, 18, 18),
-								g.Label(gpuName),
-							),
-						}, nil),
+						g.Condition(gpuName != "",
+							g.Layout{
+								g.Line(
+									g.Image(texGraphicsCard, 18, 18),
+									g.Label(gpuName)),
+							},
+							g.Layout{
+								g.Line(g.Dummy(18, 18)),
+							},
+						),
+
 						g.Dummy(-(windowPadding+buttonWidth), 24),
 						c.WithHiDPIFont(fontIosevka, fontTamzenb, g.Layout{g.Condition(isEncoding,
 							g.Layout{g.ButtonV("Cancel", buttonWidth, buttonHeight, dispose)},
@@ -364,6 +368,7 @@ func main() {
 	unlock := initSingleInstanceLock()
 	defer unlock()
 	go loadTexture()
+	gpuName, _ = nvenc.CheckDevice()
 	mw = g.NewMasterWindow("NVTool", 750, 435, g.MasterWindowFlagsNotResizable|g.MasterWindowFlagsFrameless|g.MasterWindowFlagsTransparent, loadFont)
 	currentStyle := imgui.CurrentStyle()
 	theme.SetThemeDark(&currentStyle)

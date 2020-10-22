@@ -11,6 +11,8 @@ import (
 	"strconv"
 	"strings"
 	"syscall"
+
+	execute "github.com/Nicify/nvtool/execute"
 )
 
 // Progress ...
@@ -35,7 +37,7 @@ var (
 
 func progress(stream io.ReadCloser, out chan Progress) {
 	scanner := bufio.NewScanner(stream)
-	scanner.Split(spit)
+	scanner.Split(execute.Spit)
 
 	buf := make([]byte, 2)
 	scanner.Buffer(buf, bufio.MaxScanTokenSize)
@@ -93,6 +95,16 @@ func progress(stream io.ReadCloser, out chan Progress) {
 			out <- *Progress
 		}
 	}
+}
+
+func CheckDevice() (name string, err error) {
+	stdout, _, err := execute.ExecSync(".", binary, "--check-device")
+	if err != nil {
+		return
+	}
+	r := regexp.MustCompile(`DeviceId #\d+: `)
+	name = r.ReplaceAllString(string(stdout), "")
+	return
 }
 
 // RunEncode ...
