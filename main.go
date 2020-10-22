@@ -142,7 +142,7 @@ func setMediaInfo(inputPath string) {
 		mediaInfoLog = fmt.Sprintf("Error: %s", err)
 		return
 	}
-	mediaInfoLog = strings.Join(info, "\n")
+	mediaInfoLog = info
 	g.Update()
 }
 

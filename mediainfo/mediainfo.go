@@ -1,31 +1,30 @@
 package mediainfo
 
 import (
-	"bufio"
-	"os/exec"
-	"syscall"
+	"errors"
+	"path/filepath"
+
+	"github.com/Nicify/nvtool/execute"
 )
 
 var (
-	mediainfoBinary = "mediainfo"
+	binary string
 )
 
-func GetMediaInfo(mediaFile string) (mediainfo []string, err error) {
-	cmd := exec.Command(mediainfoBinary, mediaFile)
-	cmd.SysProcAttr = &syscall.SysProcAttr{HideWindow: true}
-	stdout, err := cmd.StdoutPipe()
-	err = cmd.Start()
+func GetMediaInfo(mediaFile string) (string, error) {
+	abspath, err := filepath.Abs(mediaFile)
 	if err != nil {
-		return
+		return "", errors.New("file not found.")
 	}
-	scanner := bufio.NewScanner(stdout)
-	for scanner.Scan() {
-		line := scanner.Text()
-		mediainfo = append(mediainfo, line)
-	}
-
-	if err = scanner.Err(); err != nil {
-		return
-	}
+	stdout, _, _ := execute.ExecSync(".", binary, abspath)
+	mediainfo := string(stdout)
 	return mediainfo, nil
+}
+
+func init() {
+	path, err := filepath.Abs("./bin/mediainfo.exe")
+	if err != nil {
+		panic("NVEncC64.exe not found!")
+	}
+	binary = path
 }
