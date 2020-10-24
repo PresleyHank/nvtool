@@ -27,7 +27,7 @@ func SetThemeDark(style *imgui.Style) {
 	style.SetColor(imgui.StyleColorButton, RGBAToVec4(color.RGBA{100, 100, 100, 255}))
 	style.SetColor(imgui.StyleColorButtonHovered, RGBAToVec4(color.RGBA{120, 120, 120, 240}))
 	style.SetColor(imgui.StyleColorButtonActive, RGBAToVec4(color.RGBA{80, 80, 80, 245}))
-	style.SetColor(imgui.StyleColorTab, RGBAToVec4(color.RGBA{50, 50, 50, 250}))
+	style.SetColor(imgui.StyleColorTab, RGBAToVec4(color.RGBA{0, 0, 0, 0}))
 	style.SetColor(imgui.StyleColorTabActive, RGBAToVec4(color.RGBA{18, 150, 219, 255}))
 	style.SetColor(imgui.StyleColorTabHovered, RGBAToVec4(color.RGBA{18, 150, 219, 255}))
 	style.SetColor(imgui.StyleColorScrollbarBg, RGBAToVec4(color.RGBA{27, 27, 27, 250}))

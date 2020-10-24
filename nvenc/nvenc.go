@@ -22,16 +22,16 @@ type Progress struct {
 	FPS             float64
 	Bitrate         float64
 	Remain          string
-	GPUUsage        int
-	VEUsage         int
-	VDUsage         int
+	GPU             int
+	VE              int
+	VD              int
 	EstOutSize      string
 }
 
 var (
 	binary string
 
-	PresetOptions = []string{"default", "performance", "quality"}
+	PresetOptions = []string{"P1", "P2", "P3", "P4", "P5", "P6", "P7"}
 	AQOptions     = []string{"temporal", "spatial"}
 )
 
@@ -74,15 +74,15 @@ func progress(stream io.ReadCloser, out chan Progress) {
 					continue
 				}
 				if strings.HasPrefix(filed, "GPU") {
-					Progress.GPUUsage, _ = strconv.Atoi(strings.Split(filed, " ")[1])
+					Progress.GPU, _ = strconv.Atoi(strings.Split(filed, " ")[1])
 					continue
 				}
 				if strings.HasPrefix(filed, "VE") {
-					Progress.VEUsage, _ = strconv.Atoi(strings.Split(filed, " ")[1])
+					Progress.VE, _ = strconv.Atoi(strings.Split(filed, " ")[1])
 					continue
 				}
 				if strings.HasPrefix(filed, "VD") {
-					Progress.VDUsage, _ = strconv.Atoi(strings.Split(filed, " ")[1])
+					Progress.VD, _ = strconv.Atoi(strings.Split(filed, " ")[1])
 					continue
 				}
 				if strings.HasPrefix(filed, "EST") {
@@ -103,7 +103,7 @@ func CheckDevice() (name string, err error) {
 		return
 	}
 	r := regexp.MustCompile(`DeviceId #\d+: `)
-	name = r.ReplaceAllString(string(stdout), "")
+	name = strings.Trim(r.ReplaceAllString(string(stdout), ""), "\n")
 	return
 }
 

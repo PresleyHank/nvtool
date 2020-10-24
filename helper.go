@@ -9,6 +9,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"regexp"
 	"syscall"
 	"unsafe"
 
@@ -94,6 +95,11 @@ func limitValue(val int32, min int32, max int32) int32 {
 		return min
 	}
 	return val
+}
+
+func limitResValue(val string) string {
+	r := regexp.MustCompile(`[^0-9x]`)
+	return r.ReplaceAllString(val, "")
 }
 
 func invalidPath(inputPath string, outputPath string) bool {
