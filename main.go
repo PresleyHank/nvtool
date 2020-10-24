@@ -137,7 +137,7 @@ func onRunClick() {
 	go func() {
 		defer g.Update()
 		resetState()
-		command := fmt.Sprintf("--profile high --audio-codec aac:aac_coder=twoloop --audio-bitrate 320 --preset %s --vbr %v --vbr-quality %v --max-bitrate 60000 --lookahead 16 --strict-gop --aq-%s --aq-strength %v --vpp-resize lanczos2 --vpp-perf-monitor --ssim",
+		command := fmt.Sprintf("--profile high --audio-codec aac:aac_coder=twoloop --audio-bitrate 320 --preset %s --vbr %v --vbr-quality %v --max-bitrate 60000 --lookahead 16 --strict-gop --aq-%s --aq-strength %v --vpp-resize lanczos2 --vpp-perf-monitor --ssim --multipass 2pass-full",
 			nvenc.PresetOptions[defaultPreset.preset],
 			defaultPreset.bitrate,
 			defaultPreset.quality,
