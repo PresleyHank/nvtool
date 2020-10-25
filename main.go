@@ -304,27 +304,27 @@ func loop() {
 
 							g.Label("VPP"),
 							c.ImageButton(texDropDown, 24, 24, func() {
-								imgui.SetNextWindowPos(imgui.Vec2{X: 378 * imgui.DPIScale, Y: 160 * imgui.DPIScale})
+								imgui.SetNextWindowPos(imgui.Vec2{X: 412 * imgui.DPIScale, Y: 160 * imgui.DPIScale})
 								g.OpenPopup("VPP")
 							}),
 
 							g.Popup("VPP", g.WindowFlagsNoMove, g.Layout{
 								g.Line(
 									g.Checkbox("KNN      ##vppKnn", &defaultPreset.vppPresets.vppKnn, nil),
-									g.InputText("##vppKnnParam", 240, &defaultPreset.vppPresets.vppKnnParam),
+									g.InputText("##vppKnnParam", 180, &defaultPreset.vppPresets.vppKnnParam),
 								),
 								g.Line(
 
 									g.Checkbox("PMD      ##vppPmd", &defaultPreset.vppPresets.vppPmd, nil),
-									g.InputText("##vppPmdParam", 240, &defaultPreset.vppPresets.vppPmdParam),
+									g.InputText("##vppPmdParam", 180, &defaultPreset.vppPresets.vppPmdParam),
 								),
 								g.Line(
 									g.Checkbox("UnSharp  ##vppUnSharp", &defaultPreset.vppPresets.vppUnSharp, nil),
-									g.InputText("##vppUnSharpParam", 240, &defaultPreset.vppPresets.vppUnSharpParam),
+									g.InputText("##vppUnSharpParam", 180, &defaultPreset.vppPresets.vppUnSharpParam),
 								),
 								g.Line(
 									g.Checkbox("EdgeLevel##vppEdgeLevel", &defaultPreset.vppPresets.vppEdgeLevel, nil),
-									g.InputText("##vppEdgeLevelParam", 240, &defaultPreset.vppPresets.vppEdgeLevelParam),
+									g.InputText("##vppEdgeLevelParam", 180, &defaultPreset.vppPresets.vppEdgeLevelParam),
 								),
 							}),
 
