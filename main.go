@@ -24,20 +24,28 @@ import (
 )
 
 type encodingPresets struct {
-	preset int32
-	rc     int32
-	aq     int32
-	// cq         int32
-	// qmin       int32
-	// qmax       int32
-	quality     int32
-	bitrate     int32
-	maxrate     int32
-	aqStrength  int32
-	outputRes   string
-	resize      bool
-	noiseReduce bool
-	unSharp     bool
+	preset     int32
+	quality    int32
+	bitrate    int32
+	maxrate    int32
+	aq         int32
+	aqStrength int32
+	resize     bool
+	outputRes  string
+	vppPresets vppPresets
+}
+
+type vppPresets struct {
+	vppKnn            bool
+	vppKnnParam       string
+	vppPmd            bool
+	vppPmdParam       string
+	vppUnSharp        bool
+	vppUnSharpParam   string
+	vppEdgeLevel      bool
+	vppEdgeLevelParam string
+	vppSmooth         bool
+	vppSmoothParam    string
 }
 
 type usage struct {
@@ -63,6 +71,7 @@ var (
 
 	texLogo         *g.Texture
 	texButtonClose  *g.Texture
+	texDropDown     *g.Texture
 	texGraphicsCard *g.Texture
 
 	mw         *g.MasterWindow
@@ -88,6 +97,13 @@ var defaultPreset = encodingPresets{
 	maxrate:    59850,
 	aqStrength: 15,
 	outputRes:  "1920x1080",
+	vppPresets: vppPresets{
+		vppKnnParam:       "radius=3,strength=0.08,lerp=0.2,th_lerp=0.8",
+		vppPmdParam:       "apply_count=2,strength=100,threshold=100",
+		vppUnSharpParam:   "radius=3,weight=0.5,threshold=10.0",
+		vppEdgeLevelParam: "strength=10.0,threshold=20.0,black=0,white=0",
+		vppSmoothParam:    "quality=6,qp=12,prec=fp32",
+	},
 }
 
 var utilization = usage{
@@ -116,7 +132,7 @@ func onInputClick() {
 		nvencLog = ""
 		inputPath = filePath
 		fileExt := path.Ext(inputPath)
-		outputPath = strings.Replace(inputPath, fileExt, "_x264.mp4", 1)
+		outputPath = strings.Replace(inputPath, fileExt, "_nvenc.mp4", 1)
 		go setMediaInfo(filePath)
 	}
 }
@@ -137,7 +153,7 @@ func onRunClick() {
 	go func() {
 		defer g.Update()
 		resetState()
-		command := fmt.Sprintf("--profile high --audio-codec aac:aac_coder=twoloop --audio-bitrate 320 --preset %s --vbr %v --vbr-quality %v --max-bitrate 60000 --lookahead 16 --strict-gop --aq-%s --aq-strength %v --vpp-resize lanczos2 --vpp-perf-monitor --ssim --multipass 2pass-full",
+		command := fmt.Sprintf("--profile high --audio-codec aac:aac_coder=twoloop --audio-bitrate 320 --preset %s --vbr %v --vbr-quality %v --max-bitrate 60000 --lookahead 16 --strict-gop --aq-%s --aq-strength %v --vpp-resize lanczos2 --vpp-perf-monitor --ssim",
 			nvenc.PresetOptions[defaultPreset.preset],
 			defaultPreset.bitrate,
 			defaultPreset.quality,
@@ -146,8 +162,17 @@ func onRunClick() {
 		)
 		args := strings.Split(command, " ")
 
-		if defaultPreset.noiseReduce {
-			args = append(args, "--vpp-knn")
+		if defaultPreset.vppPresets.vppKnn {
+			args = append(args, "--vpp-knn", defaultPreset.vppPresets.vppKnnParam)
+		}
+		if defaultPreset.vppPresets.vppPmd {
+			args = append(args, "--vpp-pmd", defaultPreset.vppPresets.vppPmdParam)
+		}
+		if defaultPreset.vppPresets.vppUnSharp {
+			args = append(args, "--vpp-unsharp", defaultPreset.vppPresets.vppUnSharpParam)
+		}
+		if defaultPreset.vppPresets.vppEdgeLevel {
+			args = append(args, "--vpp-edgelevel", defaultPreset.vppPresets.vppEdgeLevelParam)
 		}
 
 		if defaultPreset.resize {
@@ -196,11 +221,6 @@ func dispose() {
 		return
 	}
 	nvencCmd.Process.Kill()
-	// if runtime.GOOS == "windows" {
-	// 	cmd := exec.Command("wmic", "process", "where", "name='NVEncC64.exe'", "delete")
-	// 	cmd.SysProcAttr = &syscall.SysProcAttr{HideWindow: true}
-	// 	cmd.Run()
-	// }
 	go nvencCmd.Wait()
 }
 
@@ -270,22 +290,44 @@ func loop() {
 							g.Combo("##preset", nvenc.PresetOptions[defaultPreset.preset], nvenc.PresetOptions, &defaultPreset.preset, 50, 0, nil),
 
 							g.Label("Quality"),
-							g.InputIntV("##vbr-quality", 24, &defaultPreset.quality, 0, nil),
+							g.InputIntV("##quality", 24, &defaultPreset.quality, 0, nil),
 
 							g.Label("Bitrate"),
-							g.InputIntV("##bitrate", 72, &defaultPreset.bitrate, 0, nil),
+							g.InputIntV("##bitrate", 65, &defaultPreset.bitrate, 0, nil),
 
 							g.Label("AQ"),
 							g.Combo("##aq", nvenc.AQOptions[defaultPreset.aq], nvenc.AQOptions, &defaultPreset.aq, 92, 0, nil),
 							g.Label("-"),
-							g.InputIntV("##aq-strength", 24, &defaultPreset.aqStrength, 0, func() {
+							g.InputIntV("##strength", 24, &defaultPreset.aqStrength, 0, func() {
 								defaultPreset.aqStrength = limitValue(defaultPreset.aqStrength, 0, 15)
 							}),
 
-							// g.Label("NR"),
-							g.Checkbox("NR", &defaultPreset.noiseReduce, func() {}),
+							g.Label("VPP"),
+							c.ImageButton(texDropDown, 24, 24, func() {
+								imgui.SetNextWindowPos(imgui.Vec2{X: 378 * imgui.DPIScale, Y: 160 * imgui.DPIScale})
+								g.OpenPopup("VPP")
+							}),
 
-							// g.Label("Resize"),
+							g.Popup("VPP", g.WindowFlagsNoMove, g.Layout{
+								g.Line(
+									g.Checkbox("KNN      ##vppKnn", &defaultPreset.vppPresets.vppKnn, nil),
+									g.InputText("##vppKnnParam", 240, &defaultPreset.vppPresets.vppKnnParam),
+								),
+								g.Line(
+
+									g.Checkbox("PMD      ##vppPmd", &defaultPreset.vppPresets.vppPmd, nil),
+									g.InputText("##vppPmdParam", 240, &defaultPreset.vppPresets.vppPmdParam),
+								),
+								g.Line(
+									g.Checkbox("UnSharp  ##vppUnSharp", &defaultPreset.vppPresets.vppUnSharp, nil),
+									g.InputText("##vppUnSharpParam", 240, &defaultPreset.vppPresets.vppUnSharpParam),
+								),
+								g.Line(
+									g.Checkbox("EdgeLevel##vppEdgeLevel", &defaultPreset.vppPresets.vppEdgeLevel, nil),
+									g.InputText("##vppEdgeLevelParam", 240, &defaultPreset.vppPresets.vppEdgeLevelParam),
+								),
+							}),
+
 							g.Checkbox("Resize", &defaultPreset.resize, nil),
 							g.InputTextV("##outputRes", 80, &defaultPreset.outputRes, g.InputTextFlagsCallbackAlways, nil, func() {
 								defaultPreset.outputRes = limitResValue(defaultPreset.outputRes)
@@ -363,6 +405,7 @@ func loadFont() {
 func loadTexture() {
 	texLogo, _ = imageToTexture("icon.png")
 	texButtonClose, _ = imageToTexture("close_white.png")
+	texDropDown, _ = imageToTexture("dropdown.png")
 	texGraphicsCard, _ = imageToTexture("graphics_card.png")
 }
 
