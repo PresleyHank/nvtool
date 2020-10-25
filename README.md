@@ -10,6 +10,6 @@ bash build_win.sh
 
 #### Screenshots
 
-![图片](https://images-cdn.shimo.im/clz5A7fc57SDBHzu__original.png)
+![图片](https://images-cdn.shimo.im/XUvfrHzbyPOKQn9c__original.png)
 
 ![图片](https://images-cdn.shimo.im/dLiWypVO9fbgAXPb__original.png)
