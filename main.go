@@ -36,16 +36,18 @@ type encodingPresets struct {
 }
 
 type vppPresets struct {
-	vppKnn            bool
-	vppKnnParam       string
-	vppPmd            bool
-	vppPmdParam       string
-	vppUnSharp        bool
-	vppUnSharpParam   string
-	vppEdgeLevel      bool
-	vppEdgeLevelParam string
-	vppSmooth         bool
-	vppSmoothParam    string
+	vppKnn             bool
+	vppKnnParam        string
+	vppPmd             bool
+	vppPmdParam        string
+	vppUnSharp         bool
+	vppUnSharpParam    string
+	vppEdgeLevel       bool
+	vppEdgeLevelParam  string
+	vppSmooth          bool
+	vppSmoothParam     string
+	vppColorSpace      bool
+	vppColorSpaceParam string
 }
 
 type usage struct {
@@ -98,11 +100,12 @@ var defaultPreset = encodingPresets{
 	aqStrength: 15,
 	outputRes:  "1920x1080",
 	vppPresets: vppPresets{
-		vppKnnParam:       "radius=3,strength=0.08,lerp=0.2,th_lerp=0.8",
-		vppPmdParam:       "apply_count=2,strength=100,threshold=100",
-		vppUnSharpParam:   "radius=3,weight=0.5,threshold=10.0",
-		vppEdgeLevelParam: "strength=10.0,threshold=20.0,black=0,white=0",
-		vppSmoothParam:    "quality=6,qp=12,prec=fp32",
+		vppKnnParam:        "radius=3,strength=0.08,lerp=0.2,th_lerp=0.8",
+		vppPmdParam:        "apply_count=2,strength=100,threshold=100",
+		vppUnSharpParam:    "radius=3,weight=0.5,threshold=10.0",
+		vppEdgeLevelParam:  "strength=10.0,threshold=20.0,black=0,white=0",
+		vppSmoothParam:     "quality=6,qp=12,prec=fp32",
+		vppColorSpaceParam: "hdr2sdr=hable,source_peak=1000.0,ldr_nits=100.0",
 	},
 }
 
@@ -162,15 +165,22 @@ func onRunClick() {
 		)
 		args := strings.Split(command, " ")
 
+		if defaultPreset.vppPresets.vppColorSpace {
+			args = append(args, "--vpp-colorspace", defaultPreset.vppPresets.vppColorSpaceParam)
+		}
+
 		if defaultPreset.vppPresets.vppKnn {
 			args = append(args, "--vpp-knn", defaultPreset.vppPresets.vppKnnParam)
 		}
+
 		if defaultPreset.vppPresets.vppPmd {
 			args = append(args, "--vpp-pmd", defaultPreset.vppPresets.vppPmdParam)
 		}
+
 		if defaultPreset.vppPresets.vppUnSharp {
 			args = append(args, "--vpp-unsharp", defaultPreset.vppPresets.vppUnSharpParam)
 		}
+
 		if defaultPreset.vppPresets.vppEdgeLevel {
 			args = append(args, "--vpp-edgelevel", defaultPreset.vppPresets.vppEdgeLevelParam)
 		}
@@ -314,13 +324,16 @@ func loop() {
 									g.InputText("##vppKnnParam", 180, &defaultPreset.vppPresets.vppKnnParam),
 								),
 								g.Line(
-
 									g.Checkbox("PMD      ##vppPmd", &defaultPreset.vppPresets.vppPmd, nil),
 									g.InputText("##vppPmdParam", 180, &defaultPreset.vppPresets.vppPmdParam),
 								),
 								g.Line(
 									g.Checkbox("UnSharp  ##vppUnSharp", &defaultPreset.vppPresets.vppUnSharp, nil),
 									g.InputText("##vppUnSharpParam", 180, &defaultPreset.vppPresets.vppUnSharpParam),
+								),
+								g.Line(
+									g.Checkbox("HDR2SDR  ##vppHDR2SDR", &defaultPreset.vppPresets.vppColorSpace, nil),
+									g.InputText("##vppHDR2SDRParam", 180, &defaultPreset.vppPresets.vppColorSpaceParam),
 								),
 								g.Line(
 									g.Checkbox("EdgeLevel##vppEdgeLevel", &defaultPreset.vppPresets.vppEdgeLevel, nil),

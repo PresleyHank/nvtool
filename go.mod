@@ -8,5 +8,5 @@ require (
 	github.com/go-gl/glfw/v3.3/glfw v0.0.0-20200707082815-5321531c36a2
 	github.com/gobuffalo/packr/v2 v2.8.0
 	github.com/sqweek/dialog v0.0.0-20200911184034-8a3d98e8211d
-	golang.org/x/sys v0.0.0-20201022201747-fb209a7c41cd
+	golang.org/x/sys v0.0.0-20201026133411-418715ba6fdd
 )

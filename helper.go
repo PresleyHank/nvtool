@@ -24,6 +24,16 @@ var (
 	box = packr.New("assets", "./assets")
 )
 
+func nTrue(b ...bool) int {
+	n := 0
+	for _, v := range b {
+		if v {
+			n++
+		}
+	}
+	return n
+}
+
 func byteCountDecimal(b int64) string {
 	const unit = 1000
 	if b < unit {

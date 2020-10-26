@@ -11,6 +11,13 @@ type EffectMethod struct {
 	Pop  func()
 }
 
+type Palette struct {
+	Tint   color.RGBA
+	Hover  color.RGBA
+	Active color.RGBA
+	BG     color.RGBA
+}
+
 func RGBAToVec4(rgba color.RGBA) imgui.Vec4 {
 	return imgui.Vec4{
 		X: float32(rgba.R) / 255,
