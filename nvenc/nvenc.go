@@ -28,6 +28,82 @@ type Progress struct {
 	EstOutSize      string
 }
 
+type VPPKNNParam struct {
+	Radius   int32
+	Strength float32
+	Lerp     float32
+	ThLerp   float32
+}
+
+type VPPPMDParam struct {
+	ApplyCount int32
+	Strength   int32
+	Threshold  int32
+}
+
+type VPPUnSharpParam struct {
+	Radius    int32
+	Weight    float32
+	Threshold float32
+}
+
+type VPPEdgeLevelParam struct {
+	Strength  float32
+	Threshold float32
+	Black     float32
+	White     float32
+}
+
+type VPPSmoothParam struct {
+	Quality int32
+	QP      int32
+	Prec    string
+}
+
+type VPPColorSpaceParam struct {
+	HDR2SDR    string
+	SourcePeak float32
+	LdrNits    float32
+}
+
+var DefaultVPPKNNParam = VPPKNNParam{
+	Radius:   3,
+	Strength: 0.08,
+	Lerp:     0.2,
+	ThLerp:   0.8,
+}
+
+var DefaultVPPPMDParam = VPPPMDParam{
+	ApplyCount: 2,
+	Strength:   100,
+	Threshold:  100,
+}
+
+var DefaultVPPUnSharpParam = VPPUnSharpParam{
+	Radius:    3,
+	Weight:    0.5,
+	Threshold: 10.0,
+}
+
+var DefaultVPPEdgeLevelParam = VPPEdgeLevelParam{
+	Strength:  10.0,
+	Threshold: 20.0,
+	Black:     0,
+	White:     0,
+}
+
+var DefaultVPPSmoothParam = VPPSmoothParam{
+	Quality: 6,
+	QP:      12,
+	Prec:    "fp32",
+}
+
+var DefaultVPPColorSpaceParam = VPPColorSpaceParam{
+	HDR2SDR:    "hdr2sdr=hable",
+	SourcePeak: 1000.0,
+	LdrNits:    100.0,
+}
+
 var (
 	binary string
 

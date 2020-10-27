@@ -32,22 +32,25 @@ type encodingPresets struct {
 	aqStrength int32
 	resize     bool
 	outputRes  string
-	vppPresets vppPresets
+	vppSwitches
+	vppParams
 }
 
-type vppPresets struct {
-	vppKnn             bool
-	vppKnnParam        string
-	vppPmd             bool
-	vppPmdParam        string
-	vppUnSharp         bool
-	vppUnSharpParam    string
-	vppEdgeLevel       bool
-	vppEdgeLevelParam  string
-	vppSmooth          bool
-	vppSmoothParam     string
-	vppColorSpace      bool
-	vppColorSpaceParam string
+type vppSwitches struct {
+	vppKNN        bool
+	vppPMD        bool
+	vppUnSharp    bool
+	vppEdgeLevel  bool
+	vppSmooth     bool
+	vppColorSpace bool
+}
+
+type vppParams struct {
+	nvenc.VPPKNNParam
+	nvenc.VPPPMDParam
+	nvenc.VPPUnSharpParam
+	nvenc.VPPEdgeLevelParam
+	nvenc.VPPColorSpaceParam
 }
 
 type usage struct {
@@ -92,21 +95,25 @@ var (
 	mediaInfoLog string = "Drag and drop media files here"
 )
 
+var defaultVppSwitches = vppSwitches{}
+
+var defaultVppParams = vppParams{
+	nvenc.DefaultVPPKNNParam,
+	nvenc.DefaultVPPPMDParam,
+	nvenc.DefaultVPPUnSharpParam,
+	nvenc.DefaultVPPEdgeLevelParam,
+	nvenc.DefaultVPPColorSpaceParam,
+}
+
 var defaultPreset = encodingPresets{
-	preset:     6,
-	quality:    24,
-	bitrate:    19850,
-	maxrate:    59850,
-	aqStrength: 15,
-	outputRes:  "1920x1080",
-	vppPresets: vppPresets{
-		vppKnnParam:        "radius=3,strength=0.08,lerp=0.2,th_lerp=0.8",
-		vppPmdParam:        "apply_count=2,strength=100,threshold=100",
-		vppUnSharpParam:    "radius=3,weight=0.5,threshold=10.0",
-		vppEdgeLevelParam:  "strength=10.0,threshold=20.0,black=0,white=0",
-		vppSmoothParam:     "quality=6,qp=12,prec=fp32",
-		vppColorSpaceParam: "hdr2sdr=hable,source_peak=1000.0,ldr_nits=100.0",
-	},
+	preset:      6,
+	quality:     24,
+	bitrate:     19850,
+	maxrate:     59850,
+	aqStrength:  15,
+	outputRes:   "1920x1080",
+	vppSwitches: defaultVppSwitches,
+	vppParams:   defaultVppParams,
 }
 
 var utilization = usage{
@@ -165,24 +172,28 @@ func onRunClick() {
 		)
 		args := strings.Split(command, " ")
 
-		if defaultPreset.vppPresets.vppColorSpace {
-			args = append(args, "--vpp-colorspace", defaultPreset.vppPresets.vppColorSpaceParam)
+		// if defaultPreset.vppPresets.vppColorSpace {
+		// 	args = append(args, "--vpp-colorspace", defaultPreset.vppPresets.vppColorSpaceParam)
+		// }
+
+		if defaultPreset.vppSwitches.vppKNN {
+			param := defaultPreset.VPPKNNParam
+			args = append(args, "--vpp-knn", fmt.Sprintf("radius=%v,strength=%.2f,lerp=%.1f,th_lerp=%.1f", param.Radius, param.Strength, param.Lerp, param.ThLerp))
 		}
 
-		if defaultPreset.vppPresets.vppKnn {
-			args = append(args, "--vpp-knn", defaultPreset.vppPresets.vppKnnParam)
+		if defaultPreset.vppSwitches.vppPMD {
+			param := defaultPreset.VPPPMDParam
+			args = append(args, "--vpp-pmd", fmt.Sprintf("apply_count=%v,strength=%v,threshold=%v", param.ApplyCount, param.Strength, param.Threshold))
 		}
 
-		if defaultPreset.vppPresets.vppPmd {
-			args = append(args, "--vpp-pmd", defaultPreset.vppPresets.vppPmdParam)
+		if defaultPreset.vppSwitches.vppUnSharp {
+			param := defaultPreset.VPPUnSharpParam
+			args = append(args, "--vpp-unsharp", fmt.Sprintf("radius=%v,weight=%.1f,threshold=%.1f", param.Radius, param.Weight, param.Threshold))
 		}
 
-		if defaultPreset.vppPresets.vppUnSharp {
-			args = append(args, "--vpp-unsharp", defaultPreset.vppPresets.vppUnSharpParam)
-		}
-
-		if defaultPreset.vppPresets.vppEdgeLevel {
-			args = append(args, "--vpp-edgelevel", defaultPreset.vppPresets.vppEdgeLevelParam)
+		if defaultPreset.vppSwitches.vppEdgeLevel {
+			param := defaultPreset.VPPEdgeLevelParam
+			args = append(args, "--vpp-edgelevel", fmt.Sprint("strength=%v,threshold=%.1f,black=%v,white=%v", param.Strength, param.Threshold, param.Black, param.White))
 		}
 
 		if defaultPreset.resize {
@@ -312,35 +323,6 @@ func loop() {
 								defaultPreset.aqStrength = limitValue(defaultPreset.aqStrength, 0, 15)
 							}),
 
-							g.Label("VPP"),
-							c.ImageButton(texDropDown, 24, 24, func() {
-								imgui.SetNextWindowPos(imgui.Vec2{X: 412 * imgui.DPIScale, Y: 160 * imgui.DPIScale})
-								g.OpenPopup("VPP")
-							}),
-
-							g.Popup("VPP", g.WindowFlagsNoMove, g.Layout{
-								g.Line(
-									g.Checkbox("KNN      ##vppKnn", &defaultPreset.vppPresets.vppKnn, nil),
-									g.InputText("##vppKnnParam", 180, &defaultPreset.vppPresets.vppKnnParam),
-								),
-								g.Line(
-									g.Checkbox("PMD      ##vppPmd", &defaultPreset.vppPresets.vppPmd, nil),
-									g.InputText("##vppPmdParam", 180, &defaultPreset.vppPresets.vppPmdParam),
-								),
-								g.Line(
-									g.Checkbox("UnSharp  ##vppUnSharp", &defaultPreset.vppPresets.vppUnSharp, nil),
-									g.InputText("##vppUnSharpParam", 180, &defaultPreset.vppPresets.vppUnSharpParam),
-								),
-								g.Line(
-									g.Checkbox("HDR2SDR  ##vppHDR2SDR", &defaultPreset.vppPresets.vppColorSpace, nil),
-									g.InputText("##vppHDR2SDRParam", 180, &defaultPreset.vppPresets.vppColorSpaceParam),
-								),
-								g.Line(
-									g.Checkbox("EdgeLevel##vppEdgeLevel", &defaultPreset.vppPresets.vppEdgeLevel, nil),
-									g.InputText("##vppEdgeLevelParam", 180, &defaultPreset.vppPresets.vppEdgeLevelParam),
-								),
-							}),
-
 							g.Checkbox("Resize", &defaultPreset.resize, nil),
 							g.InputTextV("##outputRes", 80, &defaultPreset.outputRes, g.InputTextFlagsCallbackAlways, nil, func() {
 								defaultPreset.outputRes = limitResValue(defaultPreset.outputRes)
@@ -379,9 +361,66 @@ func loop() {
 					),
 				}),
 
+				g.TabItem("Filters", g.Layout{
+					g.Dummy(contentWidth, 5),
+					g.Child("FiltersContent", false, contentWidth, 0, 0, g.Layout{
+
+						g.Label("NoiseReduce"),
+						g.Child("NoiseReduce", false, contentWidth, 150, 0, g.Layout{
+							g.Custom(func() {
+								imgui.PushStyleColor(imgui.StyleColorChildBg, imgui.Vec4{X: 0.12, Y: 0.12, Z: 0.12, W: 0.99})
+							}),
+							g.Line(
+								g.Child("KNN", true, (contentWidth-8)*0.5, 0, 0, g.Layout{
+									g.Checkbox("KNN", &defaultPreset.vppSwitches.vppKNN, nil),
+									g.SliderInt("radius", &defaultPreset.VPPKNNParam.Radius, 0, 5, "%.0f"),
+									g.SliderFloat("strength", &defaultPreset.VPPKNNParam.Strength, 0, 1, "%.2f"),
+									g.SliderFloat("lerp", &defaultPreset.VPPKNNParam.Lerp, 0, 1, "%.2f"),
+									g.SliderFloat("th_lerp", &defaultPreset.VPPKNNParam.ThLerp, 0, 1, "%.2f"),
+								}),
+								g.Child("PMD", true, (contentWidth-8)*0.5, 0, 0, g.Layout{
+									g.Checkbox("PMD", &defaultPreset.vppSwitches.vppPMD, nil),
+									g.SliderInt("applyCount", &defaultPreset.VPPPMDParam.ApplyCount, 1, 100, "%.0f"),
+									g.SliderInt("strength", &defaultPreset.VPPPMDParam.Strength, 0, 100, "%.0f"),
+									g.SliderInt("threshold", &defaultPreset.VPPPMDParam.Threshold, 0, 255, "%.0f"),
+								}),
+							),
+							g.Custom(func() {
+								imgui.PopStyleColorV(1)
+							}),
+						}),
+
+						g.Dummy(contentWidth, 5),
+						g.Label("Sharpen"),
+						g.Child("Sharpen", false, contentWidth, 150, 0, g.Layout{
+							g.Custom(func() {
+								imgui.PushStyleColor(imgui.StyleColorChildBg, imgui.Vec4{X: 0.12, Y: 0.12, Z: 0.12, W: 0.99})
+							}),
+							g.Line(
+								g.Child("UnSharp", true, (contentWidth-8)*0.5, 0, 0, g.Layout{
+									g.Checkbox("UnSharp", &defaultPreset.vppSwitches.vppUnSharp, nil),
+									g.SliderInt("radius", &defaultPreset.VPPUnSharpParam.Radius, 1, 9, "%.0f"),
+									g.SliderFloat("weight", &defaultPreset.VPPUnSharpParam.Weight, 0, 10, "%.2f"),
+									g.SliderFloat("threshold", &defaultPreset.VPPUnSharpParam.Threshold, 0, 255, "%.0f"),
+								}),
+								g.Child("EdgeLevel", true, (contentWidth-8)*0.5, 0, 0, g.Layout{
+									g.Checkbox("EdgeLevel", &defaultPreset.vppSwitches.vppEdgeLevel, nil),
+									g.SliderFloat("strength", &defaultPreset.VPPEdgeLevelParam.Strength, -31, 31, "%.0f"),
+									g.SliderFloat("threshold", &defaultPreset.VPPEdgeLevelParam.Threshold, 0, 255, "%.2f"),
+									g.SliderFloat("black", &defaultPreset.VPPEdgeLevelParam.Black, 0, 31, "%.0f"),
+									g.SliderFloat("white", &defaultPreset.VPPEdgeLevelParam.White, 0, 31, "%.2f"),
+								}),
+							),
+							g.Custom(func() {
+								imgui.PopStyleColorV(1)
+							}),
+						}),
+					}),
+				}),
+
 				g.TabItem("MediaInfo", g.Layout{
 					g.Spacing(),
-					g.InputTextMultiline("##mediaInfoLog", &mediaInfoLog, contentWidth, 360, g.InputTextFlagsReadOnly, nil, nil),
+					g.InputTextMultiline("##mediaInfoLog", &mediaInfoLog, contentWidth, 362.5, g.InputTextFlagsReadOnly, nil, nil),
 				}),
 			}),
 		})
@@ -398,7 +437,7 @@ func applyWindowProperties(window *glfw.Window) {
 	win.SetWindowCompositionAttribute(hwnd, 3, 0, 0, 0)
 	glfwWindow.SetFocusCallback(func(w *glfw.Window, focused bool) {
 		if focused {
-			glfwWindow.SetOpacity(0.98)
+			glfwWindow.SetOpacity(0.99)
 			return
 		}
 		glfwWindow.SetOpacity(1)
