@@ -24,6 +24,7 @@ import (
 )
 
 type encodingPresets struct {
+	hevc       bool
 	preset     int32
 	quality    int32
 	bitrate    int32
@@ -106,6 +107,7 @@ var defaultVppParams = vppParams{
 }
 
 var defaultPreset = encodingPresets{
+	hevc:        false,
 	preset:      6,
 	quality:     24,
 	bitrate:     19850,
@@ -163,7 +165,12 @@ func onRunClick() {
 	go func() {
 		defer g.Update()
 		resetState()
-		command := fmt.Sprintf("--profile high --audio-codec aac:aac_coder=twoloop --audio-bitrate 320 --preset %s --vbr %v --vbr-quality %v --qp-init 0 --max-bitrate 60000 --lookahead 16 --strict-gop --aq-%s --aq-strength %v --vpp-resize lanczos2 --vpp-perf-monitor --ssim",
+		codec := "h264"
+		if defaultPreset.hevc {
+			codec = "hevc"
+		}
+		command := fmt.Sprintf("--codec %s --profile high --audio-codec aac:aac_coder=twoloop --audio-bitrate 320 --preset %s --vbr %v --vbr-quality %v --qp-init 0 --max-bitrate 60000 --lookahead 16 --strict-gop --aq-%s --aq-strength %v --vpp-resize lanczos2 --vpp-perf-monitor --ssim",
+			codec,
 			nvenc.PresetOptions[defaultPreset.preset],
 			defaultPreset.bitrate,
 			defaultPreset.quality,
@@ -314,7 +321,7 @@ func loop() {
 							g.InputIntV("##quality", 24, &defaultPreset.quality, 0, nil),
 
 							g.Label("Bitrate"),
-							g.InputIntV("##bitrate", 65, &defaultPreset.bitrate, 0, nil),
+							g.InputIntV("##bitrate", 60, &defaultPreset.bitrate, 0, nil),
 
 							g.Label("AQ"),
 							g.Combo("##aq", nvenc.AQOptions[defaultPreset.aq], nvenc.AQOptions, &defaultPreset.aq, 92, 0, nil),
@@ -322,6 +329,8 @@ func loop() {
 							g.InputIntV("##strength", 24, &defaultPreset.aqStrength, 0, func() {
 								defaultPreset.aqStrength = limitValue(defaultPreset.aqStrength, 0, 15)
 							}),
+
+							g.Checkbox("HEVC", &defaultPreset.hevc, nil),
 
 							g.Checkbox("Resize", &defaultPreset.resize, nil),
 							g.InputTextV("##outputRes", 80, &defaultPreset.outputRes, g.InputTextFlagsCallbackAlways, nil, func() {
