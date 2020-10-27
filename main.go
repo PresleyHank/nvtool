@@ -361,7 +361,7 @@ func loop() {
 					),
 				}),
 
-				g.TabItem("Filters", g.Layout{
+				g.TabItem("Filter", g.Layout{
 					g.Dummy(contentWidth, 5),
 					g.Child("FiltersContent", false, contentWidth, 0, 0, g.Layout{
 
