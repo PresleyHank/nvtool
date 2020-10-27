@@ -163,7 +163,7 @@ func onRunClick() {
 	go func() {
 		defer g.Update()
 		resetState()
-		command := fmt.Sprintf("--profile high --audio-codec aac:aac_coder=twoloop --audio-bitrate 320 --preset %s --vbr %v --vbr-quality %v --max-bitrate 60000 --lookahead 16 --strict-gop --aq-%s --aq-strength %v --vpp-resize lanczos2 --vpp-perf-monitor --ssim",
+		command := fmt.Sprintf("--profile high --audio-codec aac:aac_coder=twoloop --audio-bitrate 320 --preset %s --vbr %v --vbr-quality %v --qp-init 0 --max-bitrate 60000 --lookahead 16 --strict-gop --aq-%s --aq-strength %v --vpp-resize lanczos2 --vpp-perf-monitor --ssim",
 			nvenc.PresetOptions[defaultPreset.preset],
 			defaultPreset.bitrate,
 			defaultPreset.quality,
@@ -193,7 +193,7 @@ func onRunClick() {
 
 		if defaultPreset.vppSwitches.vppEdgeLevel {
 			param := defaultPreset.VPPEdgeLevelParam
-			args = append(args, "--vpp-edgelevel", fmt.Sprint("strength=%v,threshold=%.1f,black=%v,white=%v", param.Strength, param.Threshold, param.Black, param.White))
+			args = append(args, "--vpp-edgelevel", fmt.Sprintf("strength=%v,threshold=%.1f,black=%v,white=%v", param.Strength, param.Threshold, param.Black, param.White))
 		}
 
 		if defaultPreset.resize {
