@@ -256,7 +256,7 @@ func shouldDisableInput(b bool) (flag g.WindowFlags) {
 	if b {
 		return g.WindowFlagsNoInputs
 	}
-	return
+	return g.WindowFlagsNone
 }
 
 func shouldWindowMove() {
@@ -277,6 +277,7 @@ func shouldWindowMove() {
 func loop() {
 	shouldWindowMove()
 	isEncoding := isEncoding()
+	inputDisableFlag := shouldDisableInput(isEncoding)
 	useLayoutFlat := theme.UseLayoutFlat()
 	useStyleDarkButton := theme.UseStyleDarkButton()
 	defer useLayoutFlat.Pop()
@@ -299,7 +300,7 @@ func loop() {
 			),
 			g.TabBar("maintab", g.Layout{
 				g.TabItem("Encode", g.Layout{
-					g.Child("control", false, contentWidth, 92, shouldDisableInput(isEncoding), g.Layout{
+					g.Child("control", false, contentWidth, 92, inputDisableFlag, g.Layout{
 						g.Spacing(),
 						g.Line(
 							g.InputTextV("##video", -((windowPadding+buttonWidth)/imgui.DPIScale), &inputPath, 0, nil, nil),
@@ -372,7 +373,7 @@ func loop() {
 
 				g.TabItem("Filter", g.Layout{
 					g.Dummy(contentWidth, 5),
-					g.Child("FiltersContent", false, contentWidth, 0, 0, g.Layout{
+					g.Child("FilterContent", false, contentWidth, 0, 0, g.Layout{
 
 						g.Label("NoiseReduce"),
 						g.Child("NoiseReduce", false, contentWidth, 150, 0, g.Layout{
@@ -380,14 +381,14 @@ func loop() {
 								imgui.PushStyleColor(imgui.StyleColorChildBg, imgui.Vec4{X: 0.12, Y: 0.12, Z: 0.12, W: 0.99})
 							}),
 							g.Line(
-								g.Child("KNN", true, (contentWidth-8)*0.5, 0, 0, g.Layout{
+								g.Child("KNN", true, (contentWidth-8)*0.5, 0, inputDisableFlag, g.Layout{
 									g.Checkbox("KNN", &defaultPreset.vppSwitches.vppKNN, nil),
 									g.SliderInt("radius", &defaultPreset.VPPKNNParam.Radius, 0, 5, "%.0f"),
 									g.SliderFloat("strength", &defaultPreset.VPPKNNParam.Strength, 0, 1, "%.2f"),
 									g.SliderFloat("lerp", &defaultPreset.VPPKNNParam.Lerp, 0, 1, "%.2f"),
 									g.SliderFloat("th_lerp", &defaultPreset.VPPKNNParam.ThLerp, 0, 1, "%.2f"),
 								}),
-								g.Child("PMD", true, (contentWidth-8)*0.5, 0, 0, g.Layout{
+								g.Child("PMD", true, (contentWidth-8)*0.5, 0, inputDisableFlag, g.Layout{
 									g.Checkbox("PMD", &defaultPreset.vppSwitches.vppPMD, nil),
 									g.SliderInt("applyCount", &defaultPreset.VPPPMDParam.ApplyCount, 1, 100, "%.0f"),
 									g.SliderInt("strength", &defaultPreset.VPPPMDParam.Strength, 0, 100, "%.0f"),
@@ -406,13 +407,13 @@ func loop() {
 								imgui.PushStyleColor(imgui.StyleColorChildBg, imgui.Vec4{X: 0.12, Y: 0.12, Z: 0.12, W: 0.99})
 							}),
 							g.Line(
-								g.Child("UnSharp", true, (contentWidth-8)*0.5, 0, 0, g.Layout{
+								g.Child("UnSharp", true, (contentWidth-8)*0.5, 0, inputDisableFlag, g.Layout{
 									g.Checkbox("UnSharp", &defaultPreset.vppSwitches.vppUnSharp, nil),
 									g.SliderInt("radius", &defaultPreset.VPPUnSharpParam.Radius, 1, 9, "%.0f"),
 									g.SliderFloat("weight", &defaultPreset.VPPUnSharpParam.Weight, 0, 10, "%.2f"),
 									g.SliderFloat("threshold", &defaultPreset.VPPUnSharpParam.Threshold, 0, 255, "%.0f"),
 								}),
-								g.Child("EdgeLevel", true, (contentWidth-8)*0.5, 0, 0, g.Layout{
+								g.Child("EdgeLevel", true, (contentWidth-8)*0.5, 0, inputDisableFlag, g.Layout{
 									g.Checkbox("EdgeLevel", &defaultPreset.vppSwitches.vppEdgeLevel, nil),
 									g.SliderFloat("strength", &defaultPreset.VPPEdgeLevelParam.Strength, -31, 31, "%.0f"),
 									g.SliderFloat("threshold", &defaultPreset.VPPEdgeLevelParam.Threshold, 0, 255, "%.2f"),
