@@ -382,14 +382,18 @@ func loop() {
 							}),
 							g.Line(
 								g.Child("KNN", true, (contentWidth-8)*0.5, 0, inputDisableFlag, g.Layout{
-									g.Checkbox("KNN", &defaultPreset.vppSwitches.vppKNN, nil),
+									g.Line(g.Checkbox("KNN", &defaultPreset.vppSwitches.vppKNN, nil), g.Dummy(121.5, 0), g.Button("Reset##ResetKNN", func() {
+										defaultPreset.VPPKNNParam = defaultVppParams.VPPKNNParam
+									})),
 									g.SliderInt("radius", &defaultPreset.VPPKNNParam.Radius, 0, 5, "%.0f"),
 									g.SliderFloat("strength", &defaultPreset.VPPKNNParam.Strength, 0, 1, "%.2f"),
 									g.SliderFloat("lerp", &defaultPreset.VPPKNNParam.Lerp, 0, 1, "%.2f"),
 									g.SliderFloat("th_lerp", &defaultPreset.VPPKNNParam.ThLerp, 0, 1, "%.2f"),
 								}),
 								g.Child("PMD", true, (contentWidth-8)*0.5, 0, inputDisableFlag, g.Layout{
-									g.Checkbox("PMD", &defaultPreset.vppSwitches.vppPMD, nil),
+									g.Line(g.Checkbox("PMD", &defaultPreset.vppSwitches.vppPMD, nil), g.Dummy(121.5, 0), g.Button("Reset##ResetPMD", func() {
+										defaultPreset.VPPPMDParam = defaultVppParams.VPPPMDParam
+									})),
 									g.SliderInt("applyCount", &defaultPreset.VPPPMDParam.ApplyCount, 1, 100, "%.0f"),
 									g.SliderInt("strength", &defaultPreset.VPPPMDParam.Strength, 0, 100, "%.0f"),
 									g.SliderInt("threshold", &defaultPreset.VPPPMDParam.Threshold, 0, 255, "%.0f"),
@@ -408,16 +412,20 @@ func loop() {
 							}),
 							g.Line(
 								g.Child("UnSharp", true, (contentWidth-8)*0.5, 0, inputDisableFlag, g.Layout{
-									g.Checkbox("UnSharp", &defaultPreset.vppSwitches.vppUnSharp, nil),
+									g.Line(g.Checkbox("UnSharp", &defaultPreset.vppSwitches.vppUnSharp, nil), g.Dummy(90.5, 0), g.Button("Reset##ResetUnSharp", func() {
+										defaultPreset.VPPUnSharpParam = defaultVppParams.VPPUnSharpParam
+									})),
 									g.SliderInt("radius", &defaultPreset.VPPUnSharpParam.Radius, 1, 9, "%.0f"),
 									g.SliderFloat("weight", &defaultPreset.VPPUnSharpParam.Weight, 0, 10, "%.2f"),
 									g.SliderFloat("threshold", &defaultPreset.VPPUnSharpParam.Threshold, 0, 255, "%.0f"),
 								}),
 								g.Child("EdgeLevel", true, (contentWidth-8)*0.5, 0, inputDisableFlag, g.Layout{
-									g.Checkbox("EdgeLevel", &defaultPreset.vppSwitches.vppEdgeLevel, nil),
-									g.SliderFloat("strength", &defaultPreset.VPPEdgeLevelParam.Strength, -31, 31, "%.0f"),
+									g.Line(g.Checkbox("EdgeLevel", &defaultPreset.vppSwitches.vppEdgeLevel, nil), g.Dummy(75.5, 0), g.Button("Reset##ResetEdgeLevel", func() {
+										defaultPreset.VPPEdgeLevelParam = defaultVppParams.VPPEdgeLevelParam
+									})),
+									g.SliderFloat("strength", &defaultPreset.VPPEdgeLevelParam.Strength, -31, 31, "%.2f"),
 									g.SliderFloat("threshold", &defaultPreset.VPPEdgeLevelParam.Threshold, 0, 255, "%.2f"),
-									g.SliderFloat("black", &defaultPreset.VPPEdgeLevelParam.Black, 0, 31, "%.0f"),
+									g.SliderFloat("black", &defaultPreset.VPPEdgeLevelParam.Black, 0, 31, "%.2f"),
 									g.SliderFloat("white", &defaultPreset.VPPEdgeLevelParam.White, 0, 31, "%.2f"),
 								}),
 							),
