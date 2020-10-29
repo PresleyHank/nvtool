@@ -2,6 +2,8 @@ module github.com/Nicify/nvtool
 
 go 1.15
 
+// replace github.com/AllenDang/giu => ../giu
+
 require (
 	github.com/AllenDang/giu v0.0.0-20201013041703-ec1448f8c506
 	github.com/fsnotify/fsnotify v1.4.9
