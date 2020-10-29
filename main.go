@@ -455,7 +455,7 @@ func applyWindowProperties(window *glfw.Window) {
 	win.SetWindowCompositionAttribute(hwnd, 3, 0, 0, 0)
 	glfwWindow.SetFocusCallback(func(w *glfw.Window, focused bool) {
 		if focused {
-			glfwWindow.SetOpacity(0.99)
+			glfwWindow.SetOpacity(0.98)
 			return
 		}
 		glfwWindow.SetOpacity(1)
