@@ -14,14 +14,10 @@ import (
 	"unsafe"
 
 	g "github.com/AllenDang/giu"
+	box "github.com/Nicify/nvtool/box"
 	win "github.com/Nicify/nvtool/win"
 	"github.com/fsnotify/fsnotify"
-	"github.com/gobuffalo/packr/v2"
 	"github.com/sqweek/dialog"
-)
-
-var (
-	box = packr.New("assets", "./assets")
 )
 
 func nTrue(b ...bool) int {

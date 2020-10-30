@@ -1,4 +1,12 @@
-This program uses the font licensed by be5invis.
+package main
+
+var aboutText = `NVTool 2.0
+
+A video encoding tool based on rigaya's NVEncC.
+
+This software is for personal use only and not allowed for any commercial use or modification.
+
+This software uses the font licensed by be5invis.
 
 -----------------------------------------------------------------------------------------
     iosevka
@@ -60,22 +68,22 @@ to any document created using the fonts or their derivatives.
 Definitions
 -------------
 
-`"Font Software"` refers to the set of files released by the Copyright
+"Font Software" refers to the set of files released by the Copyright
 Holder(s) under this license and clearly marked as such. This may
 include source files, build scripts and documentation.
 
-`"Reserved Font Name"` refers to any names specified as such after the
+"Reserved Font Name" refers to any names specified as such after the
 copyright statement(s).
 
-`"Original Version"` refers to the collection of Font Software components as
+"Original Version" refers to the collection of Font Software components as
 distributed by the Copyright Holder(s).
 
-`"Modified Version"` refers to any derivative made by adding to, deleting,
+"Modified Version" refers to any derivative made by adding to, deleting,
 or substituting -- in part or in whole -- any of the components of the
 Original Version, by changing formats or by porting the Font Software to a
 new environment.
 
-`"Author"` refers to any designer, engineer, programmer, technical
+"Author" refers to any designer, engineer, programmer, technical
 writer or other person who contributed to the Font Software.
 
 
@@ -141,7 +149,7 @@ not met.
 
        _____                                  __             _
       |_   _|_ _ _ __ ___  ___ _   _ _ __    / _| ___  _ __ | |_
-        | |/ _` | '_ ` _ \/ __| | | | '_ \  | |_ / _ \| '_ \| __|
+        | |/ _ | '_  _ \/ __| | | | '_ \  | |_ / _ \| '_ \| __|
         | | (_| | | | | | \__ \ |_| | | | | |  _| (_) | | | | |_
         |_|\__,_|_| |_| |_|___/\__, |_| |_| |_|  \___/|_| |_|\__|
                                |___/
@@ -162,7 +170,7 @@ of this font.
 
        _____                                __             _
       |_   _|_ _ _ __ ___  _______ _ __    / _| ___  _ __ | |_
-        | |/ _` | '_ ` _ \|_  / _ \ '_ \  | |_ / _ \| '_ \| __|
+        | |/ _ | '_  _ \|_  / _ \ '_ \  | |_ / _ \| '_ \| __|
         | | (_| | | | | | |/ /  __/ | | | |  _| (_) | | | | |_
         |_|\__,_|_| |_| |_/___\___|_| |_| |_|  \___/|_| |_|\__|
 
@@ -350,3 +358,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
 ------------------------------------------------------------------------------------------
+
+@Eva1ent 2020
+Telegram: https://t.me/Eva1ent
+`

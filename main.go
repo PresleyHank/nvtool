@@ -15,6 +15,7 @@ import (
 
 	g "github.com/AllenDang/giu"
 	"github.com/AllenDang/giu/imgui"
+	box "github.com/Nicify/nvtool/box"
 	c "github.com/Nicify/nvtool/customwidget"
 	mediainfo "github.com/Nicify/nvtool/mediainfo"
 	nvenc "github.com/Nicify/nvtool/nvenc"
@@ -440,12 +441,17 @@ func loop() {
 					g.Spacing(),
 					g.InputTextMultiline("##mediaInfoLog", &mediaInfoLog, contentWidth, 362.5, g.InputTextFlagsReadOnly, nil, nil),
 				}),
+
+				g.TabItem("About", g.Layout{
+					g.Spacing(),
+					g.InputTextMultiline("##aboutText", &aboutText, contentWidth, 362.5, g.InputTextFlagsReadOnly, nil, nil),
+				}),
 			}),
 		})
 }
 
 func applyWindowProperties(window *glfw.Window) {
-	data, err := box.Find("icon_48px.png")
+	data, err := box.Find("/assets/icon_48px.png")
 	if err != nil {
 		log.Fatal("icon_48px.png read failed.")
 	}
@@ -464,19 +470,19 @@ func applyWindowProperties(window *glfw.Window) {
 
 func loadFont() {
 	fonts := g.Context.IO().Fonts()
-	fontIosevkaTTF, _ := box.Find("iosevka.ttf")
+	fontIosevkaTTF, _ := box.Find("/assets/iosevka.ttf")
 	fontIosevka = fonts.AddFontFromMemoryTTFV(fontIosevkaTTF, 18, imgui.DefaultFontConfig, fonts.GlyphRangesChineseFull())
-	fontTamzenbTTF, _ := box.Find("tamzen8x16b.ttf")
+	fontTamzenbTTF, _ := box.Find("/assets/tamzen8x16b.ttf")
 	fontTamzenb = fonts.AddFontFromMemoryTTFV(fontTamzenbTTF, 16, imgui.DefaultFontConfig, fonts.GlyphRangesChineseFull())
-	fontTamzenrTTF, _ := box.Find("tamzen8x16r.ttf")
+	fontTamzenrTTF, _ := box.Find("/assets/tamzen8x16r.ttf")
 	fontTamzenr = fonts.AddFontFromMemoryTTFV(fontTamzenrTTF, 16, imgui.DefaultFontConfig, fonts.GlyphRangesChineseFull())
 }
 
 func loadTexture() {
-	texLogo, _ = imageToTexture("icon.png")
-	texButtonClose, _ = imageToTexture("close_white.png")
-	texDropDown, _ = imageToTexture("dropdown.png")
-	texGraphicsCard, _ = imageToTexture("graphics_card.png")
+	texLogo, _ = imageToTexture("/assets/icon.png")
+	texButtonClose, _ = imageToTexture("/assets/close_white.png")
+	texDropDown, _ = imageToTexture("/assets/dropdown.png")
+	texGraphicsCard, _ = imageToTexture("/assets/graphics_card.png")
 }
 
 func init() {
