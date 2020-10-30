@@ -2,9 +2,9 @@ package main
 
 var aboutText = `NVTool 2.0
 
-A video encoding tool based on rigaya's NVEncC.
+Video encoding tool based on rigaya's NVEncC.
 
-This software is for personal use only and not allowed for any commercial use or modification.
+This software is for personal use only and not allowed for any commercial purposes or modification.
 
 This software uses the font licensed by be5invis.
 

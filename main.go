@@ -15,7 +15,6 @@ import (
 
 	g "github.com/AllenDang/giu"
 	"github.com/AllenDang/giu/imgui"
-	box "github.com/Nicify/nvtool/box"
 	c "github.com/Nicify/nvtool/customwidget"
 	mediainfo "github.com/Nicify/nvtool/mediainfo"
 	nvenc "github.com/Nicify/nvtool/nvenc"
