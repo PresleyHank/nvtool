@@ -11,6 +11,7 @@ import (
 	"path"
 	"runtime"
 	"strings"
+	"time"
 	"unsafe"
 
 	g "github.com/AllenDang/giu"
@@ -109,7 +110,7 @@ var defaultVppParams = vppParams{
 var defaultPreset = encodingPresets{
 	hevc:        false,
 	preset:      6,
-	quality:     16,
+	quality:     12,
 	bitrate:     19850,
 	maxrate:     59850,
 	aqStrength:  5,
@@ -214,7 +215,8 @@ func onRunClick() {
 			utilization.GPU = int32(msg.GPU)
 			utilization.VE = int32(msg.VE)
 			utilization.VD = int32(msg.VD)
-			nvencLog += fmt.Sprintf("%v frames: %.0f fps, %v kb/s, remain %s, est out size %s\n", msg.FramesProcessed, msg.FPS, msg.Bitrate, msg.Remain, msg.EstOutSize)
+			nvencLog += fmt.Sprintf("\n%v frames: %.0f fps, %v kb/s, remain %s, est out size %s", msg.FramesProcessed, msg.FPS, msg.Bitrate, msg.Remain, msg.EstOutSize)
+			nvencLog = strings.Trim(nvencLog, "\n")
 			g.Update()
 		}
 
@@ -341,8 +343,13 @@ func loop() {
 					}),
 
 					g.Spacing(),
-					g.InputTextMultiline("##nvencLog", &nvencLog, contentWidth, 200, g.InputTextFlagsReadOnly, nil, func() {
-						imgui.SetScrollHereY(1.0)
+					g.InputTextMultiline("##nvencLog", &nvencLog, contentWidth, 200, g.InputTextFlagsReadOnly, nil, nil),
+					g.Custom(func() {
+						if isEncoding && time.Now().Second()%2 == 0 {
+							imgui.BeginChild("##nvencLog")
+							imgui.SetScrollHereY(1)
+							imgui.EndChild()
+						}
 					}),
 
 					g.Spacing(),

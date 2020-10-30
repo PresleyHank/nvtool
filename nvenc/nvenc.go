@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"io"
+	"os"
 	"os/exec"
 	"path/filepath"
 	"regexp"
@@ -193,6 +194,10 @@ func RunEncode(inputPath string, outputPath string, args []string) (*exec.Cmd, <
 	cmd.Path = binary
 	cmd.SysProcAttr = &syscall.SysProcAttr{HideWindow: true}
 	stderr, _ := cmd.StderrPipe()
+	stdout, _ := cmd.StdoutPipe()
+	go func() {
+		io.Copy(os.Stdout, stdout)
+	}()
 	err := cmd.Start()
 	if err != nil {
 		fmt.Println(err)
