@@ -12,7 +12,7 @@ Options Reference:
 
 Preset
 
-Encode quality preset. P1～P7 preset is available from API v10.0.
+Encode quality preset.
 
 - P1 (= performance)
 - P2
@@ -71,14 +71,13 @@ Resize 960x0    -> resize to 960x720 (0 will be replaced to 720, same as input)
 Resize 1920x-2  -> resize to 1920x1080 (calculated to keep aspect ratio)
 
 
-Filters Reference:
+Filter Reference:
 
 KNN
 
 Strong noise reduction filter.
 
-**Parameters**
-
+Parameters:
 - radius=<int> (default=3, 1-5)
   radius of filter.
 - strength=<float> (default=0.08, 0.0 - 1.0)
@@ -92,8 +91,7 @@ PMD
 
 Rather weak noise reduction by modified pmd method, aimed to preserve edge while noise reduction.
 
-**Parameters**
-
+Parameters:
 - apply_count=<int> (default=2, 1- )
   Number of times to apply the filter.
 - strength=<float> (default=100, 0-100)
@@ -105,8 +103,7 @@ Unsharp
 
 unsharp filter, for edge and detail enhancement.
 
-**Parameters**
-
+Parameters:
 - radius=<int> (default=3, 1-9)
   radius of edge / detail detection.
 - weight=<float> (default=0.5, 0-10)
@@ -118,8 +115,7 @@ EdgeLevel
 
 Edge level adjustment filter, for edge sharpening.
 
-**Parameters**
-
+Parameters:
 - strength=<float> (default=5.0, -31 - 31)
   Strength of edge sharpening. Larger value will result stronger edge sharpening.
 - threshold=<float> (default=20.0, 0 - 255)
