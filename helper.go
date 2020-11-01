@@ -108,7 +108,7 @@ func limitValue(val int32, min int32, max int32) int32 {
 }
 
 func limitResValue(val string) string {
-	r := regexp.MustCompile(`[^0-9x]`)
+	r := regexp.MustCompile(`[^0-9x-]`)
 	return r.ReplaceAllString(val, "")
 }
 
