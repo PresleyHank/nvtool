@@ -111,7 +111,7 @@ var defaultPreset = encodingPresets{
 	hevc:        false,
 	preset:      6,
 	quality:     12,
-	bitrate:     19850,
+	bitrate:     19000,
 	maxrate:     59850,
 	aqStrength:  5,
 	outputRes:   "1920x1080",
