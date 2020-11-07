@@ -491,6 +491,12 @@ func loadTexture() {
 	texGraphicsCard, _ = imageToTexture("graphics_card.png")
 }
 
+func onSecondInstance(command string) {
+	if command == "focus" {
+		glfwWindow.Restore()
+	}
+}
+
 func init() {
 	runtime.LockOSThread()
 
@@ -502,7 +508,7 @@ func init() {
 
 func main() {
 	defer dispose()
-	unlock := initSingleInstanceLock()
+	unlock := initSingleInstanceLock(onSecondInstance)
 	defer unlock()
 	go loadTexture()
 	gpuName, _ = nvenc.CheckDevice()

@@ -11,10 +11,8 @@ import (
 	"os"
 	"regexp"
 	"syscall"
-	"unsafe"
 
 	g "github.com/AllenDang/giu"
-	win "github.com/Nicify/nvtool/win"
 	"github.com/fsnotify/fsnotify"
 	"github.com/gobuffalo/packr/v2"
 	"github.com/sqweek/dialog"
@@ -126,7 +124,7 @@ func getErrorLevel(processState *os.ProcessState) (int, bool) {
 	}
 }
 
-func initSingleInstanceLock() (unlock func()) {
+func initSingleInstanceLock(onSecondInstance func(command string)) (unlock func()) {
 	f, _ := os.Create(lockFile)
 	watcher, err := fsnotify.NewWatcher()
 	if err != nil {
@@ -142,9 +140,7 @@ func initSingleInstanceLock() (unlock func()) {
 				}
 				if event.Op&fsnotify.Write == fsnotify.Write {
 					command, _ := ioutil.ReadFile(lockFile)
-					if string(command) == "focus" {
-						win.ShowWindow(win.HWND(unsafe.Pointer(glfwWindow.GetWin32Window())), win.SW_RESTORE)
-					}
+					onSecondInstance(string(command))
 				}
 			case err, ok := <-watcher.Errors:
 				if !ok {
