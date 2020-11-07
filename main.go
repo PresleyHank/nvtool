@@ -5,7 +5,6 @@ import (
 	"image"
 	"image/color"
 	"io/ioutil"
-	"log"
 	"os"
 	"os/exec"
 	"path"
@@ -457,10 +456,7 @@ func loop() {
 }
 
 func applyWindowProperties(window *glfw.Window) {
-	data, err := box.Find("icon_48px.png")
-	if err != nil {
-		log.Fatal("icon_48px.png read failed.")
-	}
+	data, _ := box.Find("icon_48px.png")
 	icon48px, _ := loadImageFromMemory(data)
 	glfwWindow.SetIcon([]image.Image{icon48px})
 	hwnd := win.HWND(unsafe.Pointer(glfwWindow.GetWin32Window()))
