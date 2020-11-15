@@ -285,20 +285,22 @@ func loop() {
 	useLayoutFlat.Push()
 	g.SingleWindow("NVTool",
 		g.Layout{
-			g.Line(
-				g.Image(texLogo, 18, 18),
-				g.Label("NVENC Video Toolbox 2.0"),
-				g.Dummy(-83, 0),
-				g.Custom(useStyleDarkButton.Push),
-				g.ButtonV(".", 20, 20, func() {}),
-				g.ButtonV("_", 20, 20, func() {
-					win.ShowWindow(win.HWND(unsafe.Pointer(glfwWindow.GetWin32Window())), win.SW_FORCEMINIMIZE)
-				}),
-				g.ImageButton(texButtonClose, 20, 20, func() {
-					glfwWindow.SetShouldClose(true)
-				}),
-				g.Custom(useStyleDarkButton.Pop),
-			),
+			g.Group(g.Layout{
+				g.Line(
+					g.Image(texLogo, 18, 18),
+					g.Label("NVENC Video Toolbox 2.0"),
+					g.Dummy(-83, 0),
+					g.Custom(useStyleDarkButton.Push),
+					g.ButtonV(".", 20, 20, func() {}),
+					g.ButtonV("_", 20, 20, func() {
+						win.ShowWindow(win.HWND(unsafe.Pointer(glfwWindow.GetWin32Window())), win.SW_FORCEMINIMIZE)
+					}),
+					g.ImageButton(texButtonClose, 20, 20, func() {
+						glfwWindow.SetShouldClose(true)
+					}),
+					g.Custom(useStyleDarkButton.Pop),
+				),
+			}),
 			g.TabBar("maintab", g.Layout{
 				g.TabItem("Encode", g.Layout{
 					g.Child("control", false, contentWidth, 92, inputDisableFlag, g.Layout{
