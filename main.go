@@ -15,11 +15,11 @@ import (
 
 	g "github.com/AllenDang/giu"
 	"github.com/AllenDang/giu/imgui"
-	c "github.com/Nicify/nvtool/customwidget"
+	c "github.com/Nicify/customwidget"
 	mediainfo "github.com/Nicify/nvtool/mediainfo"
 	nvenc "github.com/Nicify/nvtool/nvenc"
-	theme "github.com/Nicify/nvtool/theme"
 	win "github.com/Nicify/nvtool/win"
+	theme "github.com/Nicify/theme"
 	"github.com/go-gl/glfw/v3.3/glfw"
 )
 
@@ -280,7 +280,7 @@ func loop() {
 	isEncoding := isEncoding()
 	inputDisableFlag := shouldDisableInput(isEncoding)
 	useLayoutFlat := theme.UseLayoutFlat()
-	useStyleDarkButton := theme.UseStyleDarkButton()
+	useStyleButtonDark := theme.UseStyleButtonDark()
 	defer useLayoutFlat.Pop()
 	useLayoutFlat.Push()
 	g.SingleWindow("NVTool",
@@ -290,7 +290,7 @@ func loop() {
 					g.Image(texLogo, 18, 18),
 					g.Label("NVENC Video Toolbox 2.0"),
 					g.Dummy(-83, 0),
-					g.Custom(useStyleDarkButton.Push),
+					g.Custom(useStyleButtonDark.Push),
 					g.ButtonV(".", 20, 20, func() {}),
 					g.ButtonV("_", 20, 20, func() {
 						win.ShowWindow(win.HWND(unsafe.Pointer(glfwWindow.GetWin32Window())), win.SW_FORCEMINIMIZE)
@@ -298,7 +298,7 @@ func loop() {
 					g.ImageButton(texButtonClose, 20, 20, func() {
 						glfwWindow.SetShouldClose(true)
 					}),
-					g.Custom(useStyleDarkButton.Pop),
+					g.Custom(useStyleButtonDark.Pop),
 				),
 			}),
 			g.TabBar("maintab", g.Layout{
@@ -528,7 +528,7 @@ func main() {
 		go func() {
 			nvencLog = "First run detected, downloading core in progress..."
 			downloadCore("https://attachments-cdn.shimo.im/2p7AHqTijO9AY8lr.zip?attname=core.zip", "core", &percent)
-			nvencLog = "Download complete and ready to run."
+			nvencLog += "\nDownload complete and ready to run."
 		}()
 	}
 
