@@ -17,9 +17,6 @@ rm rsrc.syso
 
 ![图片](https://images-cdn.shimo.im/dLiWypVO9fbgAXPb__original.png)
 
-
-Video encoding tool based on rigaya's NVEncC.
-
 Check out the link below to see if your graphics card supports NVENC.
 
 https://developer.nvidia.com/video-encode-and-decode-gpu-support-matrix-new
