@@ -140,8 +140,8 @@ func resetState() {
 func onInputClick() {
 	filePath := selectInputPath()
 	if len(filePath) > 1 {
-		percent = 0
-		nvencLog = ""
+		// percent = 0
+		// nvencLog = ""
 		inputPath = filePath
 		fileExt := path.Ext(inputPath)
 		outputPath = strings.Replace(inputPath, fileExt, "_nvenc.mp4", 1)
@@ -508,15 +508,29 @@ func main() {
 	defer dispose()
 	unlock := initSingleInstanceLock(onSecondInstance)
 	defer unlock()
+
 	go loadTexture()
+
 	gpuName, _ = nvenc.CheckDevice()
+
 	mw = g.NewMasterWindow("NVTool", 750, 435, g.MasterWindowFlagsNotResizable|g.MasterWindowFlagsFrameless|g.MasterWindowFlagsTransparent, loadFont)
+	mw.SetBgColor(color.RGBA{0, 0, 0, 0})
+	mw.SetDropCallback(onDrop)
+
 	currentStyle := imgui.CurrentStyle()
 	theme.SetThemeDark(&currentStyle)
+
 	platform := g.Context.GetPlatform().(*imgui.GLFW)
 	glfwWindow = platform.GetWindow()
 	applyWindowProperties(glfwWindow)
-	mw.SetBgColor(color.RGBA{0, 0, 0, 0})
-	mw.SetDropCallback(onDrop)
+
+	if _, err := os.Stat(nvenc.Binary); os.IsNotExist(err) {
+		go func() {
+			nvencLog = "First run detected, downloading core in progress..."
+			downloadCore("https://attachments-cdn.shimo.im/2p7AHqTijO9AY8lr.zip?attname=core.zip", "core", &percent)
+			nvencLog = "Download complete and ready to run."
+		}()
+	}
+
 	mw.Main(loop)
 }

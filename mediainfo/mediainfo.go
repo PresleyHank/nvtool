@@ -22,9 +22,6 @@ func GetMediaInfo(mediaFile string) (string, error) {
 }
 
 func init() {
-	path, err := filepath.Abs("./bin/mediainfo.exe")
-	if err != nil {
-		panic("NVEncC64.exe not found!")
-	}
+	path, _ := filepath.Abs("./core/mediainfo.exe")
 	binary = path
 }

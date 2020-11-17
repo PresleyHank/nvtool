@@ -105,7 +105,7 @@ var DefaultVPPColorSpaceParam = VPPColorSpaceParam{
 }
 
 var (
-	binary string
+	Binary string
 
 	PresetOptions       = []string{"P1", "P2", "P3", "P4", "P5", "P6", "P7"}
 	AQOptions           = []string{"aq-temporal", "aq"}
@@ -175,7 +175,7 @@ func progress(stream io.ReadCloser, out chan Progress) {
 }
 
 func CheckDevice() (name string, err error) {
-	stdout, _, err := execute.ExecSync(".", binary, "--check-device")
+	stdout, _, err := execute.ExecSync(".", Binary, "--check-device")
 	if err != nil {
 		return
 	}
@@ -190,8 +190,8 @@ func RunEncode(inputPath string, outputPath string, args []string) (*exec.Cmd, <
 	args = append([]string{"-i", inputPath}, args...)
 	args = append(args, "-o", outputPath)
 	fmt.Println(args)
-	cmd := exec.Command(binary, args...)
-	cmd.Path = binary
+	cmd := exec.Command(Binary, args...)
+	cmd.Path = Binary
 	cmd.SysProcAttr = &syscall.SysProcAttr{HideWindow: true}
 	stderr, _ := cmd.StderrPipe()
 	stdout, _ := cmd.StdoutPipe()
@@ -216,9 +216,6 @@ func RunEncode(inputPath string, outputPath string, args []string) (*exec.Cmd, <
 }
 
 func init() {
-	path, err := filepath.Abs("./bin/NVEncC64.exe")
-	if err != nil {
-		panic("NVEncC64.exe not found!")
-	}
-	binary = path
+	path, _ := filepath.Abs("./core/NVEncC64.exe")
+	Binary = path
 }
