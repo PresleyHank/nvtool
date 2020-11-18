@@ -127,7 +127,7 @@ Parameters:
 
 License information:
 
-This software is for personal use only and not allowed for any commercial purposes or modification.
+This software is for personal use only and not allowed for any commercial purposes.
 
 This software uses the font licensed by be5invis.
 
