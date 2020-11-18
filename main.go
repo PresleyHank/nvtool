@@ -489,6 +489,21 @@ func loadTexture() {
 	texGraphicsCard, _ = imageToTexture("graphics_card.png")
 }
 
+func checkCore() {
+	if _, err := os.Stat(nvenc.Binary); os.IsNotExist(err) {
+		go func() {
+			defer g.Update()
+			nvencLog = "First run detected, downloading core in progress..."
+			downloadCore("https://attachments-cdn.shimo.im/2p7AHqTijO9AY8lr.zip?attname=core.zip", "core", func(progress float32) {
+				percent = progress
+				g.Update()
+			})
+			percent = 1
+			nvencLog += "\nDownload complete and ready to run."
+		}()
+	}
+}
+
 func onSecondInstance(command string) {
 	if command == "focus" {
 		glfwWindow.Restore()
@@ -523,14 +538,6 @@ func main() {
 	platform := g.Context.GetPlatform().(*imgui.GLFW)
 	glfwWindow = platform.GetWindow()
 	applyWindowProperties(glfwWindow)
-
-	if _, err := os.Stat(nvenc.Binary); os.IsNotExist(err) {
-		go func() {
-			nvencLog = "First run detected, downloading core in progress..."
-			downloadCore("https://attachments-cdn.shimo.im/2p7AHqTijO9AY8lr.zip?attname=core.zip", "core", &percent)
-			nvencLog += "\nDownload complete and ready to run."
-		}()
-	}
-
+	checkCore()
 	mw.Main(loop)
 }

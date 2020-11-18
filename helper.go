@@ -223,7 +223,7 @@ func Unzip(src string, dest string) ([]string, error) {
 	return filenames, nil
 }
 
-func downloadCore(url string, dest string, progress *float32) ([]string, error) {
+func downloadCore(url string, dest string, onProgress func(float32)) ([]string, error) {
 	tmp := path.Join(os.TempDir(), "core.zip")
 	defer os.Remove(tmp)
 	d := &got.Download{
@@ -236,13 +236,11 @@ func downloadCore(url string, dest string, progress *float32) ([]string, error) 
 	}
 
 	go d.RunProgress(func(d *got.Download) {
-		percent = float32(d.Size()) / float32(d.TotalSize())
-		d.Speed()
-		d.AvgSpeed()
+		progress := float32(d.Size()) / float32(d.TotalSize())
+		onProgress(progress)
 	})
 	err := d.Start()
 	d.StopProgress = true
-	percent = 1
 	if err != nil {
 		return nil, err
 	}
