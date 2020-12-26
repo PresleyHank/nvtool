@@ -11,5 +11,5 @@ require (
 	github.com/gobuffalo/packr/v2 v2.8.1
 	github.com/melbahja/got v0.5.0
 	github.com/sqweek/dialog v0.0.0-20200911184034-8a3d98e8211d
-	golang.org/x/sys v0.0.0-20201116194326-cc9327a14d48
+	golang.org/x/sys v0.0.0-20201223074533-0d417f636930
 )

@@ -169,7 +169,7 @@ func onRunClick() {
 		if defaultPreset.hevc {
 			codec = "hevc"
 		}
-		command := fmt.Sprintf("--codec %s --profile high --audio-codec aac:aac_coder=twoloop --audio-bitrate 320 --preset %s --vbr %v --vbr-quality %v --max-bitrate 60000 --lookahead 32 --gop-len 250 --%s --aq-strength %v --bframes 8 --vpp-resize lanczos2 --vpp-perf-monitor --ssim",
+		command := fmt.Sprintf("--codec %s --profile high --audio-copy --preset %s --vbr %v --vbr-quality %v --max-bitrate 60000 --lookahead 32 --gop-len 250 --%s --aq-strength %v --bframes 8 --vpp-resize lanczos2 --vpp-perf-monitor --ssim",
 			codec,
 			nvenc.PresetOptions[defaultPreset.preset],
 			defaultPreset.bitrate,
@@ -288,7 +288,7 @@ func loop() {
 			g.Group(g.Layout{
 				g.Line(
 					g.Image(texLogo, 18, 18),
-					g.Label("NVENC Video Toolbox 2.0"),
+					g.Label("NVENC Video Toolbox 2.1"),
 					g.Dummy(-83, 0),
 					g.Custom(useStyleButtonDark.Push),
 					g.ButtonV(".", 20, 20, func() {}),
@@ -494,7 +494,7 @@ func checkCore() {
 		go func() {
 			defer g.Update()
 			nvencLog = "First run detected, downloading core in progress..."
-			downloadCore("https://attachments-cdn.shimo.im/2p7AHqTijO9AY8lr.zip?attname=core.zip", "core", func(progress float32) {
+			downloadCore("https://uploader.shimo.im/f/fV7F1PbfXxM1zNjA.zip?attname=core.zip", "core", func(progress float32) {
 				percent = progress
 				g.Update()
 			})
