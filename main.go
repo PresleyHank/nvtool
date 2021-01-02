@@ -283,178 +283,177 @@ func loop() {
 	useStyleButtonDark := theme.UseStyleButtonDark()
 	defer useLayoutFlat.Pop()
 	useLayoutFlat.Push()
-	g.SingleWindow("NVTool",
-		g.Layout{
-			g.Group(g.Layout{
+	g.SingleWindow("NVTool").Layout(g.Layout{
+		g.Group().Layout(g.Layout{
+			g.Line(
+				g.Image(texLogo).Size(18, 18),
+				g.Label("NVENC Video Toolbox 2.1"),
+				g.Dummy(-83, 0),
+				g.Custom(useStyleButtonDark.Push),
+				g.Button(".").Size(20, 20),
+				g.Button("_").Size(20, 20).OnClick(func() {
+					win.ShowWindow(win.HWND(unsafe.Pointer(glfwWindow.GetWin32Window())), win.SW_FORCEMINIMIZE)
+				}),
+				g.ImageButton(texButtonClose).Size(20, 20).OnClick(func() {
+					glfwWindow.SetShouldClose(true)
+				}),
+				g.Custom(useStyleButtonDark.Pop),
+			),
+		}),
+		g.TabBar("maintab").Layout(g.Layout{
+			g.TabItem("Encode").Layout(g.Layout{
+				g.Child("control").Border(false).Flags(inputDisableFlag).Size(contentWidth, 92).Layout(g.Layout{
+					g.Spacing(),
+					g.Line(
+						g.InputText("##video", &inputPath).Size(-((windowPadding + buttonWidth) / imgui.DPIScale)).Flags(0),
+						c.WithHiDPIFont(fontIosevka, fontTamzenb, g.Layout{g.Button("Video").Size(buttonWidth, buttonHeight).OnClick(onInputClick)}),
+					),
+
+					g.Spacing(),
+					g.Line(
+						g.InputText("##output", &outputPath).Size(-((windowPadding + buttonWidth) / imgui.DPIScale)).Flags(0),
+						c.WithHiDPIFont(fontIosevka, fontTamzenb, g.Layout{g.Button("Output").Size(buttonWidth, buttonHeight).OnClick(onOutputClick)}),
+					),
+
+					g.Spacing(),
+					g.Line(
+						g.Label("Preset"),
+						g.Combo("##preset", nvenc.PresetOptions[defaultPreset.preset], nvenc.PresetOptions, &defaultPreset.preset).Size(50),
+
+						g.Label("Quality"),
+						g.InputIntV("##quality", &defaultPreset.quality).Size(24),
+
+						g.Label("Bitrate"),
+						g.InputIntV("##bitrate", &defaultPreset.bitrate).Size(60),
+
+						g.Label("AQ"),
+						g.Combo("##aq", nvenc.AQOptionsForPreview[defaultPreset.aq], nvenc.AQOptionsForPreview, &defaultPreset.aq).Size(92),
+						g.Label("-"),
+						g.InputIntV("##strength", &defaultPreset.aqStrength).Size(24).OnChange(func() {
+							defaultPreset.aqStrength = limitValue(defaultPreset.aqStrength, 0, 15)
+						}),
+
+						g.Checkbox("HEVC", &defaultPreset.hevc),
+
+						g.Checkbox("Resize", &defaultPreset.resize),
+						g.InputText("##outputRes", &defaultPreset.outputRes).Size(80).Flags(g.InputTextFlagsCallbackAlways).OnChange(func() {
+							defaultPreset.outputRes = limitResValue(defaultPreset.outputRes)
+						}),
+					),
+				}),
+
+				g.Spacing(),
+				g.InputTextMultiline("##nvencLog", &nvencLog).Size(contentWidth, 200).Flags(g.InputTextFlagsReadOnly),
+				g.Custom(func() {
+					if isEncoding && time.Now().Second()%2 == 0 {
+						imgui.BeginChild("##nvencLog")
+						imgui.SetScrollHereY(1)
+						imgui.EndChild()
+					}
+				}),
+
+				g.Spacing(),
+				g.ProgressBar(percent).Size(contentWidth, 20).Overlay(""),
+
 				g.Line(
-					g.Image(texLogo, 18, 18),
-					g.Label("NVENC Video Toolbox 2.1"),
-					g.Dummy(-83, 0),
-					g.Custom(useStyleButtonDark.Push),
-					g.ButtonV(".", 20, 20, func() {}),
-					g.ButtonV("_", 20, 20, func() {
-						win.ShowWindow(win.HWND(unsafe.Pointer(glfwWindow.GetWin32Window())), win.SW_FORCEMINIMIZE)
-					}),
-					g.ImageButton(texButtonClose, 20, 20, func() {
-						glfwWindow.SetShouldClose(true)
-					}),
-					g.Custom(useStyleButtonDark.Pop),
+					g.Dummy(0, 5),
+				),
+				g.Line(
+					g.Condition(gpuName != "",
+						g.Layout{
+							g.Line(
+								g.Image(texGraphicsCard).Size(18, 18),
+								g.Label(fmt.Sprintf("%s | GPU:%v%% VE:%v%% VD:%v%%", gpuName, utilization.GPU, utilization.VE, utilization.VD))),
+						},
+						g.Layout{
+							g.Line(g.Dummy(18, 18)),
+						},
+					),
+
+					g.Dummy(-(windowPadding+buttonWidth), 24),
+					c.WithHiDPIFont(fontIosevka, fontTamzenb, g.Layout{g.Condition(isEncoding,
+						g.Layout{g.Button("Cancel").Size(buttonWidth, buttonHeight).OnClick(dispose)},
+						g.Layout{g.Button("Run").Size(buttonWidth, buttonHeight).OnClick(onRunClick)},
+					)}),
 				),
 			}),
-			g.TabBar("maintab", g.Layout{
-				g.TabItem("Encode", g.Layout{
-					g.Child("control", false, contentWidth, 92, inputDisableFlag, g.Layout{
-						g.Spacing(),
+
+			g.TabItem("Filter").Layout(g.Layout{
+				g.Dummy(contentWidth, 5),
+				g.Child("FilterContent").Border(false).Size(contentWidth, 0).Flags(0).Layout(g.Layout{
+
+					g.Label("NoiseReduce"),
+					g.Child("NoiseReduce").Border(false).Size(contentWidth, 150).Flags(0).Layout(g.Layout{
+						g.Custom(func() {
+							imgui.PushStyleColor(imgui.StyleColorChildBg, imgui.Vec4{X: 0.12, Y: 0.12, Z: 0.12, W: 0.99})
+						}),
 						g.Line(
-							g.InputTextV("##video", -((windowPadding+buttonWidth)/imgui.DPIScale), &inputPath, 0, nil, nil),
-							c.WithHiDPIFont(fontIosevka, fontTamzenb, g.Layout{g.ButtonV("Video", buttonWidth, buttonHeight, onInputClick)}),
-						),
-
-						g.Spacing(),
-						g.Line(
-							g.InputTextV("##output", -((windowPadding+buttonWidth)/imgui.DPIScale), &outputPath, 0, nil, nil),
-							c.WithHiDPIFont(fontIosevka, fontTamzenb, g.Layout{g.ButtonV("Output", buttonWidth, buttonHeight, onOutputClick)}),
-						),
-
-						g.Spacing(),
-						g.Line(
-							g.Label("Preset"),
-							g.Combo("##preset", nvenc.PresetOptions[defaultPreset.preset], nvenc.PresetOptions, &defaultPreset.preset, 50, 0, nil),
-
-							g.Label("Quality"),
-							g.InputIntV("##quality", 24, &defaultPreset.quality, 0, nil),
-
-							g.Label("Bitrate"),
-							g.InputIntV("##bitrate", 60, &defaultPreset.bitrate, 0, nil),
-
-							g.Label("AQ"),
-							g.Combo("##aq", nvenc.AQOptionsForPreview[defaultPreset.aq], nvenc.AQOptionsForPreview, &defaultPreset.aq, 92, 0, nil),
-							g.Label("-"),
-							g.InputIntV("##strength", 24, &defaultPreset.aqStrength, 0, func() {
-								defaultPreset.aqStrength = limitValue(defaultPreset.aqStrength, 0, 15)
+							g.Child("KNN").Border(true).Size((contentWidth-8)*0.5, 0).Flags(inputDisableFlag).Layout(g.Layout{
+								g.Line(g.Checkbox("KNN", &defaultPreset.vppSwitches.vppKNN), g.Dummy(-52, 0), g.Button("Reset##ResetKNN").OnClick(func() {
+									defaultPreset.VPPKNNParam = defaultVppParams.VPPKNNParam
+								})),
+								g.SliderInt("radius", &defaultPreset.VPPKNNParam.Radius, 0, 5).Format("%.0f"),
+								g.SliderFloat("strength", &defaultPreset.VPPKNNParam.Strength, 0, 1).Format("%.2f"),
+								g.SliderFloat("lerp", &defaultPreset.VPPKNNParam.Lerp, 0, 1).Format("%.2f"),
+								g.SliderFloat("th_lerp", &defaultPreset.VPPKNNParam.ThLerp, 0, 1).Format("%.2f"),
 							}),
-
-							g.Checkbox("HEVC", &defaultPreset.hevc, nil),
-
-							g.Checkbox("Resize", &defaultPreset.resize, nil),
-							g.InputTextV("##outputRes", 80, &defaultPreset.outputRes, g.InputTextFlagsCallbackAlways, nil, func() {
-								defaultPreset.outputRes = limitResValue(defaultPreset.outputRes)
+							g.Child("PMD").Border(true).Size((contentWidth-8)*0.5, 0).Flags(inputDisableFlag).Layout(g.Layout{
+								g.Line(g.Checkbox("PMD", &defaultPreset.vppSwitches.vppPMD), g.Dummy(-52, 0), g.Button("Reset##ResetPMD").OnClick(func() {
+									defaultPreset.VPPPMDParam = defaultVppParams.VPPPMDParam
+								})),
+								g.SliderInt("applyCount", &defaultPreset.VPPPMDParam.ApplyCount, 1, 100).Format("%.0f"),
+								g.SliderInt("strength", &defaultPreset.VPPPMDParam.Strength, 0, 100).Format("%.0f"),
+								g.SliderInt("threshold", &defaultPreset.VPPPMDParam.Threshold, 0, 255).Format("%.0f"),
 							}),
 						),
+						g.Custom(func() {
+							imgui.PopStyleColorV(1)
+						}),
 					}),
 
-					g.Spacing(),
-					g.InputTextMultiline("##nvencLog", &nvencLog, contentWidth, 200, g.InputTextFlagsReadOnly, nil, nil),
-					g.Custom(func() {
-						if isEncoding && time.Now().Second()%2 == 0 {
-							imgui.BeginChild("##nvencLog")
-							imgui.SetScrollHereY(1)
-							imgui.EndChild()
-						}
-					}),
-
-					g.Spacing(),
-					g.ProgressBar(percent, contentWidth, 20, ""),
-
-					g.Line(
-						g.Dummy(0, 5),
-					),
-					g.Line(
-						g.Condition(gpuName != "",
-							g.Layout{
-								g.Line(
-									g.Image(texGraphicsCard, 18, 18),
-									g.Label(fmt.Sprintf("%s | GPU:%v%% VE:%v%% VD:%v%%", gpuName, utilization.GPU, utilization.VE, utilization.VD))),
-							},
-							g.Layout{
-								g.Line(g.Dummy(18, 18)),
-							},
-						),
-
-						g.Dummy(-(windowPadding+buttonWidth), 24),
-						c.WithHiDPIFont(fontIosevka, fontTamzenb, g.Layout{g.Condition(isEncoding,
-							g.Layout{g.ButtonV("Cancel", buttonWidth, buttonHeight, dispose)},
-							g.Layout{g.ButtonV("Run", buttonWidth, buttonHeight, onRunClick)},
-						)}),
-					),
-				}),
-
-				g.TabItem("Filter", g.Layout{
 					g.Dummy(contentWidth, 5),
-					g.Child("FilterContent", false, contentWidth, 0, 0, g.Layout{
-
-						g.Label("NoiseReduce"),
-						g.Child("NoiseReduce", false, contentWidth, 150, 0, g.Layout{
-							g.Custom(func() {
-								imgui.PushStyleColor(imgui.StyleColorChildBg, imgui.Vec4{X: 0.12, Y: 0.12, Z: 0.12, W: 0.99})
-							}),
-							g.Line(
-								g.Child("KNN", true, (contentWidth-8)*0.5, 0, inputDisableFlag, g.Layout{
-									g.Line(g.Checkbox("KNN", &defaultPreset.vppSwitches.vppKNN, nil), g.Dummy(-52, 0), g.Button("Reset##ResetKNN", func() {
-										defaultPreset.VPPKNNParam = defaultVppParams.VPPKNNParam
-									})),
-									g.SliderInt("radius", &defaultPreset.VPPKNNParam.Radius, 0, 5, "%.0f"),
-									g.SliderFloat("strength", &defaultPreset.VPPKNNParam.Strength, 0, 1, "%.2f"),
-									g.SliderFloat("lerp", &defaultPreset.VPPKNNParam.Lerp, 0, 1, "%.2f"),
-									g.SliderFloat("th_lerp", &defaultPreset.VPPKNNParam.ThLerp, 0, 1, "%.2f"),
-								}),
-								g.Child("PMD", true, (contentWidth-8)*0.5, 0, inputDisableFlag, g.Layout{
-									g.Line(g.Checkbox("PMD", &defaultPreset.vppSwitches.vppPMD, nil), g.Dummy(-52, 0), g.Button("Reset##ResetPMD", func() {
-										defaultPreset.VPPPMDParam = defaultVppParams.VPPPMDParam
-									})),
-									g.SliderInt("applyCount", &defaultPreset.VPPPMDParam.ApplyCount, 1, 100, "%.0f"),
-									g.SliderInt("strength", &defaultPreset.VPPPMDParam.Strength, 0, 100, "%.0f"),
-									g.SliderInt("threshold", &defaultPreset.VPPPMDParam.Threshold, 0, 255, "%.0f"),
-								}),
-							),
-							g.Custom(func() {
-								imgui.PopStyleColorV(1)
-							}),
+					g.Label("Sharpen"),
+					g.Child("Sharpen").Border(false).Size(contentWidth, 150).Layout(g.Layout{
+						g.Custom(func() {
+							imgui.PushStyleColor(imgui.StyleColorChildBg, imgui.Vec4{X: 0.12, Y: 0.12, Z: 0.12, W: 0.99})
 						}),
-
-						g.Dummy(contentWidth, 5),
-						g.Label("Sharpen"),
-						g.Child("Sharpen", false, contentWidth, 150, 0, g.Layout{
-							g.Custom(func() {
-								imgui.PushStyleColor(imgui.StyleColorChildBg, imgui.Vec4{X: 0.12, Y: 0.12, Z: 0.12, W: 0.99})
+						g.Line(
+							g.Child("UnSharp").Border(true).Size((contentWidth-8)*0.5, 0).Flags(inputDisableFlag).Layout(g.Layout{
+								g.Line(g.Checkbox("UnSharp", &defaultPreset.vppSwitches.vppUnSharp), g.Dummy(-52, 0), g.Button("Reset##ResetUnSharp").OnClick(func() {
+									defaultPreset.VPPUnSharpParam = defaultVppParams.VPPUnSharpParam
+								})),
+								g.SliderInt("radius", &defaultPreset.VPPUnSharpParam.Radius, 1, 9).Format("%.0f"),
+								g.SliderFloat("weight", &defaultPreset.VPPUnSharpParam.Weight, 0, 10).Format("%.2f"),
+								g.SliderFloat("threshold", &defaultPreset.VPPUnSharpParam.Threshold, 0, 255).Format("%.0f"),
 							}),
-							g.Line(
-								g.Child("UnSharp", true, (contentWidth-8)*0.5, 0, inputDisableFlag, g.Layout{
-									g.Line(g.Checkbox("UnSharp", &defaultPreset.vppSwitches.vppUnSharp, nil), g.Dummy(-52, 0), g.Button("Reset##ResetUnSharp", func() {
-										defaultPreset.VPPUnSharpParam = defaultVppParams.VPPUnSharpParam
-									})),
-									g.SliderInt("radius", &defaultPreset.VPPUnSharpParam.Radius, 1, 9, "%.0f"),
-									g.SliderFloat("weight", &defaultPreset.VPPUnSharpParam.Weight, 0, 10, "%.2f"),
-									g.SliderFloat("threshold", &defaultPreset.VPPUnSharpParam.Threshold, 0, 255, "%.0f"),
-								}),
-								g.Child("EdgeLevel", true, (contentWidth-8)*0.5, 0, inputDisableFlag, g.Layout{
-									g.Line(g.Checkbox("EdgeLevel", &defaultPreset.vppSwitches.vppEdgeLevel, nil), g.Dummy(-52, 0), g.Button("Reset##ResetEdgeLevel", func() {
-										defaultPreset.VPPEdgeLevelParam = defaultVppParams.VPPEdgeLevelParam
-									})),
-									g.SliderFloat("strength", &defaultPreset.VPPEdgeLevelParam.Strength, -31, 31, "%.2f"),
-									g.SliderFloat("threshold", &defaultPreset.VPPEdgeLevelParam.Threshold, 0, 255, "%.2f"),
-									g.SliderFloat("black", &defaultPreset.VPPEdgeLevelParam.Black, 0, 31, "%.2f"),
-									g.SliderFloat("white", &defaultPreset.VPPEdgeLevelParam.White, 0, 31, "%.2f"),
-								}),
-							),
-							g.Custom(func() {
-								imgui.PopStyleColorV(1)
+							g.Child("EdgeLevel").Border(true).Size((contentWidth-8)*0.5, 0).Flags(inputDisableFlag).Layout(g.Layout{
+								g.Line(g.Checkbox("EdgeLevel", &defaultPreset.vppSwitches.vppEdgeLevel), g.Dummy(-52, 0), g.Button("Reset##ResetEdgeLevel").OnClick(func() {
+									defaultPreset.VPPEdgeLevelParam = defaultVppParams.VPPEdgeLevelParam
+								})),
+								g.SliderFloat("strength", &defaultPreset.VPPEdgeLevelParam.Strength, -31, 31).Format("%.2f"),
+								g.SliderFloat("threshold", &defaultPreset.VPPEdgeLevelParam.Threshold, 0, 255).Format("%.2f"),
+								g.SliderFloat("black", &defaultPreset.VPPEdgeLevelParam.Black, 0, 31).Format("%.2f"),
+								g.SliderFloat("white", &defaultPreset.VPPEdgeLevelParam.White, 0, 31).Format("%.2f"),
 							}),
+						),
+						g.Custom(func() {
+							imgui.PopStyleColorV(1)
 						}),
 					}),
-				}),
-
-				g.TabItem("MediaInfo", g.Layout{
-					g.Spacing(),
-					g.InputTextMultiline("##mediaInfoLog", &mediaInfoLog, contentWidth, 362.5, g.InputTextFlagsReadOnly, nil, nil),
-				}),
-
-				g.TabItem("About", g.Layout{
-					g.Spacing(),
-					g.InputTextMultiline("##aboutText", &aboutText, contentWidth, 362.5, g.InputTextFlagsReadOnly, nil, nil),
 				}),
 			}),
-		})
+
+			g.TabItem("MediaInfo").Layout(g.Layout{
+				g.Spacing(),
+				g.InputTextMultiline("##mediaInfoLog", &mediaInfoLog).Size(contentWidth, 362.5).Flags(g.InputTextFlagsReadOnly),
+			}),
+
+			g.TabItem("About").Layout(g.Layout{
+				g.Spacing(),
+				g.InputTextMultiline("##aboutText", &aboutText).Size(contentWidth, 362.5).Flags(g.InputTextFlagsReadOnly),
+			}),
+		}),
+	})
 }
 
 func applyWindowProperties(window *glfw.Window) {
@@ -463,6 +462,7 @@ func applyWindowProperties(window *glfw.Window) {
 	glfwWindow.SetIcon([]image.Image{icon48px})
 	hwnd := win.HWND(unsafe.Pointer(glfwWindow.GetWin32Window()))
 	win.SetWindowCompositionAttribute(hwnd, 3, 0, 0, 0)
+	g.Context.GetPlatform().SetTPS(144)
 	glfwWindow.SetFocusCallback(func(w *glfw.Window, focused bool) {
 		if focused {
 			glfwWindow.SetOpacity(0.98)
@@ -539,5 +539,5 @@ func main() {
 	glfwWindow = platform.GetWindow()
 	applyWindowProperties(glfwWindow)
 	checkCore()
-	mw.Main(loop)
+	mw.Run(loop)
 }
