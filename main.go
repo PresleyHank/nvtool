@@ -112,7 +112,6 @@ var defaultPreset = encodingPresets{
 	quality:     12,
 	bitrate:     19000,
 	maxrate:     59850,
-	aqStrength:  5,
 	outputRes:   "1920x1080",
 	vppSwitches: defaultVppSwitches,
 	vppParams:   defaultVppParams,

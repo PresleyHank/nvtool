@@ -12,5 +12,5 @@ require (
 	github.com/melbahja/got v0.5.0
 	github.com/sqweek/dialog v0.0.0-20200911184034-8a3d98e8211d
 	golang.org/x/net v0.0.0-20201224014010-6772e930b67b // indirect
-	golang.org/x/sys v0.0.0-20201231184435-2d18734c6014
+	golang.org/x/sys v0.0.0-20210104204734-6f8348627aad
 )
