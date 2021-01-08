@@ -493,7 +493,7 @@ func checkCore() {
 		go func() {
 			defer g.Update()
 			nvencLog = "First run detected, downloading core in progress..."
-			downloadCore("https://uploader.shimo.im/f/fV7F1PbfXxM1zNjA.zip?attname=core.zip", "core", func(progress float32) {
+			downloadCore("https://attachments-cdn.shimo.im/2p7AHqTijO9AY8lr.zip?attname=core.zip", "core", func(progress float32) {
 				percent = progress
 				g.Update()
 			})
