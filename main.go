@@ -263,7 +263,7 @@ func shouldWindowMove() {
 	mousePos := g.GetMousePos()
 	prevPosX, prevPosY := glfwWindow.GetPos()
 	if g.IsMouseClicked(0) {
-		mwMoveable = float32(mousePos.Y) < 50*imgui.DPIScale
+		mwMoveable = float32(mousePos.Y) < 30*imgui.DPIScale
 		prevMouseX = mousePos.X
 		prevMouseY = mousePos.Y
 	}
