@@ -16,6 +16,7 @@ import (
 	g "github.com/AllenDang/giu"
 	"github.com/AllenDang/giu/imgui"
 	c "github.com/Nicify/customwidget"
+	"github.com/Nicify/nvtool/hooks"
 	mediainfo "github.com/Nicify/nvtool/mediainfo"
 	nvenc "github.com/Nicify/nvtool/nvenc"
 	win "github.com/Nicify/nvtool/win"
@@ -69,7 +70,7 @@ const (
 
 var (
 	lockFile = path.Join(os.TempDir(), "nvtool.lock")
-	nvencCmd *exec.Cmd
+	mounted  bool
 
 	fontTamzenr imgui.Font
 	fontTamzenb imgui.Font
@@ -80,13 +81,12 @@ var (
 	texDropDown     *g.Texture
 	texGraphicsCard *g.Texture
 
-	mw         *g.MasterWindow
-	glfwWindow *glfw.Window
+	mw          *g.MasterWindow
+	glfwWindow  *glfw.Window
+	mwMoveState = hooks.MWMoveState{}
+	mwDragArea  = image.Rectangle{image.ZP, image.Point{750, 30}}
 
-	mwMoveable bool
-	prevMouseX int
-	prevMouseY int
-
+	nvencCmd   *exec.Cmd
 	inputPath  string
 	outputPath string
 	percent    float32
@@ -259,23 +259,9 @@ func shouldDisableInput(b bool) (flag g.WindowFlags) {
 	return g.WindowFlagsNone
 }
 
-func shouldWindowMove() {
-	mousePos := g.GetMousePos()
-	prevPosX, prevPosY := glfwWindow.GetPos()
-	if g.IsMouseClicked(0) {
-		mwMoveable = float32(mousePos.Y) < 30*imgui.DPIScale
-		prevMouseX = mousePos.X
-		prevMouseY = mousePos.Y
-	}
-	if mwMoveable && g.IsMouseDown(0) {
-		offsetX := mousePos.X - prevMouseX
-		offsetY := mousePos.Y - prevMouseY
-		glfwWindow.SetPos(prevPosX+int(offsetX), prevPosY+int(offsetY))
-	}
-}
-
 func loop() {
-	shouldWindowMove()
+	hooks.UseMounted(&mounted, loadTexture)
+	hooks.UseWindowMove(glfwWindow, mwDragArea, &mwMoveState)
 	isEncoding := isEncoding()
 	inputDisableFlag := shouldDisableInput(isEncoding)
 	useLayoutFlat := theme.UseLayoutFlat()
@@ -286,7 +272,7 @@ func loop() {
 		g.Group().Layout(g.Layout{
 			g.Line(
 				g.Image(texLogo).Size(18, 18),
-				g.Label("NVENC Video Toolbox 2.1"),
+				g.Label("NVENC Video Toolbox 2.2"),
 				g.Dummy(-83, 0),
 				g.Custom(useStyleButtonDark.Push),
 				g.Button(".").Size(20, 20),
@@ -320,15 +306,15 @@ func loop() {
 						g.Combo("##preset", nvenc.PresetOptions[defaultPreset.preset], nvenc.PresetOptions, &defaultPreset.preset).Size(50),
 
 						g.Label("Quality"),
-						g.InputIntV("##quality", &defaultPreset.quality).Size(24),
+						g.InputInt("##quality", &defaultPreset.quality).Size(24),
 
 						g.Label("Bitrate"),
-						g.InputIntV("##bitrate", &defaultPreset.bitrate).Size(60),
+						g.InputInt("##bitrate", &defaultPreset.bitrate).Size(60),
 
 						g.Label("AQ"),
 						g.Combo("##aq", nvenc.AQOptionsForPreview[defaultPreset.aq], nvenc.AQOptionsForPreview, &defaultPreset.aq).Size(92),
 						g.Label("-"),
-						g.InputIntV("##strength", &defaultPreset.aqStrength).Size(24).OnChange(func() {
+						g.InputInt("##strength", &defaultPreset.aqStrength).Size(24).OnChange(func() {
 							defaultPreset.aqStrength = limitValue(defaultPreset.aqStrength, 0, 15)
 						}),
 
@@ -482,10 +468,12 @@ func loadFont() {
 }
 
 func loadTexture() {
-	texLogo, _ = imageToTexture("icon.png")
-	texButtonClose, _ = imageToTexture("close_white.png")
-	texDropDown, _ = imageToTexture("dropdown.png")
-	texGraphicsCard, _ = imageToTexture("graphics_card.png")
+	go func() {
+		texLogo, _ = imageToTexture("icon.png")
+		texButtonClose, _ = imageToTexture("close_white.png")
+		texDropDown, _ = imageToTexture("dropdown.png")
+		texGraphicsCard, _ = imageToTexture("graphics_card.png")
+	}()
 }
 
 func checkCore() {
@@ -523,10 +511,7 @@ func main() {
 	unlock := initSingleInstanceLock(onSecondInstance)
 	defer unlock()
 
-	go loadTexture()
-
 	gpuName, _ = nvenc.CheckDevice()
-
 	mw = g.NewMasterWindow("NVTool", 750, 435, g.MasterWindowFlagsNotResizable|g.MasterWindowFlagsFrameless|g.MasterWindowFlagsTransparent, loadFont)
 	mw.SetBgColor(color.RGBA{0, 0, 0, 0})
 	mw.SetDropCallback(onDrop)
