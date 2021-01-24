@@ -3,7 +3,7 @@ module github.com/Nicify/nvtool
 go 1.15
 
 require (
-	github.com/AllenDang/giu v0.5.1-0.20210123111141-809022cb96fc
+	github.com/AllenDang/giu v0.5.1
 	github.com/Nicify/customwidget v0.0.0-20210102171126-6fa77e5f2b7b
 	github.com/Nicify/theme v0.0.0-20210102172236-892d8922cc31
 	github.com/fsnotify/fsnotify v1.4.9

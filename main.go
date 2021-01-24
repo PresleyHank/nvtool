@@ -168,7 +168,7 @@ func onRunClick() {
 		if defaultPreset.hevc {
 			codec = "hevc"
 		}
-		command := fmt.Sprintf("--codec %s --profile high --audio-copy --preset %s --vbr %v --vbr-quality %v --max-bitrate 60000 --lookahead 32 --gop-len 250 --%s --aq-strength %v --bframes 8 --vpp-resize lanczos2 --vpp-perf-monitor --ssim",
+		command := fmt.Sprintf("--codec %s --profile high --audio-copy --preset %s --vbr %v --vbr-quality %v --max-bitrate 60000 --bframes 4 --ref 16 --lookahead 32 --gop-len 250 --%s --aq-strength %v --vpp-resize lanczos2 --vpp-perf-monitor --ssim",
 			codec,
 			nvenc.PresetOptions[defaultPreset.preset],
 			defaultPreset.bitrate,
