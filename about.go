@@ -1,6 +1,6 @@
 package main
 
-var aboutText = `NVTool 2.0
+var aboutText = `NVTool 2.2
 
 Video encoding tool based on rigaya's NVEncC.
 
@@ -126,8 +126,6 @@ Parameters:
   strength to enhance bright part of edges.
 
 License information:
-
-This software is for personal use only and not allowed for any commercial purposes.
 
 This software uses the font licensed by be5invis.
 
