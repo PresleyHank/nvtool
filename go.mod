@@ -3,9 +3,9 @@ module github.com/Nicify/nvtool
 go 1.15
 
 require (
-	github.com/AllenDang/giu v0.5.2-0.20210125064534-edafc0647e24
-	github.com/Nicify/customwidget v0.0.0-20210102171126-6fa77e5f2b7b
-	github.com/Nicify/theme v0.0.0-20210102172236-892d8922cc31
+	github.com/AllenDang/giu v0.5.2
+	github.com/Nicify/customwidget v0.0.0-20210126131938-73377ac2c99c
+	github.com/Nicify/theme v0.0.0-20210126132023-cd60c00faccd
 	github.com/fsnotify/fsnotify v1.4.9
 	github.com/go-gl/glfw/v3.3/glfw v0.0.0-20201108214237-06ea97f0c265
 	github.com/go-resty/resty/v2 v2.4.0 // indirect

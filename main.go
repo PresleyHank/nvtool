@@ -290,13 +290,13 @@ func loop() {
 				g.Child("control").Border(false).Flags(inputDisableFlag).Size(contentWidth, 92).Layout(
 					g.Spacing(),
 					g.Line(
-						g.InputText("##video", &inputPath).Size(-((windowPadding+buttonWidth)/imgui.DPIScale)).Flags(0),
+						g.InputText("##video", &inputPath).Size(-((windowPadding+buttonWidth)/imgui.DPIScale)),
 						c.WithHiDPIFont(fontIosevka, fontTamzenb, g.Layout{g.Button("Video").Size(buttonWidth, buttonHeight).OnClick(onInputClick)}),
 					),
 
 					g.Spacing(),
 					g.Line(
-						g.InputText("##output", &outputPath).Size(-((windowPadding+buttonWidth)/imgui.DPIScale)).Flags(0),
+						g.InputText("##output", &outputPath).Size(-((windowPadding+buttonWidth)/imgui.DPIScale)),
 						c.WithHiDPIFont(fontIosevka, fontTamzenb, g.Layout{g.Button("Output").Size(buttonWidth, buttonHeight).OnClick(onOutputClick)}),
 					),
 
@@ -365,10 +365,10 @@ func loop() {
 
 			g.TabItem("Filter").Layout(
 				g.Dummy(contentWidth, 5),
-				g.Child("FilterContent").Border(false).Size(contentWidth, 0).Flags(0).Layout(
+				g.Child("FilterContent").Border(false).Size(contentWidth, 0).Layout(
 
 					g.Label("NoiseReduce"),
-					g.Child("NoiseReduce").Border(false).Size(contentWidth, 150).Flags(0).Layout(
+					g.Child("NoiseReduce").Border(false).Size(contentWidth, 150).Layout(
 						g.Custom(func() {
 							imgui.PushStyleColor(imgui.StyleColorChildBg, imgui.Vec4{X: 0.12, Y: 0.12, Z: 0.12, W: 0.99})
 						}),
