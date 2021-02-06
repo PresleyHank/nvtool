@@ -447,7 +447,7 @@ func applyWindowProperties(window *glfw.Window) {
 	glfwWindow.SetIcon([]image.Image{icon48px})
 	hwnd := win.HWND(unsafe.Pointer(glfwWindow.GetWin32Window()))
 	win.SetWindowCompositionAttribute(hwnd, 3, 0, 0, 0)
-	g.Context.GetPlatform().SetTPS(144)
+	g.Context.GetPlatform().SetTPS(240)
 	glfwWindow.SetFocusCallback(func(w *glfw.Window, focused bool) {
 		if focused {
 			glfwWindow.SetOpacity(0.98)
@@ -491,7 +491,12 @@ func checkCore() {
 	}
 }
 
-func onSecondInstance(command string) {
+func onSecondInstance() {
+	ioutil.WriteFile(lockFile, []byte("focus"), 0644)
+	os.Exit(0)
+}
+
+func onCommand(command string) {
 	if command == "focus" {
 		glfwWindow.Restore()
 	}
@@ -500,15 +505,11 @@ func onSecondInstance(command string) {
 func init() {
 	runtime.LockOSThread()
 
-	if err := os.Remove(lockFile); err != nil && !os.IsNotExist(err) {
-		ioutil.WriteFile(lockFile, []byte("focus"), 0644)
-		os.Exit(0)
-	}
 }
 
 func main() {
 	defer dispose()
-	unlock := initSingleInstanceLock(onSecondInstance)
+	unlock := initSingleInstanceLock(lockFile, onSecondInstance, onCommand)
 	defer unlock()
 
 	gpuName, _ = nvenc.CheckDevice()

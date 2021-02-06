@@ -130,7 +130,10 @@ func getErrorLevel(processState *os.ProcessState) (int, bool) {
 	}
 }
 
-func initSingleInstanceLock(onSecondInstance func(command string)) (unlock func()) {
+func initSingleInstanceLock(lockFile string, onSecondInstance func(), onCommand func(command string)) (unlock func()) {
+	if err := os.Remove(lockFile); err != nil && !os.IsNotExist(err) {
+		onSecondInstance()
+	}
 	f, _ := os.Create(lockFile)
 	watcher, err := fsnotify.NewWatcher()
 	if err != nil {
@@ -146,7 +149,7 @@ func initSingleInstanceLock(onSecondInstance func(command string)) (unlock func(
 				}
 				if event.Op&fsnotify.Write == fsnotify.Write {
 					command, _ := ioutil.ReadFile(lockFile)
-					onSecondInstance(string(command))
+					onCommand(string(command))
 				}
 			case err, ok := <-watcher.Errors:
 				if !ok {
