@@ -21,6 +21,7 @@ import (
 	"github.com/fsnotify/fsnotify"
 	"github.com/gobuffalo/packr/v2"
 	"github.com/melbahja/got"
+	"github.com/saracen/go7z"
 	"github.com/sqweek/dialog"
 )
 
@@ -226,8 +227,49 @@ func Unzip(src string, dest string) ([]string, error) {
 	return filenames, nil
 }
 
-func downloadCore(url string, dest string, onProgress func(float32)) ([]string, error) {
-	tmp := path.Join(os.TempDir(), "core.zip")
+func extract7z(file string, dist string) (files []string, err error) {
+	sz, err := go7z.OpenReader(file)
+	if err != nil {
+		return
+	}
+	defer sz.Close()
+
+	for {
+		hdr, err := sz.Next()
+		if err == io.EOF {
+			break // End of archive
+		}
+		if err != nil {
+			return nil, err
+		}
+
+		// If empty stream (no contents) and isn't specifically an empty file...
+		// then it's a directory.
+		if hdr.IsEmptyStream && !hdr.IsEmptyFile {
+			if err := os.MkdirAll(hdr.Name, os.ModePerm); err != nil {
+				return nil, err
+			}
+			continue
+		}
+
+		// Create file
+		files = []string{}
+		f, err := os.Create(path.Join(dist, hdr.Name))
+		if err != nil {
+			return nil, err
+		}
+		defer f.Close()
+
+		if _, err := io.Copy(f, sz); err != nil {
+			return files, err
+		}
+		files = append(files, f.Name())
+	}
+	return
+}
+
+func download(url string, dest string, onProgress func(float32)) ([]string, error) {
+	tmp := path.Join(os.TempDir(), "nvtool_download.zip")
 	defer os.Remove(tmp)
 	d := &got.Download{
 		URL:  url,
@@ -247,5 +289,5 @@ func downloadCore(url string, dest string, onProgress func(float32)) ([]string, 
 	if err != nil {
 		return nil, err
 	}
-	return Unzip(d.Name(), dest)
+	return extract7z(d.Name(), dest)
 }
