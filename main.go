@@ -480,13 +480,16 @@ func checkCore() {
 	if _, err := os.Stat(nvenc.Binary); os.IsNotExist(err) {
 		go func() {
 			defer g.Update()
-			nvencLog = "Downloading core.zip..."
-			download("https://hub.fastgit.org/rigaya/NVEnc/releases/download/5.27/NVEncC_5.27_x64.7z", "./core", func(progress float32) {
+			nvencLog = "Downloading core.zip...\n"
+			files, err := download("https://hub.fastgit.org/rigaya/NVEnc/releases/download/5.27/NVEncC_5.27_x64.7z", "./core", func(progress float32) {
 				percent = progress
 				g.Update()
 			})
+			if err != nil {
+				fmt.Printf("Download failed %s", err)
+			}
 			percent = 1
-			nvencLog += "\nDownload completed."
+			nvencLog += strings.Join(files, "\n") + "\nDownload completed."
 		}()
 	}
 }
