@@ -13,9 +13,9 @@ rm rsrc.syso
 
 #### Screenshots
 
-![图片](https://images-cdn.shimo.im/XUvfrHzbyPOKQn9c__original.png)
+![图片](https://i.imgsli.com/images/ed875b9d-9201-43cd-a6b3-7832d257c318.png)
 
-![图片](https://images-cdn.shimo.im/dLiWypVO9fbgAXPb__original.png)
+![图片](https://i.imgsli.com/images/8f0a17c5-6bfc-4342-ada1-a35cbb3508a4.png)
 
 Check out the link below to see if your graphics card supports NVENC.
 
