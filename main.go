@@ -481,7 +481,7 @@ func checkCore() {
 		go func() {
 			defer g.Update()
 			nvencLog = "Downloading core.zip...\n"
-			files, err := download("https://hub.fastgit.org/rigaya/NVEnc/releases/download/5.27/NVEncC_5.27_x64.7z", "./core", func(progress float32) {
+			files, err := download("https://hub.fastgit.org/rigaya/NVEnc/releases/download/5.29/NVEncC_5.29_x64.7z", "./core", func(progress float32) {
 				percent = progress
 				g.Update()
 			})
