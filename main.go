@@ -541,6 +541,6 @@ func main() {
 	platform := g.Context.GetPlatform().(*imgui.GLFW)
 	glfwWindow = platform.GetWindow()
 	applyWindowProperties(glfwWindow)
-	checkCore()
+	go checkCore()
 	mw.Run(loop)
 }
