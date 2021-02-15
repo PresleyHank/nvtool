@@ -482,11 +482,13 @@ func checkCore() {
 	}
 
 	if _, err := os.Stat(mediainfo.Binary); os.IsNotExist(err) {
-		bytes, err := box.Find("MediaInfo.exe")
+		bytes, err := box.Find("MediaInfo.7z")
 		if err != nil {
 			return
 		}
-		ioutil.WriteFile(mediainfo.Binary, bytes, 0777)
+		tmpPath := path.Join(os.TempDir(), "mediainfo.7z")
+		ioutil.WriteFile(tmpPath, bytes, 0777)
+		extract7z(tmpPath, "core")
 	}
 
 	if _, err := os.Stat(nvenc.Binary); os.IsNotExist(err) {
