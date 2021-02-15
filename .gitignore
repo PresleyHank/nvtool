@@ -2,5 +2,4 @@
 *-packr.go
 nvtool.exe
 /bin
-/core/*
-!/core/MediaInfo.exe
+/core

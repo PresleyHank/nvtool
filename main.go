@@ -477,16 +477,29 @@ func loadTexture() {
 }
 
 func checkCore() {
+	if _, err := os.Stat("core"); os.IsNotExist(err) {
+		os.Mkdir("core", 0777)
+	}
+
+	if _, err := os.Stat(mediainfo.Binary); os.IsNotExist(err) {
+		bytes, err := box.Find("MediaInfo.exe")
+		if err != nil {
+			return
+		}
+		ioutil.WriteFile(mediainfo.Binary, bytes, 0777)
+	}
+
 	if _, err := os.Stat(nvenc.Binary); os.IsNotExist(err) {
 		go func() {
 			defer g.Update()
-			nvencLog = "Downloading core.zip...\n"
+			nvencLog = "Downloading NVEncC...\n"
 			files, err := download("https://hub.fastgit.org/rigaya/NVEnc/releases/download/5.29/NVEncC_5.29_x64.7z", "./core", func(progress float32) {
 				percent = progress
 				g.Update()
 			})
 			if err != nil {
 				fmt.Printf("Download failed %s", err)
+				return
 			}
 			percent = 1
 			nvencLog += strings.Join(files, "\n") + "\nDownload completed."

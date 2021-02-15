@@ -8,7 +8,7 @@ import (
 )
 
 var (
-	binary string
+	Binary string
 )
 
 func GetMediaInfo(mediaFile string) (string, error) {
@@ -16,12 +16,14 @@ func GetMediaInfo(mediaFile string) (string, error) {
 	if err != nil {
 		return "", errors.New("file not found.")
 	}
-	stdout, _, _ := execute.ExecSync(".", binary, abspath)
+	stdout, _, _ := execute.ExecSync(".", Binary, abspath)
 	mediainfo := string(stdout)
 	return mediainfo, nil
 }
 
 func init() {
-	path, _ := filepath.Abs("./core/mediainfo.exe")
-	binary = path
+	path, err := filepath.Abs("./core/MediaInfo.exe")
+	if err == nil {
+		Binary = path
+	}
 }
