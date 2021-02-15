@@ -178,10 +178,6 @@ func onRunClick() {
 		)
 		args := strings.Split(command, " ")
 
-		// if defaultPreset.vppPresets.vppColorSpace {
-		// 	args = append(args, "--vpp-colorspace", defaultPreset.vppPresets.vppColorSpaceParam)
-		// }
-
 		if defaultPreset.vppSwitches.vppKNN {
 			param := defaultPreset.VPPKNNParam
 			args = append(args, "--vpp-knn", fmt.Sprintf("radius=%v,strength=%.2f,lerp=%.1f,th_lerp=%.1f", param.Radius, param.Strength, param.Lerp, param.ThLerp))
@@ -306,22 +302,22 @@ func loop() {
 						g.Combo("##preset", nvenc.PresetOptions[defaultPreset.preset], nvenc.PresetOptions, &defaultPreset.preset).Size(50),
 
 						g.Label("Quality"),
-						g.InputInt("##quality", &defaultPreset.quality).Size(24),
+						g.InputInt("##quality", &defaultPreset.quality).Size(24/imgui.DPIScale),
 
 						g.Label("Bitrate"),
-						g.InputInt("##bitrate", &defaultPreset.bitrate).Size(60),
+						g.InputInt("##bitrate", &defaultPreset.bitrate).Size(60/imgui.DPIScale),
 
 						g.Label("AQ"),
 						g.Combo("##aq", nvenc.AQOptionsForPreview[defaultPreset.aq], nvenc.AQOptionsForPreview, &defaultPreset.aq).Size(92),
 						g.Label("-"),
-						g.InputInt("##strength", &defaultPreset.aqStrength).Size(24).OnChange(func() {
+						g.InputInt("##strength", &defaultPreset.aqStrength).Size(24/imgui.DPIScale).OnChange(func() {
 							defaultPreset.aqStrength = limitValue(defaultPreset.aqStrength, 0, 15)
 						}),
 
 						g.Checkbox("HEVC", &defaultPreset.hevc),
 
 						g.Checkbox("Resize", &defaultPreset.resize),
-						g.InputText("##outputRes", &defaultPreset.outputRes).Size(80).Flags(g.InputTextFlagsCallbackAlways).OnChange(func() {
+						g.InputText("##outputRes", &defaultPreset.outputRes).Size(80/imgui.DPIScale).Flags(g.InputTextFlagsCallbackAlways).OnChange(func() {
 							defaultPreset.outputRes = limitResValue(defaultPreset.outputRes)
 						}),
 					),
