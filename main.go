@@ -268,7 +268,7 @@ func loop() {
 		g.Group().Layout(
 			g.Line(
 				g.Image(texLogo).Size(18, 18),
-				g.Label("NVENC Video Toolbox 2.2"),
+				g.Label("NVENC Video Toolbox 2.3"),
 				g.Dummy(-83, 0),
 				g.Custom(useStyleButtonDark.Push),
 				g.Button(".").Size(20, 20),
