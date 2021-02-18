@@ -16,14 +16,9 @@ import (
 
 	g "github.com/AllenDang/giu"
 	"github.com/fsnotify/fsnotify"
-	"github.com/gobuffalo/packr/v2"
 	"github.com/melbahja/got"
 	"github.com/saracen/go7z"
 	"github.com/sqweek/dialog"
-)
-
-var (
-	box = packr.New("assets", "./assets")
 )
 
 func nTrue(b ...bool) int {
@@ -80,7 +75,7 @@ func loadImageFromMemory(imageData []byte) (imageRGBA *image.RGBA, err error) {
 }
 
 func imageToTexture(filename string) (*g.Texture, error) {
-	imageByte, err := box.Find(filename)
+	imageByte, err := assets.ReadFile(filename)
 	if err != nil {
 		return nil, err
 	}

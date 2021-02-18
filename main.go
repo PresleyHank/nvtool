@@ -438,7 +438,7 @@ func loop() {
 }
 
 func applyWindowProperties(window *glfw.Window) {
-	data, _ := box.Find("icon_48px.png")
+	data, _ := assets.ReadFile("assets/icon_48px.png")
 	icon48px, _ := loadImageFromMemory(data)
 	glfwWindow.SetIcon([]image.Image{icon48px})
 	hwnd := win.HWND(unsafe.Pointer(glfwWindow.GetWin32Window()))
@@ -455,20 +455,20 @@ func applyWindowProperties(window *glfw.Window) {
 
 func loadFont() {
 	fonts := g.Context.IO().Fonts()
-	fontIosevkaTTF, _ := box.Find("iosevka.ttf")
+	fontIosevkaTTF, _ := assets.ReadFile("assets/iosevka.ttf")
 	fontIosevka = fonts.AddFontFromMemoryTTFV(fontIosevkaTTF, 18, imgui.DefaultFontConfig, fonts.GlyphRangesChineseFull())
-	fontTamzenbTTF, _ := box.Find("tamzen8x16b.ttf")
+	fontTamzenbTTF, _ := assets.ReadFile("assets/tamzen8x16b.ttf")
 	fontTamzenb = fonts.AddFontFromMemoryTTFV(fontTamzenbTTF, 16, imgui.DefaultFontConfig, fonts.GlyphRangesChineseFull())
-	fontTamzenrTTF, _ := box.Find("tamzen8x16r.ttf")
+	fontTamzenrTTF, _ := assets.ReadFile("assets/tamzen8x16r.ttf")
 	fontTamzenr = fonts.AddFontFromMemoryTTFV(fontTamzenrTTF, 16, imgui.DefaultFontConfig, fonts.GlyphRangesChineseFull())
 }
 
 func loadTexture() {
 	go func() {
-		texLogo, _ = imageToTexture("icon.png")
-		texButtonClose, _ = imageToTexture("close_white.png")
-		texDropDown, _ = imageToTexture("dropdown.png")
-		texGraphicsCard, _ = imageToTexture("graphics_card.png")
+		texLogo, _ = imageToTexture("assets/icon.png")
+		texButtonClose, _ = imageToTexture("assets/close_white.png")
+		texDropDown, _ = imageToTexture("assets/dropdown.png")
+		texGraphicsCard, _ = imageToTexture("assets/graphics_card.png")
 	}()
 }
 
@@ -478,7 +478,7 @@ func checkCore() {
 	}
 
 	if _, err := os.Stat(mediainfo.Binary); os.IsNotExist(err) {
-		bytes, err := box.Find("MediaInfo.7z")
+		bytes, err := assets.ReadFile("assets/MediaInfo.7z")
 		if err != nil {
 			return
 		}
