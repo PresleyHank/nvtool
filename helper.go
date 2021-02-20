@@ -200,16 +200,14 @@ func extract7z(file string, dist string) (files []string, err error) {
 	return
 }
 
-func download(url string, dest string, onProgress func(float32)) ([]string, error) {
-	tmp := path.Join(os.TempDir(), "nvtool_download.zip")
-	defer os.Remove(tmp)
+func download(url string, dest string, onProgress func(float32)) error {
 	d := &got.Download{
 		URL:  url,
-		Dest: tmp,
+		Dest: dest,
 	}
 
 	if err := d.Init(); err != nil {
-		fmt.Print(err)
+		return err
 	}
 
 	go d.RunProgress(func(d *got.Download) {
@@ -218,8 +216,5 @@ func download(url string, dest string, onProgress func(float32)) ([]string, erro
 	})
 	err := d.Start()
 	d.StopProgress = true
-	if err != nil {
-		return nil, err
-	}
-	return extract7z(d.Name(), dest)
+	return err
 }
