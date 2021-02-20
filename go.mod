@@ -14,5 +14,5 @@ require (
 	github.com/saracen/solidblock v0.0.0-20190426153529-45df20abab6f // indirect
 	github.com/sqweek/dialog v0.0.0-20200911184034-8a3d98e8211d
 	github.com/ulikunitz/xz v0.5.10 // indirect
-	golang.org/x/sys v0.0.0-20201119102817-f84b799fce68
+	golang.org/x/sys v0.0.0-20210220050731-9a76102bfb43
 )

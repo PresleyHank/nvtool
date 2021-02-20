@@ -216,6 +216,8 @@ func RunEncode(inputPath string, outputPath string, args []string) (*exec.Cmd, <
 }
 
 func init() {
-	path, _ := filepath.Abs("./core/NVEncC64.exe")
-	Binary = path
+	path, err := filepath.Abs("./core/NVEncC64.exe")
+	if err == nil {
+		Binary = path
+	}
 }
