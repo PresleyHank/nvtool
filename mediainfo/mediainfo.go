@@ -7,23 +7,20 @@ import (
 	"github.com/Nicify/nvtool/execute"
 )
 
-var (
-	Binary string
-)
+type MediaInfo struct {
+	binaryPath string
+}
 
-func GetMediaInfo(mediaFile string) (string, error) {
+func New(binaryPath string) *MediaInfo {
+	return &MediaInfo{binaryPath: binaryPath}
+}
+
+func (m *MediaInfo) GetMediaInfo(mediaFile string) (string, error) {
 	abspath, err := filepath.Abs(mediaFile)
 	if err != nil {
 		return "", errors.New("file not found.")
 	}
-	stdout, _, _ := execute.ExecSync(".", Binary, abspath)
+	stdout, _, _ := execute.ExecSync(".", m.binaryPath, abspath)
 	mediainfo := string(stdout)
 	return mediainfo, nil
-}
-
-func init() {
-	path, err := filepath.Abs("./core/MediaInfo.exe")
-	if err == nil {
-		Binary = path
-	}
 }

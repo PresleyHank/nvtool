@@ -12,6 +12,7 @@ import (
 	"os"
 	"path"
 	"regexp"
+	"strings"
 	"syscall"
 
 	g "github.com/AllenDang/giu"
@@ -74,7 +75,7 @@ func loadImageFromMemory(imageData []byte) (imageRGBA *image.RGBA, err error) {
 	}
 }
 
-func imageToTexture(filename string) (*g.Texture, error) {
+func loadTexture(filename string) (*g.Texture, error) {
 	imageByte, err := assets.ReadFile(filename)
 	if err != nil {
 		return nil, err
@@ -82,6 +83,41 @@ func imageToTexture(filename string) (*g.Texture, error) {
 	imageRGBA, _ := loadImageFromMemory(imageByte)
 	textureID, err := g.NewTextureFromRgba(imageRGBA)
 	return textureID, err
+}
+
+func checkCore() {
+	if _, err := os.Stat("core"); os.IsNotExist(err) {
+		os.Mkdir("core", 0777)
+	}
+
+	if _, err := os.Stat("./core/MediaInfo.exe"); os.IsNotExist(err) {
+		bytes, err := assets.ReadFile("assets/MediaInfo.7z")
+		if err != nil {
+			return
+		}
+		tmpPath := path.Join(os.TempDir(), "mediainfo.7z")
+		ioutil.WriteFile(tmpPath, bytes, 0777)
+		extract7z(tmpPath, "core")
+	}
+
+	if _, err := os.Stat("./core/NVEncC64.exe"); os.IsNotExist(err) {
+		nvencLog = "Downloading NVEncC...\n"
+		g.Update()
+		tmp := path.Join(os.TempDir(), "NVEncC.7z")
+		err := download("https://hub.fastgit.org/rigaya/NVEnc/releases/download/5.29/NVEncC_5.29_x64.7z", tmp, func(progress float32) {
+			percent = progress * 0.95
+			g.Update()
+		})
+		if err != nil {
+			fmt.Printf("Download failed %s", err)
+			return
+		}
+		files, err := extract7z(tmp, "./core")
+		percent = 1
+		nvencLog += strings.Join(files, "\n") + "\nDownload completed."
+		os.Remove(tmp)
+		g.Update()
+	}
 }
 
 func selectInputPath() string {

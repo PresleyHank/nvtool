@@ -1,6 +1,6 @@
 package main
 
-var aboutText = `NVTool 2.3
+var aboutText = `NVTool 2.4
 
 Video encoding tool based on rigaya's NVEncC.
 

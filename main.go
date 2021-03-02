@@ -8,6 +8,7 @@ import (
 	"os"
 	"os/exec"
 	"path"
+	"path/filepath"
 	"runtime"
 	"strings"
 	"time"
@@ -52,7 +53,6 @@ type vppParams struct {
 	nvenc.VPPPMDParam
 	nvenc.VPPUnSharpParam
 	nvenc.VPPEdgeLevelParam
-	nvenc.VPPColorSpaceParam
 }
 
 type usage struct {
@@ -86,6 +86,8 @@ var (
 	mwMoveState = hooks.MWMoveState{}
 	mwDragArea  = image.Rectangle{image.ZP, image.Point{750, 30}}
 
+	NVENC      *nvenc.NVENC
+	MediaInfo  *mediainfo.MediaInfo
 	nvencCmd   *exec.Cmd
 	inputPath  string
 	outputPath string
@@ -103,7 +105,6 @@ var defaultVppParams = vppParams{
 	nvenc.DefaultVPPPMDParam,
 	nvenc.DefaultVPPUnSharpParam,
 	nvenc.DefaultVPPEdgeLevelParam,
-	nvenc.DefaultVPPColorSpaceParam,
 }
 
 var defaultPreset = encodingPresets{
@@ -139,8 +140,6 @@ func resetState() {
 func onInputClick() {
 	filePath := selectInputPath()
 	if len(filePath) > 1 {
-		// percent = 0
-		// nvencLog = ""
 		inputPath = filePath
 		fileExt := path.Ext(inputPath)
 		outputPath = strings.Replace(inputPath, fileExt, "_nvenc.mp4", 1)
@@ -202,7 +201,7 @@ func onRunClick() {
 			args = append(args, "--output-res", defaultPreset.outputRes)
 		}
 
-		cmd, progress, _ := nvenc.RunEncode(inputPath, outputPath, args)
+		cmd, progress, _ := NVENC.RunEncode(inputPath, outputPath, args)
 		nvencCmd = cmd
 		for msg := range progress {
 			percent = float32(msg.Percent) / 100
@@ -221,7 +220,7 @@ func onRunClick() {
 }
 
 func setMediaInfo(inputPath string) {
-	info, err := mediainfo.GetMediaInfo(inputPath)
+	info, err := MediaInfo.GetMediaInfo(inputPath)
 	if err != nil {
 		mediaInfoLog = fmt.Sprintf("Error: %s", err)
 		return
@@ -256,7 +255,7 @@ func shouldDisableInput(b bool) (flag g.WindowFlags) {
 }
 
 func loop() {
-	hooks.UseMounted(&mounted, loadTexture)
+	hooks.UseMounted(&mounted, onMounted)
 	hooks.UseWindowMove(glfwWindow, mwDragArea, &mwMoveState)
 	isEncoding := isEncoding()
 	inputDisableFlag := shouldDisableInput(isEncoding)
@@ -268,7 +267,7 @@ func loop() {
 		g.Group().Layout(
 			g.Line(
 				g.Image(texLogo).Size(18, 18),
-				g.Label("NVENC Video Toolbox 2.3"),
+				g.Label("NVENC Video Toolbox"),
 				g.Dummy(-83, 0),
 				g.Custom(useStyleButtonDark.Push),
 				g.Button(".").Size(20, 20),
@@ -463,50 +462,13 @@ func loadFont() {
 	fontTamzenr = fonts.AddFontFromMemoryTTFV(fontTamzenrTTF, 16, imgui.DefaultFontConfig, fonts.GlyphRangesChineseFull())
 }
 
-func loadTexture() {
+func onMounted() {
 	go func() {
-		texLogo, _ = imageToTexture("assets/icon.png")
-		texButtonClose, _ = imageToTexture("assets/close_white.png")
-		texDropDown, _ = imageToTexture("assets/dropdown.png")
-		texGraphicsCard, _ = imageToTexture("assets/graphics_card.png")
+		texLogo, _ = loadTexture("assets/icon.png")
+		texButtonClose, _ = loadTexture("assets/close_white.png")
+		texDropDown, _ = loadTexture("assets/dropdown.png")
+		texGraphicsCard, _ = loadTexture("assets/graphics_card.png")
 	}()
-}
-
-func checkCore() {
-	if _, err := os.Stat("core"); os.IsNotExist(err) {
-		os.Mkdir("core", 0777)
-	}
-
-	if _, err := os.Stat(mediainfo.Binary); os.IsNotExist(err) {
-		bytes, err := assets.ReadFile("assets/MediaInfo.7z")
-		if err != nil {
-			return
-		}
-		tmpPath := path.Join(os.TempDir(), "mediainfo.7z")
-		ioutil.WriteFile(tmpPath, bytes, 0777)
-		extract7z(tmpPath, "core")
-	}
-
-	if _, err := os.Stat(nvenc.Binary); os.IsNotExist(err) {
-		go func() {
-			nvencLog = "Downloading NVEncC...\n"
-			g.Update()
-			tmp := path.Join(os.TempDir(), "NVEncC.7z")
-			err := download("https://hub.fastgit.org/rigaya/NVEnc/releases/download/5.29/NVEncC_5.29_x64.7z", tmp, func(progress float32) {
-				percent = progress * 0.95
-				g.Update()
-			})
-			if err != nil {
-				fmt.Printf("Download failed %s", err)
-				return
-			}
-			files, err := extract7z(tmp, "./core")
-			percent = 1
-			nvencLog += strings.Join(files, "\n") + "\nDownload completed."
-			os.Remove(tmp)
-			g.Update()
-		}()
-	}
 }
 
 func onSecondInstance() {
@@ -522,7 +484,6 @@ func onCommand(command string) {
 
 func init() {
 	runtime.LockOSThread()
-
 }
 
 func main() {
@@ -530,7 +491,6 @@ func main() {
 	unlock := initSingleInstanceLock(lockFile, onSecondInstance, onCommand)
 	defer unlock()
 
-	gpuName, _ = nvenc.CheckDevice()
 	mw = g.NewMasterWindow("NVTool", 750, 435, g.MasterWindowFlagsNotResizable|g.MasterWindowFlagsFrameless|g.MasterWindowFlagsTransparent, loadFont)
 	mw.SetBgColor(color.RGBA{0, 0, 0, 0})
 	mw.SetDropCallback(onDrop)
@@ -541,6 +501,16 @@ func main() {
 	platform := g.Context.GetPlatform().(*imgui.GLFW)
 	glfwWindow = platform.GetWindow()
 	applyWindowProperties(glfwWindow)
-	go checkCore()
+	go func() {
+		checkCore()
+		nPath, _ := filepath.Abs("./core/NVEncC64.exe")
+		NVENC = nvenc.New(nPath)
+
+		mPath, _ := filepath.Abs("./core/MediaInfo.exe")
+		MediaInfo = mediainfo.New(mPath)
+
+		gpuName, _ = NVENC.CheckDevice()
+		g.Update()
+	}()
 	mw.Run(loop)
 }

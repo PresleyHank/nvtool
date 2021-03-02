@@ -6,7 +6,6 @@ import (
 	"io"
 	"os"
 	"os/exec"
-	"path/filepath"
 	"regexp"
 	"strconv"
 	"strings"
@@ -54,18 +53,6 @@ type VPPEdgeLevelParam struct {
 	White     float32
 }
 
-type VPPSmoothParam struct {
-	Quality int32
-	QP      int32
-	Prec    string
-}
-
-type VPPColorSpaceParam struct {
-	HDR2SDR    string
-	SourcePeak float32
-	LdrNits    float32
-}
-
 var DefaultVPPKNNParam = VPPKNNParam{
 	Radius:   3,
 	Strength: 0.08,
@@ -92,25 +79,15 @@ var DefaultVPPEdgeLevelParam = VPPEdgeLevelParam{
 	White:     0,
 }
 
-var DefaultVPPSmoothParam = VPPSmoothParam{
-	Quality: 6,
-	QP:      12,
-	Prec:    "fp32",
-}
-
-var DefaultVPPColorSpaceParam = VPPColorSpaceParam{
-	HDR2SDR:    "hdr2sdr=hable",
-	SourcePeak: 1000.0,
-	LdrNits:    100.0,
-}
-
 var (
-	Binary string
-
 	PresetOptions       = []string{"P1", "P2", "P3", "P4", "P5", "P6", "P7"}
 	AQOptions           = []string{"aq-temporal", "aq"}
 	AQOptionsForPreview = []string{"temporal", "spatial"}
 )
+
+type NVENC struct {
+	binaryPath string
+}
 
 func progress(stream io.ReadCloser, out chan Progress) {
 	scanner := bufio.NewScanner(stream)
@@ -174,8 +151,12 @@ func progress(stream io.ReadCloser, out chan Progress) {
 	}
 }
 
-func CheckDevice() (name string, err error) {
-	stdout, _, err := execute.ExecSync(".", Binary, "--check-device")
+func New(binaryPath string) *NVENC {
+	return &NVENC{binaryPath: binaryPath}
+}
+
+func (n *NVENC) CheckDevice() (name string, err error) {
+	stdout, _, err := execute.ExecSync(".", n.binaryPath, "--check-device")
 	if err != nil {
 		return
 	}
@@ -185,13 +166,13 @@ func CheckDevice() (name string, err error) {
 }
 
 // RunEncode ...
-func RunEncode(inputPath string, outputPath string, args []string) (*exec.Cmd, <-chan Progress, error) {
+func (n *NVENC) RunEncode(inputPath string, outputPath string, args []string) (*exec.Cmd, <-chan Progress, error) {
 	out := make(chan Progress)
 	args = append([]string{"-i", inputPath}, args...)
 	args = append(args, "-o", outputPath)
 	fmt.Println(args)
-	cmd := exec.Command(Binary, args...)
-	cmd.Path = Binary
+	cmd := exec.Command(n.binaryPath, args...)
+	cmd.Path = n.binaryPath
 	cmd.SysProcAttr = &syscall.SysProcAttr{HideWindow: true}
 	stderr, _ := cmd.StderrPipe()
 	stdout, _ := cmd.StdoutPipe()
@@ -213,11 +194,4 @@ func RunEncode(inputPath string, outputPath string, args []string) (*exec.Cmd, <
 	}()
 
 	return cmd, out, nil
-}
-
-func init() {
-	path, err := filepath.Abs("./core/NVEncC64.exe")
-	if err == nil {
-		Binary = path
-	}
 }
