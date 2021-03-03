@@ -464,6 +464,7 @@ func loadFont() {
 
 func onMounted() {
 	go func() {
+		defer glfwWindow.SetOpacity(0.98)
 		texLogo, _ = loadTexture("assets/icon.png")
 		texButtonClose, _ = loadTexture("assets/close_white.png")
 		texDropDown, _ = loadTexture("assets/dropdown.png")
@@ -500,6 +501,7 @@ func main() {
 
 	platform := g.Context.GetPlatform().(*imgui.GLFW)
 	glfwWindow = platform.GetWindow()
+	glfwWindow.SetOpacity(0)
 	applyWindowProperties(glfwWindow)
 	go func() {
 		checkCore()

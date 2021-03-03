@@ -4,7 +4,7 @@ go 1.16
 
 require (
 	github.com/AllenDang/giu v0.5.3-0.20210225120435-83efa4609bde
-	github.com/Nicify/customwidget v0.0.0-20210126131938-73377ac2c99c
+	github.com/Nicify/customwidget v0.0.0-20210303104616-eeac03da5b99
 	github.com/Nicify/theme v0.0.0-20210215152415-024f73bbbdad
 	github.com/fsnotify/fsnotify v1.4.9
 	github.com/go-gl/glfw/v3.3/glfw v0.0.0-20201108214237-06ea97f0c265
@@ -14,5 +14,5 @@ require (
 	github.com/saracen/solidblock v0.0.0-20190426153529-45df20abab6f // indirect
 	github.com/sqweek/dialog v0.0.0-20200911184034-8a3d98e8211d
 	github.com/ulikunitz/xz v0.5.10 // indirect
-	golang.org/x/sys v0.0.0-20210228012217-479acdf4ea46
+	golang.org/x/sys v0.0.0-20210301091718-77cc2087c03b
 )
