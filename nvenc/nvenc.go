@@ -2,7 +2,6 @@ package nvenc
 
 import (
 	"bufio"
-	"fmt"
 	"io"
 	"os"
 	"os/exec"
@@ -87,6 +86,7 @@ var (
 
 type NVENC struct {
 	binaryPath string
+	Cmd        *exec.Cmd
 }
 
 func progress(stream io.ReadCloser, out chan Progress) {
@@ -166,22 +166,22 @@ func (n *NVENC) CheckDevice() (name string, err error) {
 }
 
 // RunEncode ...
-func (n *NVENC) RunEncode(inputPath string, outputPath string, args []string) (*exec.Cmd, <-chan Progress, error) {
+func (n *NVENC) RunEncode(inputPath string, outputPath string, args []string) (<-chan Progress, error) {
 	out := make(chan Progress)
 	args = append([]string{"-i", inputPath}, args...)
 	args = append(args, "-o", outputPath)
-	fmt.Println(args)
-	cmd := exec.Command(n.binaryPath, args...)
-	cmd.Path = n.binaryPath
-	cmd.SysProcAttr = &syscall.SysProcAttr{HideWindow: true}
-	stderr, _ := cmd.StderrPipe()
-	stdout, _ := cmd.StdoutPipe()
+	n.Cmd = exec.Command(n.binaryPath, args...)
+	n.Cmd.Path = n.binaryPath
+	n.Cmd.SysProcAttr = &syscall.SysProcAttr{HideWindow: true}
+	stderr, _ := n.Cmd.StderrPipe()
+	stdout, _ := n.Cmd.StdoutPipe()
 	go func() {
 		io.Copy(os.Stdout, stdout)
 	}()
-	err := cmd.Start()
+
+	err := n.Cmd.Start()
 	if err != nil {
-		fmt.Println(err)
+		return nil, err
 	}
 
 	go func() {
@@ -190,8 +190,23 @@ func (n *NVENC) RunEncode(inputPath string, outputPath string, args []string) (*
 
 	go func() {
 		defer close(out)
-		err = cmd.Wait()
+		err = n.Cmd.Wait()
 	}()
 
-	return cmd, out, nil
+	return out, err
+}
+
+func (n *NVENC) IsEncoding() bool {
+	if n.Cmd == nil || (n.Cmd.ProcessState != nil && n.Cmd.ProcessState.Exited()) {
+		return false
+	}
+	return true
+}
+
+func (n *NVENC) Stop() {
+	if n.Cmd == nil {
+		return
+	}
+	n.Cmd.Process.Kill()
+	go n.Cmd.Wait()
 }

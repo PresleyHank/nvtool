@@ -6,7 +6,6 @@ import (
 	"image/color"
 	"io/ioutil"
 	"os"
-	"os/exec"
 	"path"
 	"path/filepath"
 	"runtime"
@@ -88,7 +87,6 @@ var (
 
 	NVENC      *nvenc.NVENC
 	MediaInfo  *mediainfo.MediaInfo
-	nvencCmd   *exec.Cmd
 	inputPath  string
 	outputPath string
 	percent    float32
@@ -124,13 +122,6 @@ var utilization = usage{
 	VE:  0,
 }
 
-func isEncoding() bool {
-	if nvencCmd == nil || (nvencCmd.ProcessState != nil && nvencCmd.ProcessState.Exited()) {
-		return false
-	}
-	return true
-}
-
 func resetState() {
 	percent = 0
 	nvencLog = ""
@@ -155,7 +146,7 @@ func onOutputClick() {
 }
 
 func onRunClick() {
-	if isEncoding() ||
+	if NVENC.IsEncoding() ||
 		invalidPath(inputPath, outputPath) ||
 		strings.HasSuffix(nvencLog, "Get input file information...") {
 		return
@@ -201,8 +192,7 @@ func onRunClick() {
 			args = append(args, "--output-res", defaultPreset.outputRes)
 		}
 
-		cmd, progress, _ := NVENC.RunEncode(inputPath, outputPath, args)
-		nvencCmd = cmd
+		progress, _ := NVENC.RunEncode(inputPath, outputPath, args)
 		for msg := range progress {
 			percent = float32(msg.Percent) / 100
 			utilization.GPU = int32(msg.GPU)
@@ -213,7 +203,7 @@ func onRunClick() {
 			g.Update()
 		}
 
-		if nvencCmd.ProcessState != nil && nvencCmd.ProcessState.Success() {
+		if NVENC.Cmd.ProcessState != nil && NVENC.Cmd.ProcessState.Success() {
 			percent = 1.0
 		}
 	}()
@@ -230,21 +220,13 @@ func setMediaInfo(inputPath string) {
 }
 
 func onDrop(dropItem []string) {
-	if isEncoding() {
+	if NVENC.IsEncoding() {
 		return
 	}
 	inputPath = dropItem[0]
 	fileExt := path.Ext(inputPath)
 	outputPath = strings.Replace(inputPath, fileExt, "_nvenc.mp4", 1)
 	go setMediaInfo(inputPath)
-}
-
-func dispose() {
-	if nvencCmd == nil {
-		return
-	}
-	nvencCmd.Process.Kill()
-	go nvencCmd.Wait()
 }
 
 func shouldDisableInput(b bool) (flag g.WindowFlags) {
@@ -257,7 +239,7 @@ func shouldDisableInput(b bool) (flag g.WindowFlags) {
 func loop() {
 	hooks.UseMounted(&mounted, onMounted)
 	hooks.UseWindowMove(glfwWindow, mwDragArea, &mwMoveState)
-	isEncoding := isEncoding()
+	isEncoding := NVENC.IsEncoding()
 	inputDisableFlag := shouldDisableInput(isEncoding)
 	useLayoutFlat := theme.UseLayoutFlat()
 	useStyleButtonDark := theme.UseStyleButtonDark()
@@ -352,7 +334,7 @@ func loop() {
 
 					g.Dummy(-(windowPadding+buttonWidth), 24),
 					c.WithHiDPIFont(fontIosevka, fontTamzenb, g.Layout{g.Condition(isEncoding,
-						g.Layout{g.Button("Cancel").Size(buttonWidth, buttonHeight).OnClick(dispose)},
+						g.Layout{g.Button("Cancel").Size(buttonWidth, buttonHeight).OnClick(NVENC.Stop)},
 						g.Layout{g.Button("Run").Size(buttonWidth, buttonHeight).OnClick(onRunClick)},
 					)}),
 				),
@@ -485,10 +467,16 @@ func onCommand(command string) {
 
 func init() {
 	runtime.LockOSThread()
+
+	basePath, _ := filepath.Abs(".")
+	nPath := filepath.Join(basePath, "core", "NVEncC64.exe")
+	mPath := filepath.Join(basePath, "core", "MediaInfo.exe")
+	NVENC = nvenc.New(nPath)
+	MediaInfo = mediainfo.New(mPath)
 }
 
 func main() {
-	defer dispose()
+	defer NVENC.Stop()
 	unlock := initSingleInstanceLock(lockFile, onSecondInstance, onCommand)
 	defer unlock()
 
@@ -505,12 +493,6 @@ func main() {
 	applyWindowProperties(glfwWindow)
 	go func() {
 		checkCore()
-		nPath, _ := filepath.Abs("./core/NVEncC64.exe")
-		NVENC = nvenc.New(nPath)
-
-		mPath, _ := filepath.Abs("./core/MediaInfo.exe")
-		MediaInfo = mediainfo.New(mPath)
-
 		gpuName, _ = NVENC.CheckDevice()
 		g.Update()
 	}()
