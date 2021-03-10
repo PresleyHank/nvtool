@@ -165,7 +165,6 @@ func (n *NVENC) CheckDevice() (name string, err error) {
 	return
 }
 
-// RunEncode ...
 func (n *NVENC) RunEncode(inputPath string, outputPath string, args []string) (<-chan Progress, error) {
 	out := make(chan Progress)
 	args = append([]string{"-i", inputPath}, args...)

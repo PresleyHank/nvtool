@@ -1,6 +1,6 @@
 # NVTool
 
-> NVENC video encoding tool based on NVEncC
+> Video encoding tool based on rigaya's NVEncC.
 
 #### Build
 
