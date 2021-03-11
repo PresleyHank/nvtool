@@ -10,7 +10,7 @@ import (
 	"strings"
 	"syscall"
 
-	execute "github.com/Nicify/nvtool/execute"
+	execute "github.com/Nicify/nvtool/helper"
 )
 
 // Progress ...

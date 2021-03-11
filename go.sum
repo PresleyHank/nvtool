@@ -1,6 +1,5 @@
+github.com/AllenDang/giu v0.5.2 h1:x1CwWPMUqDvsA1jfbRTO4atxg5PWXgQu7UFe2hvaSd8=
 github.com/AllenDang/giu v0.5.2/go.mod h1:zeil+vqQkg+VVHnVNMUTkRuQ7lOX1LYowfwmjfP3wRY=
-github.com/AllenDang/giu v0.5.3-0.20210310024556-12ad6f2d9614 h1:Qkf0f583un3xYTlsOipl2nltvo0NIWrmss+ctabQozw=
-github.com/AllenDang/giu v0.5.3-0.20210310024556-12ad6f2d9614/go.mod h1:zeil+vqQkg+VVHnVNMUTkRuQ7lOX1LYowfwmjfP3wRY=
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
 github.com/Nicify/customwidget v0.0.0-20210303104616-eeac03da5b99 h1:cKllYOXeajPZtwYenA4UL4P9q2JLbnxvImfdWJYfu8k=
 github.com/Nicify/customwidget v0.0.0-20210303104616-eeac03da5b99/go.mod h1:2YQ3r8hX+wbM64k1RFJOilXIMfzkmGJ0nCBCcDorTmE=
@@ -22,8 +21,8 @@ github.com/fsnotify/fsnotify v1.4.9/go.mod h1:znqG4EE+3YCdAaPaxE2ZRY/06pZUdp0tY4
 github.com/go-gl/gl v0.0.0-20190320180904-bf2b1f2f34d7 h1:SCYMcCJ89LjRGwEa0tRluNRiMjZHalQZrVrvTbPh+qw=
 github.com/go-gl/gl v0.0.0-20190320180904-bf2b1f2f34d7/go.mod h1:482civXOzJJCPzJ4ZOX/pwvXBWSnzD4OKMdH4ClKGbk=
 github.com/go-gl/glfw/v3.3/glfw v0.0.0-20201108214237-06ea97f0c265/go.mod h1:tQ2UAYgL5IevRw8kRxooKSPJfGvJ9fJQFa0TUsXzTg8=
-github.com/go-gl/glfw/v3.3/glfw v0.0.0-20210307203918-211ecac01a39 h1:2qFWhzDGB9xbHSLzd8vcILKnH0iAJoKfwIzgOOUGUjI=
-github.com/go-gl/glfw/v3.3/glfw v0.0.0-20210307203918-211ecac01a39/go.mod h1:tQ2UAYgL5IevRw8kRxooKSPJfGvJ9fJQFa0TUsXzTg8=
+github.com/go-gl/glfw/v3.3/glfw v0.0.0-20210311203641-62640a716d48 h1:QrUfZrT8n72FUuiABt4tbu8PwDnOPAbnj3Mql1UhdRI=
+github.com/go-gl/glfw/v3.3/glfw v0.0.0-20210311203641-62640a716d48/go.mod h1:tQ2UAYgL5IevRw8kRxooKSPJfGvJ9fJQFa0TUsXzTg8=
 github.com/go-resty/resty/v2 v2.3.0/go.mod h1:UpN9CgLZNsv4e9XG50UU8xdI0F43UQ4HmxLBDwaroHU=
 github.com/go-resty/resty/v2 v2.4.0 h1:s6TItTLejEI+2mn98oijC5w/Rk2YU+OA6x0mnZN6r6k=
 github.com/go-resty/resty/v2 v2.4.0/go.mod h1:B88+xCTEwvfD94NOuE6GS1wMlnoKNY8eEiNizfNwOwA=

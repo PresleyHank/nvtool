@@ -4,7 +4,7 @@ import (
 	"errors"
 	"path/filepath"
 
-	"github.com/Nicify/nvtool/execute"
+	"github.com/Nicify/nvtool/helper"
 )
 
 type MediaInfo struct {
@@ -20,7 +20,7 @@ func (m *MediaInfo) GetMediaInfo(mediaFile string) (string, error) {
 	if err != nil {
 		return "", errors.New("file not found.")
 	}
-	stdout, _, _ := execute.ExecSync(".", m.binaryPath, abspath)
+	stdout, _, _ := helper.ExecSync(".", m.binaryPath, abspath)
 	mediainfo := string(stdout)
 	return mediainfo, nil
 }
