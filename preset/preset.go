@@ -40,7 +40,7 @@ type VPPParams struct {
 var (
 	DefaultVppSwitches = VPPSwitches{}
 
-	DefaultVppParams = VPPParams{
+	DefaultVPPParams = VPPParams{
 		nvenc.DefaultVPPKNNParam,
 		nvenc.DefaultVPPPMDParam,
 		nvenc.DefaultVPPUnSharpParam,
@@ -55,7 +55,7 @@ var (
 		Maxrate:     59850,
 		OutputRes:   "1920x1080",
 		VPPSwitches: DefaultVppSwitches,
-		VPPParams:   DefaultVppParams,
+		VPPParams:   DefaultVPPParams,
 	}
 )
 

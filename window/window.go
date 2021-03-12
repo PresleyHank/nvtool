@@ -20,7 +20,7 @@ type GLFWWindowConfig struct {
 	Icon48px             *image.RGBA
 	TPS                  int
 	CompositionAttribute *CompositionAttribute
-	FocusCallback        func(w *glfw.Window, focused bool)
+	FocusCallback        func(focused bool)
 }
 
 func ApplyWindowConfig(window *glfw.Window, config *GLFWWindowConfig) {
@@ -29,5 +29,9 @@ func ApplyWindowConfig(window *glfw.Window, config *GLFWWindowConfig) {
 	attr := config.CompositionAttribute
 	win.SetWindowCompositionAttribute(hwnd, attr.AccentState, attr.Flags, attr.Color, attr.AnimationID)
 	g.Context.GetPlatform().SetTPS(config.TPS)
-	window.SetFocusCallback(config.FocusCallback)
+	window.SetFocusCallback(func(w *glfw.Window, focused bool) {
+		if config.FocusCallback != nil {
+			config.FocusCallback(focused)
+		}
+	})
 }

@@ -13,7 +13,6 @@ import (
 	"github.com/Nicify/nvtool/hooks"
 	window "github.com/Nicify/nvtool/window"
 	"github.com/Nicify/theme"
-	"github.com/go-gl/glfw/v3.3/glfw"
 )
 
 func init() {
@@ -43,12 +42,12 @@ func main() {
 		Icon48px:             icon48px,
 		TPS:                  240,
 		CompositionAttribute: &window.CompositionAttribute{AccentState: 3, Flags: 0, Color: 0, AnimationID: 0},
-		FocusCallback: func(w *glfw.Window, focused bool) {
+		FocusCallback: func(focused bool) {
 			if focused {
-				w.SetOpacity(0.98)
+				glfwWindow.SetOpacity(0.98)
 				return
 			}
-			w.SetOpacity(1)
+			glfwWindow.SetOpacity(1)
 		},
 	})
 	go app.InstallCore()

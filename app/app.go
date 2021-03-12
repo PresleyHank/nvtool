@@ -56,7 +56,7 @@ type Application struct {
 	NVENC          *nvenc.NVENC
 	MediaInfo      *mediainfo.MediaInfo
 	LockFile       string
-	Mounted        bool
+	mounted        bool
 	Window         *Window
 	Fonts          *CustomFonts
 	Textures       *Textures
@@ -64,7 +64,7 @@ type Application struct {
 	Usage          *Usage
 	EncodingPreset preset.EncodingPresets
 	VPPSwitches    preset.VPPSwitches
-	VppParams      preset.VPPParams
+	VPPParams      preset.VPPParams
 	Update         func()
 }
 
@@ -92,7 +92,7 @@ func GetInstance() *Application {
 			Update:         g.Update,
 			EncodingPreset: preset.DefaultPreset,
 			VPPSwitches:    preset.DefaultVppSwitches,
-			VppParams:      preset.DefaultVppParams,
+			VPPParams:      preset.DefaultVPPParams,
 		}
 	})
 	return app

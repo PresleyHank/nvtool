@@ -24,7 +24,7 @@ const (
 )
 
 func (app *Application) Render() {
-	hooks.UseMounted(&app.Mounted, app.OnMounted)
+	hooks.UseMounted(&app.mounted, app.OnMounted)
 	hooks.UseWindowMove(app.Window.GLFWWindow, app.Window.MWDragArea, app.Window.MWMoveState)
 	isEncoding := app.NVENC.IsEncoding()
 	inputDisableFlag := app.ShouldDisableInput(isEncoding)
@@ -139,20 +139,20 @@ func (app *Application) Render() {
 						g.Line(
 							g.Child("KNN").Border(true).Size((contentWidth-8)*0.5, 0).Flags(inputDisableFlag).Layout(
 								g.Line(g.Checkbox("KNN", &app.VPPSwitches.VPPKNN), g.Dummy(-52, 0), g.Button("Reset##ResetKNN").OnClick(func() {
-									app.VppParams.VPPKNNParam = preset.DefaultVppParams.VPPKNNParam
+									app.VPPParams.VPPKNNParam = preset.DefaultVPPParams.VPPKNNParam
 								})),
-								g.SliderInt("radius", &app.VppParams.VPPKNNParam.Radius, 0, 5).Format("%.0f"),
-								g.SliderFloat("strength", &app.VppParams.VPPKNNParam.Strength, 0, 1).Format("%.2f"),
-								g.SliderFloat("lerp", &app.VppParams.VPPKNNParam.Lerp, 0, 1).Format("%.2f"),
-								g.SliderFloat("th_lerp", &app.VppParams.VPPKNNParam.ThLerp, 0, 1).Format("%.2f"),
+								g.SliderInt("radius", &app.VPPParams.VPPKNNParam.Radius, 0, 5).Format("%.0f"),
+								g.SliderFloat("strength", &app.VPPParams.VPPKNNParam.Strength, 0, 1).Format("%.2f"),
+								g.SliderFloat("lerp", &app.VPPParams.VPPKNNParam.Lerp, 0, 1).Format("%.2f"),
+								g.SliderFloat("th_lerp", &app.VPPParams.VPPKNNParam.ThLerp, 0, 1).Format("%.2f"),
 							),
 							g.Child("PMD").Border(true).Size((contentWidth-8)*0.5, 0).Flags(inputDisableFlag).Layout(
 								g.Line(g.Checkbox("PMD", &app.VPPSwitches.VPPPMD), g.Dummy(-52, 0), g.Button("Reset##ResetPMD").OnClick(func() {
-									app.VppParams.VPPPMDParam = preset.DefaultVppParams.VPPPMDParam
+									app.VPPParams.VPPPMDParam = preset.DefaultVPPParams.VPPPMDParam
 								})),
-								g.SliderInt("applyCount", &app.VppParams.VPPPMDParam.ApplyCount, 1, 100).Format("%.0f"),
-								g.SliderInt("strength", &app.VppParams.VPPPMDParam.Strength, 0, 100).Format("%.0f"),
-								g.SliderInt("threshold", &app.VppParams.VPPPMDParam.Threshold, 0, 255).Format("%.0f"),
+								g.SliderInt("applyCount", &app.VPPParams.VPPPMDParam.ApplyCount, 1, 100).Format("%.0f"),
+								g.SliderInt("strength", &app.VPPParams.VPPPMDParam.Strength, 0, 100).Format("%.0f"),
+								g.SliderInt("threshold", &app.VPPParams.VPPPMDParam.Threshold, 0, 255).Format("%.0f"),
 							),
 						),
 						g.Custom(func() {
@@ -169,20 +169,20 @@ func (app *Application) Render() {
 						g.Line(
 							g.Child("UnSharp").Border(true).Size((contentWidth-8)*0.5, 0).Flags(inputDisableFlag).Layout(
 								g.Line(g.Checkbox("UnSharp", &app.VPPSwitches.VPPUnSharp), g.Dummy(-52, 0), g.Button("Reset##ResetUnSharp").OnClick(func() {
-									app.VppParams.VPPUnSharpParam = preset.DefaultVppParams.VPPUnSharpParam
+									app.VPPParams.VPPUnSharpParam = preset.DefaultVPPParams.VPPUnSharpParam
 								})),
-								g.SliderInt("radius", &app.VppParams.VPPUnSharpParam.Radius, 1, 9).Format("%.0f"),
-								g.SliderFloat("weight", &app.VppParams.VPPUnSharpParam.Weight, 0, 10).Format("%.2f"),
-								g.SliderFloat("threshold", &app.VppParams.VPPUnSharpParam.Threshold, 0, 255).Format("%.0f"),
+								g.SliderInt("radius", &app.VPPParams.VPPUnSharpParam.Radius, 1, 9).Format("%.0f"),
+								g.SliderFloat("weight", &app.VPPParams.VPPUnSharpParam.Weight, 0, 10).Format("%.2f"),
+								g.SliderFloat("threshold", &app.VPPParams.VPPUnSharpParam.Threshold, 0, 255).Format("%.0f"),
 							),
 							g.Child("EdgeLevel").Border(true).Size((contentWidth-8)*0.5, 0).Flags(inputDisableFlag).Layout(
 								g.Line(g.Checkbox("EdgeLevel", &app.VPPSwitches.VPPEdgeLevel), g.Dummy(-52, 0), g.Button("Reset##ResetEdgeLevel").OnClick(func() {
-									app.VppParams.VPPEdgeLevelParam = preset.DefaultVppParams.VPPEdgeLevelParam
+									app.VPPParams.VPPEdgeLevelParam = preset.DefaultVPPParams.VPPEdgeLevelParam
 								})),
-								g.SliderFloat("strength", &app.VppParams.VPPEdgeLevelParam.Strength, -31, 31).Format("%.2f"),
-								g.SliderFloat("threshold", &app.VppParams.VPPEdgeLevelParam.Threshold, 0, 255).Format("%.2f"),
-								g.SliderFloat("black", &app.VppParams.VPPEdgeLevelParam.Black, 0, 31).Format("%.2f"),
-								g.SliderFloat("white", &app.VppParams.VPPEdgeLevelParam.White, 0, 31).Format("%.2f"),
+								g.SliderFloat("strength", &app.VPPParams.VPPEdgeLevelParam.Strength, -31, 31).Format("%.2f"),
+								g.SliderFloat("threshold", &app.VPPParams.VPPEdgeLevelParam.Threshold, 0, 255).Format("%.2f"),
+								g.SliderFloat("black", &app.VPPParams.VPPEdgeLevelParam.Black, 0, 31).Format("%.2f"),
+								g.SliderFloat("white", &app.VPPParams.VPPEdgeLevelParam.White, 0, 31).Format("%.2f"),
 							),
 						),
 						g.Custom(func() {
