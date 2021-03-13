@@ -10,7 +10,6 @@ import (
 	applation "github.com/Nicify/nvtool/app"
 	assets "github.com/Nicify/nvtool/assets"
 	"github.com/Nicify/nvtool/helper"
-	"github.com/Nicify/nvtool/hooks"
 	window "github.com/Nicify/nvtool/window"
 	"github.com/Nicify/theme"
 )
@@ -33,15 +32,17 @@ func main() {
 	theme.SetThemeDark(&currentStyle)
 
 	platform := g.Context.GetPlatform().(*imgui.GLFW)
+	platform.SetTPS(240)
 	glfwWindow := platform.GetWindow()
 	glfwWindow.SetOpacity(0)
-
 	data, _ := assets.EmbedFS.ReadFile("embed/icon_48px.png")
 	icon48px, _ := helper.LoadImageFromMemory(data)
 	window.ApplyWindowConfig(glfwWindow, &window.GLFWWindowConfig{
 		Icon48px:             icon48px,
-		TPS:                  240,
 		CompositionAttribute: &window.CompositionAttribute{AccentState: 3, Flags: 0, Color: 0, AnimationID: 0},
+		DragConfig: &window.DragConfig{
+			DragArea: image.Rectangle{image.Point{}, image.Point{750, 30}},
+		},
 		FocusCallback: func(focused bool) {
 			if focused {
 				glfwWindow.SetOpacity(0.98)
@@ -52,9 +53,7 @@ func main() {
 	})
 	go app.InstallCore()
 	app.Mount(&applation.Window{
-		GLFWWindow:  glfwWindow,
-		MW:          mw,
-		MWMoveState: &hooks.MWMoveState{},
-		MWDragArea:  image.Rectangle{image.Point{}, image.Point{750, 30}},
+		GLFWWindow: glfwWindow,
+		MW:         mw,
 	}).Run()
 }

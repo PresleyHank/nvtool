@@ -36,22 +36,6 @@ func (app *Application) OnRunClick() {
 	}()
 }
 
-func (app *Application) OnMounted() {
-	go func() {
-		defer app.Window.GLFWWindow.SetOpacity(0.98)
-		texLogo, _ := app.LoadTexture("embed/icon.png")
-		texButtonClose, _ := app.LoadTexture("embed/close_white.png")
-		texDropDown, _ := app.LoadTexture("embed/dropdown.png")
-		texGraphicsCard, _ := app.LoadTexture("embed/graphics_card.png")
-		app.Textures = &Textures{
-			texLogo:         texLogo,
-			texButtonClose:  texButtonClose,
-			texDropDown:     texDropDown,
-			texGraphicsCard: texGraphicsCard,
-		}
-	}()
-}
-
 func (app *Application) OnInputClick() {
 	filePath := helper.SelectInputPath()
 	if len(filePath) > 1 {

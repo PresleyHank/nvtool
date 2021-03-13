@@ -18,7 +18,7 @@ func New(binaryPath string) *MediaInfo {
 func (m *MediaInfo) GetMediaInfo(mediaFile string) (string, error) {
 	abspath, err := filepath.Abs(mediaFile)
 	if err != nil {
-		return "", errors.New("file not found.")
+		return "", errors.New("file not found")
 	}
 	stdout, _, _ := helper.ExecSync(".", m.binaryPath, abspath)
 	mediainfo := string(stdout)

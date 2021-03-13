@@ -1,7 +1,6 @@
 package app
 
 import (
-	"image"
 	"os"
 	"path"
 	"path/filepath"
@@ -10,7 +9,6 @@ import (
 
 	g "github.com/AllenDang/giu"
 	"github.com/AllenDang/giu/imgui"
-	"github.com/Nicify/nvtool/hooks"
 	"github.com/Nicify/nvtool/mediainfo"
 	"github.com/Nicify/nvtool/nvenc"
 	"github.com/Nicify/nvtool/preset"
@@ -31,10 +29,8 @@ type Textures struct {
 }
 
 type Window struct {
-	MW          *g.MasterWindow
-	GLFWWindow  *glfw.Window
-	MWMoveState *hooks.MWMoveState
-	MWDragArea  image.Rectangle
+	MW         *g.MasterWindow
+	GLFWWindow *glfw.Window
 }
 
 type State struct {
@@ -56,7 +52,6 @@ type Application struct {
 	NVENC          *nvenc.NVENC
 	MediaInfo      *mediainfo.MediaInfo
 	LockFile       string
-	mounted        bool
 	Window         *Window
 	Fonts          *CustomFonts
 	Textures       *Textures

@@ -40,14 +40,26 @@ func (app *Application) LoadFont() {
 	}
 }
 
-func (app *Application) LoadTexture(filename string) (*g.Texture, error) {
-	imageByte, err := assets.EmbedFS.ReadFile(filename)
-	if err != nil {
-		return nil, err
-	}
+func (app *Application) NewTextureFromMemory(imageByte []byte) (*g.Texture, error) {
 	imageRGBA, _ := helper.LoadImageFromMemory(imageByte)
 	textureID, err := g.NewTextureFromRgba(imageRGBA)
 	return textureID, err
+}
+
+func (app *Application) LoadTexture() {
+	load := func(filename string, textureID **g.Texture) {
+		imageByte, _ := assets.EmbedFS.ReadFile(filename)
+		newTex, _ := app.NewTextureFromMemory(imageByte)
+		*textureID = newTex
+	}
+	go func() {
+		defer app.Window.GLFWWindow.SetOpacity(0.98)
+		// defer func(t time.Time) { fmt.Printf("--- Time Elapsed: %v ---\n", time.Since(t)) }(time.Now())
+		load("embed/icon.png", &app.Textures.texLogo)
+		load("embed/close_white.png", &app.Textures.texButtonClose)
+		// load("embed/dropdown.png", &app.Textures.texDropDown)
+		load("embed/graphics_card.png", &app.Textures.texGraphicsCard)
+	}()
 }
 
 func (app *Application) CheckCore() {

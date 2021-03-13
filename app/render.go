@@ -5,11 +5,12 @@ import (
 	"time"
 	"unsafe"
 
+	"sync"
+
 	g "github.com/AllenDang/giu"
 	"github.com/AllenDang/giu/imgui"
 	c "github.com/Nicify/customwidget"
 	"github.com/Nicify/nvtool/helper"
-	"github.com/Nicify/nvtool/hooks"
 	"github.com/Nicify/nvtool/nvenc"
 	"github.com/Nicify/nvtool/preset"
 	"github.com/Nicify/nvtool/win"
@@ -23,9 +24,10 @@ const (
 	buttonHeight  = 24
 )
 
+var onceMounted sync.Once
+
 func (app *Application) Render() {
-	hooks.UseMounted(&app.mounted, app.OnMounted)
-	hooks.UseWindowMove(app.Window.GLFWWindow, app.Window.MWDragArea, app.Window.MWMoveState)
+	onceMounted.Do(app.LoadTexture)
 	isEncoding := app.NVENC.IsEncoding()
 	inputDisableFlag := app.ShouldDisableInput(isEncoding)
 	useLayoutFlat := theme.UseLayoutFlat()
