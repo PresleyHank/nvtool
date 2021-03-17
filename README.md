@@ -2,7 +2,7 @@
 
 > Video encoding tool based on rigaya's NVEncC.
 
-#### Build
+### Build
 
 ```powershell
 rsrc -manifest nvtool.exe.manifest -ico ./assets/embed/icon.ico -arch amd64 -o rsrc.syso
@@ -10,17 +10,19 @@ go build -ldflags="-s -w -H windowsgui -linkmode external -extldflags -static" .
 rm rsrc.syso
 ```
 
-#### Screenshots
+### Screenshots
 
 ![图片](https://i.imgsli.com/images/ed875b9d-9201-43cd-a6b3-7832d257c318.png)
 
 ![图片](https://i.imgsli.com/images/8f0a17c5-6bfc-4342-ada1-a35cbb3508a4.png)
 
+> Note that this program is a work-in-progress and may lack certain features at this stage, such as HDR, CQP and CBR mode, more filters and manual setting of command line parameters. This will be improved in subsequent development.
+
 Check out the link below to see if your graphics card supports NVENC.
 
 https://developer.nvidia.com/video-encode-and-decode-gpu-support-matrix-new
 
-### Options Reference:
+### Options Reference
 
 #### Preset
 
@@ -134,3 +136,9 @@ Parameters
   strength to enhance dark part of edges.
 - white=<float> (default=0.0, 0-31)
   strength to enhance bright part of edges.
+
+### Contribution
+
+Give a ⭐️ if this project helped you.
+
+All kinds of pull request are more then welcome!
